@@ -194,7 +194,7 @@ try{ if(window.supabase&&SUPA_KEY&&SUPA_KEY.indexOf('PASTE')<0) supa=window.supa
 let DB={users:[],depts:[],staff:[],tasks:[],session:null,gsheet:{csvUrl:'',map:{}}};
 const CATS={
   BU:['Proship','Ratraco','MICAFI','FDS','Fado168','EuroGo','Fado VN','The Winds','GoPrint','Internal Project','BOD/CEO'],
-  Function:['Demand Management','Marketing Strategy','Performance','Marketing Operation','Content & Creative','Growth & Innovation'],
+  Function:['Content & Creative','Marketing Operation','Marketing Strategy','Growth & Innovation'],
   SubFunction:['Request Intake','Project Coordination','Campaign Planning','Research','KPI','Google Ads','Facebook Ads','TikTok Ads','Zalo Ads','SEO','Lead Generation','Retargeting','Website','Landing Page','Tracking','Dashboard','Analytics','Reporting','Content'],
   Source:['New Request','Recurring','Maintenance','Campaign','Ad-hoc/Internal'],
   Priority:['P1','P2','P3','P4'],
@@ -425,7 +425,7 @@ function buildMenu(){
   const items=NAV.filter(n=>n.roles.includes(r));
   const reqCount=['admin','manager'].includes(r)?DB.tasks.filter(t=>!isClosed(t)&&!t.Owner).length:0;
   const bkOpen=roleTasks().filter(t=>!isClosed(t));
-  const bkCount=bkOpen.filter(t=>dueState(t)==='overdue').length; // ưu tiên đỏ: quá hạn
+  const bkCount=bkOpen.filter(t=>dueState(t)==='overdue'||t.Health==='Blocked'||t.Health==='Difficulty').length; // ưu tiên đỏ: quá hạn + bị chặn / gặp khó
   let html='',lastSec=null;
   items.forEach(n=>{
     if(n.sec!==lastSec){html+=`<div class="lbl">${n.sec}</div>`;lastSec=n.sec;}
@@ -839,7 +839,7 @@ window.taskModal=(id,presetType)=>{
       <div class="fld"><label>Mã (Request ID)</label><input id="t_id" value="${esc(t['Request ID']||autoId())}"></div>
       <div class="fld"><label>BU *</label><select id="t_bu">${opt(CATS.BU,t.BU)}</select></div>
       <div class="fld full"><label>Dự án / Campaign</label><input id="t_proj" value="${esc(t['Project/Campaign']||'')}"></div>
-      <div class="fld full"><label>Mô tả / Ghi chú</label><textarea id="t_note" rows="2">${esc(t.Notes||'')}</textarea></div>`)}
+      <div class="fld full"><label>Mô tả / Ghi chú</label><textarea id="t_note" rows="2">${esc(t.Notes||'')}</textarea></div>${t.Attachment?`<div class="fld full"><label>Ảnh / Tài liệu đính kèm</label><a href="${esc(t.Attachment)}" target="_blank" rel="noopener" title="Bấm để mở/tải">${(t.Attachment.slice(0,10)==='data:image'||/\.(png|jpe?g|webp|gif)(\?|$)/i.test(t.Attachment))?`<img src="${esc(t.Attachment)}" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid var(--line);display:block">`:'📎 Mở tài liệu đính kèm →'}</a></div>`:''}`)}
     ${sec('Giao việc & kế hoạch','',`
       <div class="fld"><label>Function</label><select id="t_fn">${opt(CATS.Function,t.Function)}</select></div>
       <div class="fld"><label>Sub Function</label><select id="t_sub">${opt(CATS.SubFunction,t['Sub Function'])}</select></div>
@@ -1045,7 +1045,7 @@ window.taskDetail=id=>{
       ${row('Satisfaction',`<span style="color:#b58a3a">${sat}</span>`)}${row('Source',esc(t.Source||'—'))}
     </div>
     ${t.Notes?`<div style="margin-top:14px"><div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:5px">Notes</div><div style="font-size:13px;line-height:1.6;background:#f8f9fc;border:1px solid var(--line);border-radius:8px;padding:10px 12px">${esc(t.Notes)}</div></div>`:''}
-    ${t.Attachment?`<div style="margin-top:12px"><a href="${esc(t.Attachment)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#3b6ea5;text-decoration:none;background:#eef3f9;border:1px solid #d6e2ef;border-radius:8px;padding:8px 12px">📎 Tài liệu / link đính kèm →</a></div>`:''}
+    ${t.Attachment?`<div style="margin-top:12px">${(t.Attachment.slice(0,10)==='data:image'||/\.(png|jpe?g|webp|gif)(\?|$)/i.test(t.Attachment))?`<div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:5px">Ảnh đính kèm</div><a href="${esc(t.Attachment)}" target="_blank" rel="noopener" title="Bấm để mở ảnh đầy đủ"><img src="${esc(t.Attachment)}" style="max-width:100%;max-height:280px;border-radius:8px;border:1px solid var(--line);display:block"></a>`:`<a href="${esc(t.Attachment)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#3b6ea5;text-decoration:none;background:#eef3f9;border:1px solid #d6e2ef;border-radius:8px;padding:8px 12px">📎 Tài liệu / link đính kèm →</a>`}</div>`:''}
     ${subSection}
     <div style="margin-top:18px"><div style="font-size:13px;font-weight:700;margin-bottom:9px">Comments (${comments.length})</div>
       <div style="display:flex;flex-direction:column;gap:8px;max-height:180px;overflow-y:auto;margin-bottom:10px">${comments.length?comments.map(cm=>`<div style="background:#f8f9fc;border:1px solid var(--line);border-radius:8px;padding:8px 11px"><div style="display:flex;justify-content:space-between"><b style="font-size:12px">${esc(cm.by)}</b><span style="font-size:11px;color:var(--muted)">${esc(cm.at)}</span></div><div style="font-size:13px;margin-top:3px">${esc(cm.text)}</div></div>`).join(''):'<div style="font-size:12.5px;color:var(--muted)">No comments yet.</div>'}</div>
