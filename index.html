@@ -323,20 +323,23 @@ window.mSubOwner=(i,v)=>{if(MSUBS[i])MSUBS[i].owner=v;};
 window.mSubTemplate=key=>{const have=new Set(MSUBS.map(s=>(s.name||'').toLowerCase()));(SUBTASK_TEMPLATES[key]||[]).forEach(n=>{if(!have.has(n.toLowerCase()))MSUBS.push({id:uidS(),name:n,owner:'',status:'Open'});});renderMsubs();};
 
 function remoteShape(){return {users:DB.users,depts:DB.depts,staff:DB.staff,tasks:DB.tasks,gsheet:DB.gsheet};}
-let _saveTimer=null,REMOTE_TS=null,SAVE_PENDING=false;
+let _saveTimer=null,REMOTE_TS=null,SAVE_PENDING=false,_pushing=false,_dirty=false;
 function save(){
   try{localStorage.setItem(SESS_KEY,DB.session||'');}catch(e){}
   try{localStorage.setItem(DB_KEY,JSON.stringify(DB));}catch(e){}   /* backup cục bộ */
-  if(supa){SAVE_PENDING=true;clearTimeout(_saveTimer);_saveTimer=setTimeout(pushRemote,450);}
+  if(supa){SAVE_PENDING=true;pushRemote();}   /* ghi NGAY lên cloud, không chờ — tránh mất lệnh khi tải lại nhanh */
 }
 async function pushRemote(){
   if(!supa)return;
+  if(_pushing){_dirty=true;return;}            /* gộp các lần ghi liên tiếp */
+  _pushing=true;
   const ts=new Date().toISOString();
   try{
     const {error}=await supa.from('app_state').update({data:remoteShape(),updated_at:ts}).eq('id','main');
     setSync(!error);if(error)console.warn('Supabase save:',error.message);else REMOTE_TS=ts; // đánh dấu bản của mình để live-sync không tự kéo lại
   }catch(e){setSync(false);console.warn(e);}
-  SAVE_PENDING=false;
+  _pushing=false;SAVE_PENDING=false;
+  if(_dirty){_dirty=false;pushRemote();}        /* có thay đổi trong lúc đang ghi -> ghi lại */
 }
 /* Live-sync: tự lấy bản mới từ Supabase khi người khác cập nhật (không cần F5) */
 async function liveSync(){
@@ -391,9 +394,9 @@ function doLogin(){
   const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
   const usr=DB.users.find(x=>x.username===u&&x.pass===p);
   if(!usr){document.getElementById('lerr').textContent='Incorrect username or password';return;}
-  DB.session=usr.id;save();openApp();
+  DB.session=usr.id;try{localStorage.setItem(SESS_KEY,DB.session);}catch(e){}openApp();
 }
-document.getElementById('logoutBtn').onclick=()=>{DB.session=null;save();location.reload();};
+document.getElementById('logoutBtn').onclick=()=>{DB.session=null;try{localStorage.setItem(SESS_KEY,'');}catch(e){}location.reload();};
 function me(){return DB.users.find(u=>u.id===DB.session);}
 
 /* ============ ROLE-BASED MENU ============ */
@@ -414,7 +417,6 @@ const NAV=[
   {v:'staff',ic:'☺',t:'People',sec:'ADMIN',roles:['admin']},
   {v:'dept',ic:'⬡',t:'Departments',sec:'ADMIN',roles:['admin']},
   {v:'users',ic:'⚷',t:'Accounts & Roles',sec:'ADMIN',roles:['admin']},
-  {v:'gsheet',ic:'⊞',t:'Google Sheet Sync',sec:'ADMIN',roles:['admin']},
   {v:'backup',ic:'⛃',t:'Sao lưu & Khôi phục',sec:'ADMIN',roles:['admin']},
   {v:'guide',ic:'◈',t:'Guide & Training',sec:'HELP',roles:['admin','manager','lead','staff']},
 ];
@@ -450,6 +452,7 @@ let VIEW='dash';
 function openApp(){
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='block';
+  const sd=document.getElementById('syncDot');if(sd){sd.style.cursor='pointer';sd.title='Dữ liệu lưu trên Supabase — bấm để mở';sd.onclick=()=>window.open('https://supabase.com/dashboard/project/vxmuxorsnnharbrpygvw/editor','_blank');}
   const u=me();
   document.getElementById('meName').textContent=u.name;
   document.getElementById('meRole').textContent=roleLabel(u.role)+(u.func?(' · '+u.func):'');
@@ -474,9 +477,8 @@ function autoPull(){
 }
 function startAutoSync(){
   if(SYNC_TIMER)clearInterval(SYNC_TIMER);
-  const u=me();if(!u||!['admin','manager'].includes(u.role))return;
-  setTimeout(autoPull,4000);               // kéo lần đầu ngay sau khi vào
-  SYNC_TIMER=setInterval(autoPull,60*60*1000); // rồi mỗi 60 phút
+  // Auto-kéo Google Sheet đã TẮT — dữ liệu giờ đến trực tiếp từ Cổng BU (Supabase).
+  // Nếu cần nhập từ Sheet, dùng nút "⬇ Lấy từ Google Sheet" trong mục Yêu cầu mới (thủ công).
 }
 
 /* ============ ROLE-BASED TASK SCOPE ============ */
@@ -1481,9 +1483,8 @@ function recentTasks(){
 /* ---- REQUESTS (Intake từ Google Form/Sheet) ---- */
 let REQMSG='';
 function rRequests(c,ta){
-  ta.innerHTML=`<button class="btn ghost" id="reqPull">⬇ Lấy từ Google Sheet</button><button class="btn gold" id="reqNew">+ Thêm yêu cầu</button>`;
+  ta.innerHTML=`<button class="btn gold" id="reqNew">+ Thêm yêu cầu</button>`;
   setTimeout(()=>{
-    const p=document.getElementById('reqPull');if(p)p.onclick=pullCsvInto;
     const n=document.getElementById('reqNew');if(n)n.onclick=()=>taskModal();
   },0);
   const reqs=roleTasks().filter(t=>!isClosed(t)&&!t.Owner)
@@ -1491,7 +1492,7 @@ function rRequests(c,ta){
   const msg=REQMSG;REQMSG='';
   c.innerHTML=`<div style="display:flex;align-items:center;gap:10px;background:#f8f9fc;border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin-bottom:14px">
       <span style="font-size:18px">📥</span>
-      <span style="font-size:12.5px;color:var(--ink2);line-height:1.55">Yêu cầu từ <b>Google Form → Google Sheet</b> đổ về đây <span style="color:var(--muted)">· 🔄 tự đồng bộ mỗi giờ</span>. Duyệt rồi bấm <b>Giao cho Lead</b> để chọn Function & người phụ trách — task sẽ chuyển sang luồng làm việc.</span>
+      <span style="font-size:12.5px;color:var(--ink2);line-height:1.55">Yêu cầu từ <b>Cổng yêu cầu BU</b> đổ về đây tự động. Bấm <b>✓ Xác nhận hợp lệ</b> để duyệt, rồi <b>Giao cho Lead</b> để chọn Function & người phụ trách — task chuyển sang luồng làm việc.</span>
       <span style="margin-left:auto;background:#17191f;color:#fff;border-radius:20px;font-size:12px;font-weight:700;padding:4px 12px;flex-shrink:0">${reqs.length} chờ giao</span>
     </div>
     ${msg?`<div style="font-size:12.5px;margin-bottom:12px">${msg}</div>`:''}
@@ -1502,16 +1503,20 @@ function reqCard(t){
   return `<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 15px;display:flex;flex-direction:column;gap:9px">
     <div style="display:flex;align-items:center;gap:7px"><span class="pr pr-${t.Priority}">${esc(t.Priority||'P3')}</span><span class="bu-tag">${esc(t.BU||'—')}</span><span style="margin-left:auto;font-size:11px;color:var(--muted)">${esc(t['Request Date']||'')}</span></div>
     <div style="font-size:14px;font-weight:600;line-height:1.4">${esc(t['Request Name']||'(không tên)')}</div>
+    <div>${t.Confirmed?'<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#2f6d4d;background:#e6f0ea;padding:3px 9px;border-radius:6px">✓ Đã xác nhận hợp lệ</span>':'<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#8a6516;background:#f7efe0;padding:3px 9px;border-radius:6px">⏳ Chờ xác nhận hợp lệ</span>'}</div>
     <div style="font-size:12px;color:var(--muted)">Người yêu cầu: <b style="color:var(--ink2)">${esc(t.Requestor||'—')}</b></div>
     ${t.Function?`<div style="display:flex;align-items:center;gap:7px;font-size:11.5px;flex-wrap:wrap"><span style="background:#eef3f9;color:#3b6ea5;border:1px solid #d6e2ef;border-radius:6px;padding:3px 8px;font-weight:700">⊚ ${esc(t.Function)}</span><span style="color:var(--muted)">→ Lead: <b style="color:var(--ink2)">${leadOf(t.Function)}</b></span></div>`:''}
     ${note?`<div style="font-size:12.5px;line-height:1.55;background:#f8f9fc;border:1px solid var(--line);border-radius:8px;padding:8px 10px">${esc(note)}</div>`:''}
     ${t.Attachment?`<a href="${esc(t.Attachment)}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:#3b6ea5;text-decoration:none">📎 Tài liệu đính kèm →</a>`:''}
     <div style="display:flex;gap:8px;margin-top:3px">
-      <button class="btn gold sm" style="flex:1" onclick="taskModal('${t._id}')">➤ Giao cho Lead</button>
+      ${t.Confirmed
+        ? `<button class="btn gold sm" style="flex:1" onclick="taskModal('${t._id}')">➤ Giao cho Lead</button>`
+        : `<button class="btn sm" style="flex:1;background:#2f6d4d;color:#fff" onclick="reqConfirm('${t._id}')">✓ Xác nhận hợp lệ</button>`}
       <button class="btn ghost sm" onclick="reqDismiss('${t._id}')">Bỏ qua</button>
     </div>
   </div>`;
 }
+window.reqConfirm=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.Confirmed=true;logHist(t,'Xác nhận yêu cầu hợp lệ (MKT Services)');save();render();};
 window.reqDismiss=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;
   mOpen(`<h2 style="margin-bottom:6px">Bỏ qua yêu cầu</h2>
     <div style="font-size:13px;color:var(--ink2);line-height:1.5"><b>${esc(t['Request Name']||'(không tên)')}</b></div>
