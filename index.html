@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -166,7 +167,10 @@
     <main class="main">
       <div class="top">
         <div><h1 id="vtitle">Overview</h1><div class="sub" id="vsub"></div></div>
-        <div id="topActions" style="display:flex;gap:9px"></div>
+        <div style="display:flex;align-items:center;gap:9px">
+          <a href="bu-portal.html" target="_blank" rel="noopener" class="btn ghost" style="text-decoration:none" title="Mở Cổng yêu cầu BU (trang khác)">⇆ Cổng yêu cầu BU</a>
+          <div id="topActions" style="display:flex;gap:9px"></div>
+        </div>
       </div>
       <div id="gfbar"></div>
       <div id="content"></div>
@@ -411,6 +415,7 @@ const NAV=[
   {v:'dept',ic:'⬡',t:'Departments',sec:'ADMIN',roles:['admin']},
   {v:'users',ic:'⚷',t:'Accounts & Roles',sec:'ADMIN',roles:['admin']},
   {v:'gsheet',ic:'⊞',t:'Google Sheet Sync',sec:'ADMIN',roles:['admin']},
+  {v:'backup',ic:'⛃',t:'Sao lưu & Khôi phục',sec:'ADMIN',roles:['admin']},
   {v:'guide',ic:'◈',t:'Guide & Training',sec:'HELP',roles:['admin','manager','lead','staff']},
 ];
 function buildMenu(){
@@ -516,7 +521,7 @@ function render(){
   const c=document.getElementById('content');
   const ta=document.getElementById('topActions');ta.innerHTML='';
   const u=me();
-  const T={dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Marketing Tasks','Task list & tracking'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],guide:['Guide & Training','How to use this CRM — at a glance']};
+  const T={dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Marketing Tasks','Task list & tracking'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],backup:['Sao lưu & Khôi phục','Tải bản sao lưu toàn bộ dữ liệu hoặc khôi phục từ file'],guide:['Guide & Training','How to use this CRM — at a glance']};
   document.getElementById('vtitle').textContent=T[VIEW][0];
   document.getElementById('vsub').textContent=T[VIEW][1];
   renderGFBar();
@@ -541,6 +546,7 @@ function render(){
   else if(VIEW==='dept')rDept(c,ta);
   else if(VIEW==='users')rUsers(c,ta);
   else if(VIEW==='gsheet')rGSheet(c,ta);
+  else if(VIEW==='backup')rBackup(c,ta);
   else if(VIEW==='guide')rGuide(c);
 }
 
@@ -886,6 +892,61 @@ window.saveTask=id=>{
   save();mClose();render();
 };
 function autoId(){return 'MKT-'+new Date().getFullYear()+'-'+String(DB.tasks.length+1).padStart(3,'0');}
+
+/* ---- BACKUP / RESTORE (sao lưu & khôi phục toàn bộ dữ liệu) ---- */
+function doBackup(){
+  const payload={_type:'fado_mkt_backup',_ver:1,_at:new Date().toISOString(),data:remoteShape()};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='FADO_MKT_backup_'+today()+'.json';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+}
+function doRestore(e){
+  const f=e.target.files[0];if(!f){return;}
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const j=JSON.parse(rd.result);
+      const d=(j&&j.data)?j.data:j;
+      if(!d||!Array.isArray(d.tasks))throw new Error('File không đúng định dạng sao lưu.');
+      const when=j&&j._at?(' (sao lưu lúc '+new Date(j._at).toLocaleString('vi-VN')+')'):'';
+      if(!confirm('⚠️ KHÔI PHỤC sẽ GHI ĐÈ toàn bộ dữ liệu hiện tại (kể cả trên cloud) bằng dữ liệu trong file'+when+':\n\n• '+(d.tasks||[]).length+' task\n• '+(d.staff||[]).length+' nhân sự\n• '+(d.users||[]).length+' tài khoản\n\nTiếp tục?'))return;
+      DB.users=d.users||DB.users;DB.depts=d.depts||DB.depts;DB.staff=d.staff||DB.staff;DB.tasks=d.tasks||[];if(d.gsheet)DB.gsheet=d.gsheet;
+      save();buildMenu();render();
+      alert('✓ Đã khôi phục '+(d.tasks||[]).length+' task. Dữ liệu đã được lưu lên cloud.');
+    }catch(err){alert('Không đọc được file: '+err.message);}
+  };
+  rd.readAsText(f);
+  e.target.value='';
+}
+function rBackup(c,ta){
+  const d=remoteShape();
+  c.innerHTML=`
+  <div style="max-width:720px">
+    <div class="panel" style="margin-bottom:16px">
+      <h3><span class="dot" style="background:var(--green)"></span>Sao lưu dữ liệu</h3>
+      <p style="color:var(--muted);font-size:12.5px;line-height:1.6;margin-bottom:16px">Tải toàn bộ dữ liệu (task, nhân sự, tài khoản, phòng ban) về máy dưới dạng <b>1 file .json</b>. Nên sao lưu định kỳ — nhất là <b>trước khi xoá nhiều dữ liệu</b>. Giữ file an toàn trên máy/Drive.</p>
+      <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:18px">
+        <div><div style="font-size:26px;font-weight:800;letter-spacing:-1px">${(d.tasks||[]).length}</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px">Task</div></div>
+        <div><div style="font-size:26px;font-weight:800;letter-spacing:-1px">${(d.staff||[]).length}</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px">Nhân sự</div></div>
+        <div><div style="font-size:26px;font-weight:800;letter-spacing:-1px">${(d.users||[]).length}</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px">Tài khoản</div></div>
+        <div><div style="font-size:26px;font-weight:800;letter-spacing:-1px">${(d.depts||[]).length}</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px">Phòng ban</div></div>
+      </div>
+      <button class="btn" id="bkDl">⬇ Tải bản sao lưu (.json)</button>
+    </div>
+    <div class="panel" style="border-color:#e6c5c4">
+      <h3><span class="dot" style="background:var(--red)"></span>Khôi phục dữ liệu</h3>
+      <p style="color:var(--muted);font-size:12.5px;line-height:1.6;margin-bottom:16px">Chọn 1 file <b>.json</b> đã sao lưu để khôi phục. ⚠️ Thao tác này <b style="color:#b4524f">GHI ĐÈ toàn bộ</b> dữ liệu hiện tại (kể cả trên cloud Supabase). Hãy chắc chắn — nên sao lưu bản hiện tại trước khi khôi phục.</p>
+      <button class="btn ghost" id="bkUp">⬆ Chọn file khôi phục…</button>
+      <input type="file" id="bkFile" accept=".json,application/json">
+    </div>
+  </div>`;
+  setTimeout(()=>{
+    const dl=document.getElementById('bkDl');if(dl)dl.onclick=doBackup;
+    const up=document.getElementById('bkUp');if(up)up.onclick=()=>document.getElementById('bkFile').click();
+    const fi=document.getElementById('bkFile');if(fi)fi.onchange=doRestore;
+  },0);
+}
 
 /* ---- QUICK LOG (Ghi nhanh việc nhỏ 30ph–1h) ---- */
 window.quickModal=()=>{
