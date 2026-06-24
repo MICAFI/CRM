@@ -919,6 +919,13 @@ function doRestore(e){
   rd.readAsText(f);
   e.target.value='';
 }
+function doClearTasks(){
+  const n=DB.tasks.length;
+  if(!confirm('⚠️ XÓA SẠCH toàn bộ '+n+' task?\n\nGiữ lại: tài khoản, nhân sự, phòng ban.\nNên bấm "Tải bản sao lưu" trước.\n\nKHÔNG hoàn tác được. Tiếp tục?'))return;
+  if(!confirm('Xác nhận lần cuối: xóa hết '+n+' task để làm lại từ đầu?'))return;
+  DB.tasks=[];save();buildMenu();render();
+  alert('✓ Đã xóa sạch '+n+' task. Hệ thống trống, sẵn sàng nhận yêu cầu mới từ Cổng BU.');
+}
 function rBackup(c,ta){
   const d=remoteShape();
   c.innerHTML=`
@@ -940,11 +947,17 @@ function rBackup(c,ta){
       <button class="btn ghost" id="bkUp">⬆ Chọn file khôi phục…</button>
       <input type="file" id="bkFile" accept=".json,application/json">
     </div>
+    <div class="panel" style="border-color:#e6c5c4;margin-top:16px">
+      <h3><span class="dot" style="background:var(--red)"></span>Dọn dữ liệu — làm lại từ đầu</h3>
+      <p style="color:var(--muted);font-size:12.5px;line-height:1.6;margin-bottom:16px">Xóa <b>toàn bộ task</b> (giữ lại tài khoản, nhân sự, phòng ban) để bắt đầu sạch với luồng yêu cầu mới từ BU. ⚠️ <b style="color:#b4524f">Không hoàn tác được</b> — nên <b>Tải bản sao lưu</b> ở trên trước.</p>
+      <button class="btn" id="bkClear" style="background:#b4524f;color:#fff">✕ Xóa sạch toàn bộ task</button>
+    </div>
   </div>`;
   setTimeout(()=>{
     const dl=document.getElementById('bkDl');if(dl)dl.onclick=doBackup;
     const up=document.getElementById('bkUp');if(up)up.onclick=()=>document.getElementById('bkFile').click();
     const fi=document.getElementById('bkFile');if(fi)fi.onchange=doRestore;
+    const cl=document.getElementById('bkClear');if(cl)cl.onclick=doClearTasks;
   },0);
 }
 
