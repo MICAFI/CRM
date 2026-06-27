@@ -11,12 +11,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root,:root[data-theme="navy"]{
-    --bg:#0a0f1e;--card:#131a2c;--card2:#161f33;--line:#27314a;--track:#222c44;
-    --ink:#e9ecf5;--ink2:#aab3c7;--muted:#7c8499;
-    --accent:#3f6fff;--accent-2:#2f56d8;--accent-soft:#8ab0ff;
-    --side-bg:#0d1424;--input-bg:#0f1626;--hover:rgba(255,255,255,.04);
-    --navy:#0d1424;--navy2:#141b2e;--navy3:#1b2440;--gold:#3f6fff;
-    --green:#46b07d;--blue:#5b8cff;--purple:#9a7bf0;--red:#e0564f;
+    --bg:#0a0c1a;--card:#13162b;--card2:#1a1e38;--line:#262a4d;--track:#20264a;
+    --ink:#eef0ff;--ink2:#aab1d4;--muted:#7e84b8;
+    --accent:#6366f1;--accent-2:#4f52d8;--accent-soft:#c7c9ff;
+    --side-bg:#0c0e1c;--input-bg:#0e1124;--hover:rgba(255,255,255,.045);
+    --navy:#0c0e1c;--navy2:#13162b;--navy3:#1a1e38;--gold:#6366f1;
+    --green:#46b07d;--blue:#7c8cff;--purple:#9a7bf0;--red:#e0564f;
   }
   :root[data-theme="white"]{
     --bg:#f4f6fb;--card:#ffffff;--card2:#f7f9fc;--line:#e4e8f0;--track:#eef1f6;
@@ -186,7 +186,7 @@
   .theme-row span[data-th].on{border-color:#fff}
   /* ===== LOGIN 2-PANEL ===== */
   #login{position:fixed;inset:0;display:flex;background:var(--bg);z-index:100}
-  .login-hero{flex:1;background:var(--side-bg);color:#e9ecf5;padding:54px 56px;display:flex;flex-direction:column;justify-content:center;max-width:55%;position:relative}
+  .login-hero{flex:1.5;background:var(--side-bg);color:#e9ecf5;padding:56px 60px;display:flex;flex-direction:column;justify-content:center;position:relative}
   .login-hero .lh-brand{display:flex;align-items:center;gap:13px;margin-bottom:50px}
   .lh-logo{width:46px;height:46px;border-radius:11px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:16px}
   .lh-name{font-size:20px;font-weight:800;letter-spacing:-.3px;line-height:1.1}.lh-name span{color:var(--accent-soft)}
@@ -198,7 +198,7 @@
   .lh-stat .lh-ic{color:var(--accent-soft);font-size:17px;margin-bottom:7px;line-height:1}
   .lh-lab{font-size:11.5px;color:#8b93a7;font-weight:500}
   .lh-num{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-top:3px;color:#fff}
-  .lh-foot{position:absolute;left:56px;right:56px;bottom:24px;font-size:11px;color:#5f6678;letter-spacing:.2px}
+  .lh-foot{position:absolute;left:60px;right:60px;bottom:24px;font-size:11px;color:#5f6678;letter-spacing:.2px}
   .login-form{flex:1;display:flex;align-items:center;justify-content:center;padding:30px;background:var(--bg)}
   .lf-inner{width:362px;max-width:100%}
   .lf-inner h2{font-size:24px;font-weight:800;color:var(--ink);margin-bottom:6px;letter-spacing:-.4px}
@@ -250,7 +250,7 @@
     <aside class="sidebar">
       <div class="brand"><div class="logo">FM</div><div><b>FADO MKT</b><span>WORK MANAGEMENT</span></div></div>
       <nav class="menu" id="menu"></nav>
-      <div class="theme-row" id="themePick"><span class="tl">THEME</span><span data-th="navy" title="Navy" style="background:#3f6fff"></span><span data-th="white" title="Trắng" style="background:#e8ebf2"></span><span data-th="violet" title="Tím" style="background:#8b5cf6"></span><span data-th="coral" title="Coral" style="background:#e0564f"></span></div>
+      <div class="theme-row" id="themePick"><span class="tl">THEME</span><span data-th="navy" title="Indigo" style="background:#6366f1"></span><span data-th="white" title="Trắng" style="background:#e8ebf2"></span><span data-th="violet" title="Tím" style="background:#8b5cf6"></span><span data-th="coral" title="Coral" style="background:#e0564f"></span></div>
       <div class="side-foot">
         <div class="av" id="meAv">A</div>
         <div><b id="meName">Admin</b><span id="meRole">Administrator</span></div>
