@@ -186,26 +186,26 @@
   .theme-row span[data-th].on{border-color:#fff}
   /* ===== LOGIN 2-PANEL ===== */
   #login{position:fixed;inset:0;display:flex;background:var(--bg);z-index:100}
-  .login-hero{flex:1.5;background:var(--side-bg);color:#e9ecf5;padding:56px 60px;display:flex;flex-direction:column;justify-content:center;position:relative}
+  .login-hero{flex:1.2;background:var(--side-bg);color:#e9ecf5;padding:56px 60px;display:flex;flex-direction:column;justify-content:center;position:relative}
   .login-hero .lh-brand{display:flex;align-items:center;gap:13px;margin-bottom:50px}
   .lh-logo{width:46px;height:46px;border-radius:11px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:16px}
   .lh-name{font-size:20px;font-weight:800;letter-spacing:-.3px;line-height:1.1}.lh-name span{color:var(--accent-soft)}
   .lh-tag{font-size:10.5px;color:#8b93a7;letter-spacing:1.4px;text-transform:uppercase;font-weight:600;margin-top:2px}
-  .lh-title{font-size:38px;line-height:1.13;font-weight:800;letter-spacing:-1px;margin-bottom:16px;color:#fff}
-  .lh-sub{font-size:14px;color:#aab3c7;line-height:1.7;max-width:440px;margin-bottom:38px}
-  .lh-stats{display:grid;grid-template-columns:1fr 1fr;gap:13px;max-width:470px}
-  .lh-stat{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:15px 17px}
+  .lh-title{font-size:43px;line-height:1.12;font-weight:800;letter-spacing:-1.2px;margin-bottom:18px;color:#fff}
+  .lh-sub{font-size:14.5px;color:#aab3c7;line-height:1.7;max-width:540px;margin-bottom:40px}
+  .lh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+  .lh-stat{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:17px 16px}
   .lh-stat .lh-ic{color:var(--accent-soft);font-size:17px;margin-bottom:7px;line-height:1}
   .lh-lab{font-size:11.5px;color:#8b93a7;font-weight:500}
   .lh-num{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-top:3px;color:#fff}
   .lh-foot{position:absolute;left:60px;right:60px;bottom:24px;font-size:11px;color:#5f6678;letter-spacing:.2px}
   .login-form{flex:1;display:flex;align-items:center;justify-content:center;padding:30px;background:var(--bg)}
-  .lf-inner{width:362px;max-width:100%}
+  .lf-inner{width:384px;max-width:100%}
   .lf-inner h2{font-size:24px;font-weight:800;color:var(--ink);margin-bottom:6px;letter-spacing:-.4px}
   .lf-welcome{font-size:13.5px;color:var(--muted);margin-bottom:28px}
   .lf-inner label{display:block;font-size:12.5px;font-weight:600;color:var(--ink2);margin:16px 0 6px}
   .lf-inner input{width:100%;padding:13px 15px;border:1px solid var(--line);border-radius:10px;background:var(--input-bg);color:var(--ink);font-size:14px;font-family:inherit;outline:none;transition:.15s}
-  .lf-inner input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(63,111,255,.12)}
+  .lf-inner input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,255,255,.07)}
   .lf-inner #loginBtn{width:100%;margin-top:24px;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s}
   .lf-inner #loginBtn:hover{background:var(--accent-2)}
   .lf-inner .lerr{color:var(--red);font-size:12.5px;margin-top:12px;text-align:center;min-height:16px}
@@ -2629,7 +2629,7 @@ window.mClose=()=>document.getElementById('modal').classList.remove('show');
 document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')mClose();};
 
 /* ============ INIT ============ */
-function applyTheme(t){t=t||localStorage.getItem('fado_theme')||'navy';document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('fado_theme',t);}catch(e){}var p=document.getElementById('themePick');if(p)p.querySelectorAll('span[data-th]').forEach(function(s){s.classList.toggle('on',s.dataset.th===t);});}
+function applyTheme(t){t=t||localStorage.getItem('fado_theme')||'coral';document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('fado_theme',t);}catch(e){}var p=document.getElementById('themePick');if(p)p.querySelectorAll('span[data-th]').forEach(function(s){s.classList.toggle('on',s.dataset.th===t);});}
 window.setTheme=applyTheme;
 document.addEventListener('click',function(e){var s=e.target&&e.target.closest?e.target.closest('#themePick span[data-th]'):null;if(s)applyTheme(s.dataset.th);});
 function renderLoginStats(){try{var ts=DB.tasks||[];var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};set('st_total',ts.length);set('st_wip',ts.filter(function(t){return t.Status==='WIP';}).length);set('st_queue',ts.filter(function(t){return t.Status==='Open';}).length);var bus=new Set(ts.map(function(t){return t.BU;}).filter(Boolean)).size;set('st_bu',bus||(CATS.BU?CATS.BU.length:0));}catch(e){}}
