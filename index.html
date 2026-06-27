@@ -193,11 +193,15 @@
   .lh-tag{font-size:10.5px;color:#8b93a7;letter-spacing:1.4px;text-transform:uppercase;font-weight:600;margin-top:2px}
   .lh-title{font-size:43px;line-height:1.12;font-weight:800;letter-spacing:-1.2px;margin-bottom:18px;color:#fff}
   .lh-sub{font-size:14.5px;color:#aab3c7;line-height:1.7;max-width:540px;margin-bottom:22px}
-  .lh-flows{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;max-width:560px}
-  .lh-flow{display:flex;gap:11px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:14px 15px}
-  .lh-flow .lf-ic{width:32px;height:32px;border-radius:9px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-  .lf-t{font-size:13px;font-weight:700;color:#fff;margin-bottom:3px}
-  .lf-d{font-size:11px;color:#9aa3b8;line-height:1.55}
+  .lh-flow-d{display:flex;align-items:center;gap:13px;margin-bottom:24px;max-width:585px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:15px 17px}
+  .lfd-cap{font-size:9px;font-weight:700;letter-spacing:.8px;color:#7e889a;margin-bottom:8px}
+  .lfd-node{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:11px 13px;border-radius:10px;text-align:center;line-height:1.3}
+  .lfd-col.grow{flex:1}
+  .lfd-arrows{display:flex;flex-direction:column;gap:6px;align-items:center;color:#9aa3b8;font-size:9.5px;font-weight:600;white-space:nowrap}
+  .lfd-arrows .back{color:#7e889a}
+  .lfd-pipe{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .lfd-pipe span{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#eaeef5;font-size:11px;font-weight:600;padding:7px 10px;border-radius:8px}
+  .lfd-pipe i{color:var(--accent);font-style:normal;font-weight:800;font-size:13px}
   .lh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
   .lh-stat{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:17px 16px}
   .lh-stat .lh-ic{color:var(--accent-soft);font-size:17px;margin-bottom:7px;line-height:1}
@@ -234,9 +238,10 @@
     <div class="lh-brand"><div class="lh-logo">FM</div><div><div class="lh-name">FADO <span>MKT</span></div><div class="lh-tag">Marketing Work Management</div></div></div>
     <div class="lh-title">Nền tảng điều phối<br>công việc Marketing</div>
     <div class="lh-sub">Quản lý công việc, hàng đợi yêu cầu, giao việc theo từng BU và theo dõi hiệu suất tổng quan — trên một nền tảng duy nhất.</div>
-    <div class="lh-flows">
-      <div class="lh-flow"><div class="lf-ic">✉</div><div><div class="lf-t">BU gửi yêu cầu</div><div class="lf-d">Các đơn vị (Proship, MICAFI, FDS…) đăng nhập gửi yêu cầu công việc và theo dõi tiến độ, credit.</div></div></div>
-      <div class="lh-flow"><div class="lf-ic">◆</div><div><div class="lf-t">MKT quản trị nội bộ</div><div class="lf-d">Đội Marketing tiếp nhận, duyệt, giao việc, thực thi và báo cáo hiệu suất tổng quan.</div></div></div>
+    <div class="lh-flow-d">
+      <div class="lfd-col"><div class="lfd-cap">LUỒNG BU</div><div class="lfd-node">✉ BU gửi<br>yêu cầu</div></div>
+      <div class="lfd-arrows"><div>yêu cầu →</div><div class="back">← kết quả</div></div>
+      <div class="lfd-col grow"><div class="lfd-cap">MKT QUẢN TRỊ NỘI BỘ</div><div class="lfd-pipe"><span>Tiếp nhận</span><i>›</i><span>Giao việc</span><i>›</i><span>Thực thi</span><i>›</i><span>Báo cáo</span></div></div>
     </div>
     <div class="lh-stats">
       <div class="lh-stat"><div class="lh-ic">▦</div><div class="lh-lab">Tổng công việc</div><div class="lh-num" id="st_total">—</div></div>
@@ -257,7 +262,7 @@
       <input id="lp" type="password" placeholder="••••••••">
       <button id="loginBtn">Đăng nhập</button>
       <div class="lerr" id="lerr"></div>
-      <div class="hint"><b>Demo:</b> admin / admin — Administrator<br>Mỗi BU có tài khoản riêng (mật khẩu = username): proship · ratraco · micafi · fds · fado168 · eurogo · fadovn · thewinds · goprint</div>
+      <div class="hint">Mỗi đơn vị (BU) được cấp tài khoản riêng để gửi và theo dõi yêu cầu. Liên hệ quản trị MKT nếu cần cấp tài khoản.</div>
     </div>
   </div>
 </div>
@@ -520,7 +525,7 @@ function seed(){
   }
 }
 // Tạo sẵn 1 tài khoản cho TỪNG BU lẻ — mỗi BU chỉ đăng nhập & xem task của chính mình.
-// username = tên BU rút gọn, mật khẩu = username (vd: micafi / micafi).
+// Mỗi BU có 1 tài khoản đăng nhập riêng (tạo tự động lần đầu).
 const BU_ACCOUNTS=[
   ['Proship','proship'],['Ratraco','ratraco'],['MICAFI','micafi'],['FDS','fds'],
   ['Fado168','fado168'],['EuroGo','eurogo'],['Fado VN','fadovn'],
