@@ -42,6 +42,14 @@
     --navy:#131922;--navy2:#1e2735;--navy3:#232d3b;--gold:#e0564f;
     --green:#4cc28a;--blue:#5b9bd5;--purple:#b08cf0;--red:#ff7a73;
   }
+  :root[data-theme="ember"]{
+    --bg:#160e14;--card:#211620;--card2:#2a1b27;--line:#3d2935;--track:#2f1f2c;
+    --ink:#f5e9ef;--ink2:#cbb0bd;--muted:#9a7e8c;
+    --accent:#ff6d5a;--accent-2:#e8503c;--accent-soft:#ffb3a6;
+    --side-bg:#12090f;--input-bg:#1c121a;--hover:rgba(255,255,255,.05);
+    --navy:#12090f;--navy2:#211620;--navy3:#2a1b27;--gold:#ff6d5a;
+    --green:#46b07d;--blue:#6f9bd5;--purple:#c08cf0;--red:#ff7a6b;
+  }
   *{box-sizing:border-box;margin:0;padding:0}
   input,select,textarea,button,option{font-family:'Be Vietnam Pro',system-ui,-apple-system,sans-serif}
   input::placeholder,textarea::placeholder{font-family:inherit}
@@ -312,7 +320,7 @@
     <aside class="sidebar">
       <div class="brand"><div class="logo">FM</div><div><b>FADO MKT</b><span>WORK MANAGEMENT</span></div></div>
       <nav class="menu" id="menu"></nav>
-      <div class="theme-row" id="themePick"><span class="tl">THEME</span><span data-th="navy" title="Indigo" style="background:#6366f1"></span><span data-th="white" title="Trắng" style="background:var(--track)"></span><span data-th="violet" title="Tím" style="background:#8b5cf6"></span><span data-th="coral" title="Coral" style="background:#e0564f"></span></div>
+      <div class="theme-row" id="themePick"><span class="tl">THEME</span><span data-th="navy" title="Indigo" style="background:#6366f1"></span><span data-th="white" title="Trắng" style="background:var(--track)"></span><span data-th="violet" title="Tím" style="background:#8b5cf6"></span><span data-th="coral" title="Coral" style="background:#e0564f"></span><span data-th="ember" title="Ember (n8n)" style="background:#ff6d5a"></span></div>
       <div class="side-foot">
         <div class="av" id="meAv">A</div>
         <div><b id="meName">Admin</b><span id="meRole">Administrator</span></div>
@@ -2763,7 +2771,7 @@ window.mClose=()=>document.getElementById('modal').classList.remove('show');
 document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')mClose();};
 
 /* ============ INIT ============ */
-function applyTheme(t){t=t||localStorage.getItem('fado_theme')||'coral';document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('fado_theme',t);}catch(e){}var p=document.getElementById('themePick');if(p)p.querySelectorAll('span[data-th]').forEach(function(s){s.classList.toggle('on',s.dataset.th===t);});}
+function applyTheme(t){t=t||localStorage.getItem('fado_theme')||'ember';document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('fado_theme',t);}catch(e){}var p=document.getElementById('themePick');if(p)p.querySelectorAll('span[data-th]').forEach(function(s){s.classList.toggle('on',s.dataset.th===t);});}
 window.setTheme=applyTheme;
 document.addEventListener('click',function(e){var s=e.target&&e.target.closest?e.target.closest('#themePick span[data-th]'):null;if(s)applyTheme(s.dataset.th);});
 function renderLoginStats(){try{var ts=DB.tasks||[];var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};set('st_total',ts.length);set('st_wip',ts.filter(function(t){return t.Status==='WIP';}).length);set('st_queue',ts.filter(function(t){return t.Status==='Open';}).length);var bus=new Set(ts.map(function(t){return t.BU;}).filter(Boolean)).size;set('st_bu',bus||(CATS.BU?CATS.BU.length:0));renderLoginChart();}catch(e){}}
