@@ -598,6 +598,7 @@ const NAV=[
   {v:'users',ic:'⚷',t:'Accounts & Roles',sec:'ADMIN',roles:['admin']},
   {v:'backup',ic:'⛃',t:'Sao lưu & Khôi phục',sec:'ADMIN',roles:['admin']},
   {v:'agents',ic:'⚡',t:'Automation & API',sec:'ADMIN',roles:['admin','manager']},
+  {v:'account',ic:'⚙',t:'Tài khoản',sec:'HELP',roles:['admin','manager','lead','staff']},
   {v:'guide',ic:'◈',t:'Guide & Training',sec:'HELP',roles:['admin','manager','lead','staff']},
 ];
 function buildMenu(){
@@ -711,7 +712,7 @@ function render(){
   const c=document.getElementById('content');
   const ta=document.getElementById('topActions');ta.innerHTML='';
   const u=me();
-  const T={dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Marketing Tasks','Task list & tracking'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],backup:['Sao lưu & Khôi phục','Tải bản sao lưu toàn bộ dữ liệu hoặc khôi phục từ file'],agents:['Automation & API','Ngân sách credit theo BU · endpoint agent (content/ảnh/video) · API đấu nối'],guide:['Guide & Training','How to use this CRM — at a glance']};
+  const T={dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Marketing Tasks','Task list & tracking'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],backup:['Sao lưu & Khôi phục','Tải bản sao lưu toàn bộ dữ liệu hoặc khôi phục từ file'],agents:['Automation & API','Ngân sách credit theo BU · endpoint agent (content/ảnh/video) · API đấu nối'],account:['Tài khoản','Cập nhật thông tin cá nhân & đổi mật khẩu'],guide:['Guide & Training','How to use this CRM — at a glance']};
   document.getElementById('vtitle').textContent=T[VIEW][0];
   document.getElementById('vsub').textContent=T[VIEW][1];
   renderGFBar();
@@ -738,6 +739,7 @@ function render(){
   else if(VIEW==='gsheet')rGSheet(c,ta);
   else if(VIEW==='backup')rBackup(c,ta);
   else if(VIEW==='agents')rAgents(c,ta);
+  else if(VIEW==='account')rAccount(c,ta);
   else if(VIEW==='guide')rGuide(c);
   buTips();
 }
@@ -2360,6 +2362,57 @@ function wireDrag(canDragTask){
 }
 
 /* ---- GUIDE & TRAINING (visual map) ---- */
+function rAccount(c,ta){
+  const u=me(); if(!u){c.innerHTML=emptyBox('Chưa đăng nhập.');return;}
+  const F=(id,lab,val,ph,type)=>`<div class="fld"><label>${lab}</label><input id="${id}" type="${type||'text'}" value="${esc(val||'')}" placeholder="${esc(ph||'')}"></div>`;
+  c.innerHTML=`
+  <div style="max-width:580px">
+    <div class="panel" style="margin-bottom:16px">
+      <h3><span class="dot" style="background:var(--accent)"></span>Thông tin cá nhân</h3>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+        <div style="width:54px;height:54px;border-radius:13px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px">${esc((u.name||'?')[0].toUpperCase())}</div>
+        <div><div style="font-weight:700;font-size:15px">${esc(u.name||'')}</div><div style="font-size:12px;color:var(--muted)">${esc(roleLabel(u.role))}${u.func?(' · '+esc(u.func)):''}${u.bu?(' · '+esc(u.bu)):''}</div></div>
+      </div>
+      <div class="mgrid">
+        <div class="fld"><label>Tên đăng nhập</label><input value="${esc(u.username||'')}" disabled style="opacity:.55;cursor:not-allowed"></div>
+        ${F('ac_name','Tên đầy đủ *',u.name,'Họ và tên')}
+        ${F('ac_phone','Số điện thoại',u.phone,'09xx xxx xxx')}
+        <div class="fld"><label>Vai trò</label><input value="${esc(roleLabel(u.role))}" disabled style="opacity:.55;cursor:not-allowed"></div>
+        <div class="fld full"><label>Tiểu sử / Ghi chú</label><textarea id="ac_bio" rows="2">${esc(u.bio||'')}</textarea></div>
+      </div>
+      <div style="margin-top:16px"><button class="btn gold" id="acSave">Lưu thông tin</button></div>
+    </div>
+    <div class="panel">
+      <h3><span class="dot" style="background:var(--red)"></span>Đổi mật khẩu</h3>
+      <div class="mgrid">
+        ${F('ac_old','Mật khẩu hiện tại','','','password')}
+        <div></div>
+        ${F('ac_new','Mật khẩu mới','','Tối thiểu 4 ký tự','password')}
+        ${F('ac_new2','Nhập lại mật khẩu mới','','','password')}
+      </div>
+      <div id="acPwMsg" style="font-size:12.5px;margin-top:10px;min-height:16px"></div>
+      <div style="margin-top:4px"><button class="btn ghost" id="acPwBtn">Đổi mật khẩu</button></div>
+    </div>
+  </div>`;
+  document.getElementById('acSave').onclick=()=>{
+    const nm=document.getElementById('ac_name').value.trim();
+    if(!nm){alert('Vui lòng nhập tên.');return;}
+    u.name=nm;u.phone=document.getElementById('ac_phone').value.trim();u.bio=document.getElementById('ac_bio').value.trim();
+    save();
+    const mn=document.getElementById('meName');if(mn)mn.textContent=u.name;
+    const av=document.getElementById('meAv');if(av)av.textContent=u.name[0].toUpperCase();
+    alert('✓ Đã lưu thông tin.');render();
+  };
+  document.getElementById('acPwBtn').onclick=()=>{
+    const o=document.getElementById('ac_old').value,n1=document.getElementById('ac_new').value,n2=document.getElementById('ac_new2').value;
+    const m=document.getElementById('acPwMsg');
+    if(o!==u.pass){m.style.color='var(--red)';m.textContent='Mật khẩu hiện tại không đúng.';return;}
+    if(!n1||n1.length<4){m.style.color='var(--red)';m.textContent='Mật khẩu mới tối thiểu 4 ký tự.';return;}
+    if(n1!==n2){m.style.color='var(--red)';m.textContent='Hai mật khẩu mới không khớp.';return;}
+    u.pass=n1;save();m.style.color='var(--green)';m.textContent='✓ Đã đổi mật khẩu thành công.';
+    document.getElementById('ac_old').value='';document.getElementById('ac_new').value='';document.getElementById('ac_new2').value='';
+  };
+}
 function rGuide(c){
   const node=(n,ic,t,sub)=>`<div style="flex:1;min-width:130px;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:14px 12px;text-align:center"><div style="width:30px;height:30px;border-radius:8px;background:var(--ink);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 9px">${n}</div><div style="font-size:19px;margin-bottom:5px">${ic}</div><div style="font-size:13px;font-weight:700">${t}</div><div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4">${sub}</div></div>`;
   const arrow=`<div style="display:flex;align-items:center;color:#c2c5cd;font-size:20px;flex:0 0 auto">→</div>`;
