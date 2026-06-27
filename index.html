@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -147,7 +146,7 @@
     <input id="lp" type="password" placeholder="••••••••">
     <button id="loginBtn">Sign in</button>
     <div class="lerr" id="lerr"></div>
-    <div class="hint"><b>Demo account:</b><br>admin / admin — Administrator<br>(Đăng nhập xong, vào "Accounts & Roles" để tạo tài khoản cho Function Lead và nhân viên)</div>
+    <div class="hint"><b>Demo account:</b><br>admin / admin — Administrator<br>Mỗi BU có tài khoản riêng (mật khẩu = username), chỉ xem task của BU mình:<br>proship · ratraco · micafi · fds · fado168 · eurogo · fadovn · thewinds · goprint</div>
   </div>
 </div>
 
@@ -168,7 +167,6 @@
       <div class="top">
         <div><h1 id="vtitle">Overview</h1><div class="sub" id="vsub"></div></div>
         <div style="display:flex;align-items:center;gap:9px">
-          <a href="bu-portal.html" target="_blank" rel="noopener" class="btn ghost" style="text-decoration:none" title="Mở Cổng yêu cầu BU (trang khác)">⇆ Cổng yêu cầu BU</a>
           <div id="topActions" style="display:flex;gap:9px"></div>
         </div>
       </div>
@@ -177,6 +175,9 @@
     </main>
   </div>
 </div>
+
+<!-- CỔNG BU (nhúng trực tiếp — không còn iframe, đúng nghĩa 1 file) -->
+<div id="buPortal" style="display:none;position:fixed;inset:0;z-index:50;background:#f1f2f4;overflow:auto"></div>
 
 <!-- MODAL -->
 <div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
@@ -191,7 +192,7 @@ const SUPA_URL='https://vxmuxorsnnharbrpygvw.supabase.co';
 const SUPA_KEY='sb_publishable__t-Jjuw0w2nxDK-WQKwXXQ_mEHOoIYl';
 let supa=null,REMOTE_OK=false;
 try{ if(window.supabase&&SUPA_KEY&&SUPA_KEY.indexOf('PASTE')<0) supa=window.supabase.createClient(SUPA_URL,SUPA_KEY); }catch(e){console.warn('Supabase init',e);}
-let DB={users:[],depts:[],staff:[],tasks:[],session:null,gsheet:{csvUrl:'',map:{}}};
+let DB={users:[],depts:[],staff:[],tasks:[],session:null,gsheet:{csvUrl:'',map:{}},buCredits:{},agents:{webhook:'',content:'',image:'',video:''}};
 const CATS={
   BU:['Proship','Ratraco','MICAFI','FDS','Fado168','EuroGo','Fado VN','The Winds','GoPrint','Internal Project','BOD/CEO'],
   Function:['Content & Creative','Marketing Operation','Marketing Strategy','Growth & Innovation'],
@@ -206,19 +207,39 @@ const CATS={
   TaskType:['Một lần','Định kỳ'],
   Cadence:['Hàng ngày','Hàng tuần','Hàng tháng'],
 };
-const ROLES={admin:'Administrator',manager:'Marketing Work Mgmt',lead:'Function Lead',staff:'Staff'};
+const ROLES={admin:'Administrator',manager:'Marketing Work Mgmt',lead:'Function Lead',staff:'Staff',bu:'Business Unit (gửi yêu cầu)'};
 // Backward-compat labels for any old accounts still tagged ceo/head
 const ROLES_LEGACY={ceo:'Marketing Work Mgmt',head:'Function Lead'};
 function roleLabel(r){return ROLES[r]||ROLES_LEGACY[r]||r;}
 function migrateRoles(){let ch=false;(DB.users||[]).forEach(u=>{if(u.role==='head'){u.role='lead';if(!u.func&&u.bu){u.func='';}ch=true;}else if(u.role==='ceo'){u.role='manager';ch=true;}});return ch;}
-// Credit scale by Complexity (adjust here if needed)
-const CREDIT_MAP={'X':0.5,'S':1,'M':3,'L':8};
+// === CREDIT MODEL (theo file Task MKT.xlsx · 1 Credit = 15 phút) ===
+// Ma trận: Complexity (S/M/L) × Capacity Level (Low/Medium/High)
+const CREDIT_MATRIX={
+  S:{Low:2,Medium:4,High:8},
+  M:{Low:16,Medium:24,High:32},
+  L:{Low:64,Medium:96,High:128},
+};
+const CAP_LEVELS=['Low','Medium','High'];
+const CAP_LABEL={Low:'Thấp',Medium:'Trung bình',High:'Cao'};
+function cxKey(t){const c=(typeof t==='string'?t:(t&&t.Complexity||'')).trim().toUpperCase();if(c[0]==='L')return 'L';if(c[0]==='M')return 'M';return 'S';}
+function capKey(t){const v=(typeof t==='string'?t:(t&&(t['Capacity Level']||t.CapacityLevel)||'')).trim().toLowerCase();if(v[0]==='l')return 'Low';if(v[0]==='h')return 'High';return 'Medium';}
 function creditOf(t){
   if(t.CreditOverride!=null&&t.CreditOverride!==''){const n=Number(t.CreditOverride);if(!isNaN(n))return n;}
-  const cx=(t.Complexity||'').trim().charAt(0).toUpperCase();
-  return CREDIT_MAP[cx]||1; // default 1 when complexity is unknown
+  const row=CREDIT_MATRIX[cxKey(t)]||CREDIT_MATRIX.M;
+  return row[capKey(t)]||row.Medium;
 }
+function creditFor(cx,cap){const row=CREDIT_MATRIX[cxKey(cx)]||CREDIT_MATRIX.M;return row[capKey(cap)]||row.Medium;}
 function sumCredit(arr){return arr.reduce((s,t)=>s+creditOf(t),0);}
+
+// === VÍ CREDIT THEO BU ===
+const DEFAULT_BU_CREDIT=650; // credit/tháng mặc định mỗi BU
+function buBudget(bu){const c=DB.buCredits&&DB.buCredits[bu];return c&&c.budget!=null&&c.budget!==''?Number(c.budget):DEFAULT_BU_CREDIT;}
+function buConsumes(t){return t.Status!=='Open'&&t.Status!=='Cancelled';} // trừ credit khi task đã duyệt/bắt đầu
+function curMonthKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function taskMonthKey(t){const d=parseDate(t['Start Date']||t['Request Date']);return d?d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'):curMonthKey();}
+function buUsed(bu,mk){mk=mk||curMonthKey();return DB.tasks.filter(t=>t.BU===bu&&buConsumes(t)&&taskMonthKey(t)===mk).reduce((s,t)=>s+creditOf(t),0);}
+function buPending(bu,mk){mk=mk||curMonthKey();return DB.tasks.filter(t=>t.BU===bu&&t.Status==='Open'&&taskMonthKey(t)===mk).reduce((s,t)=>s+creditOf(t),0);}
+function buWallet(bu){const budget=buBudget(bu),used=buUsed(bu),pending=buPending(bu);return {budget,used,pending,remaining:budget-used,pct:budget?Math.min(100,Math.round(used/budget*100)):0};}
 
 /* ---- progress / deadline / quality helpers ---- */
 function today(){return new Date().toISOString().slice(0,10);}
@@ -322,7 +343,7 @@ window.mSubCycle=i=>{const o=['Open','WIP','Done'];MSUBS[i].status=o[(o.indexOf(
 window.mSubOwner=(i,v)=>{if(MSUBS[i])MSUBS[i].owner=v;};
 window.mSubTemplate=key=>{const have=new Set(MSUBS.map(s=>(s.name||'').toLowerCase()));(SUBTASK_TEMPLATES[key]||[]).forEach(n=>{if(!have.has(n.toLowerCase()))MSUBS.push({id:uidS(),name:n,owner:'',status:'Open'});});renderMsubs();};
 
-function remoteShape(){return {users:DB.users,depts:DB.depts,staff:DB.staff,tasks:DB.tasks,gsheet:DB.gsheet};}
+function remoteShape(){return {users:DB.users,depts:DB.depts,staff:DB.staff,tasks:DB.tasks,gsheet:DB.gsheet,buCredits:DB.buCredits,agents:DB.agents};}
 let _saveTimer=null,REMOTE_TS=null,SAVE_PENDING=false,_pushing=false,_dirty=false;
 function save(){
   try{localStorage.setItem(SESS_KEY,DB.session||'');}catch(e){}
@@ -354,7 +375,7 @@ async function liveSync(){
     if(REMOTE_TS&&data.updated_at===REMOTE_TS)return; // không có gì mới
     REMOTE_TS=data.updated_at;
     const d=data.data||{};
-    DB.users=d.users||[];DB.depts=d.depts||[];DB.staff=d.staff||[];DB.tasks=d.tasks||[];if(d.gsheet)DB.gsheet=d.gsheet;
+    DB.users=d.users||[];DB.depts=d.depts||[];DB.staff=d.staff||[];DB.tasks=d.tasks||[];if(d.gsheet)DB.gsheet=d.gsheet;DB.buCredits=d.buCredits||DB.buCredits||{};if(d.agents)DB.agents=d.agents;
     setSync(true);buildMenu();render();
   }catch(e){}
 }
@@ -369,7 +390,7 @@ async function load(){
       if(error)throw error;
       const d=(data&&data.data)||{};
       REMOTE_TS=data&&data.updated_at||null;
-      DB.users=d.users||[];DB.depts=d.depts||[];DB.staff=d.staff||[];DB.tasks=d.tasks||[];DB.gsheet=d.gsheet||{csvUrl:'',map:{}};
+      DB.users=d.users||[];DB.depts=d.depts||[];DB.staff=d.staff||[];DB.tasks=d.tasks||[];DB.gsheet=d.gsheet||{csvUrl:'',map:{}};DB.buCredits=d.buCredits||{};DB.agents=d.agents||DB.agents||{webhook:'',content:'',image:'',video:''};
       REMOTE_OK=true;setSync(true);
     }catch(e){ok=false;REMOTE_OK=false;setSync(false);console.warn('Supabase load failed:',e&&e.message);}
   }else{loadLocal();setSync(false);}
@@ -385,6 +406,26 @@ function seed(){
     save();
   }
 }
+// Tạo sẵn 1 tài khoản cho TỪNG BU lẻ — mỗi BU chỉ đăng nhập & xem task của chính mình.
+// username = tên BU rút gọn, mật khẩu = username (vd: micafi / micafi).
+const BU_ACCOUNTS=[
+  ['Proship','proship'],['Ratraco','ratraco'],['MICAFI','micafi'],['FDS','fds'],
+  ['Fado168','fado168'],['EuroGo','eurogo'],['Fado VN','fadovn'],
+  ['The Winds','thewinds'],['GoPrint','goprint']
+];
+function seedBUs(){
+  let changed=false;
+  BU_ACCOUNTS.forEach(([bu,uname])=>{
+    // đã có 1 tài khoản BU cho đơn vị này chưa?
+    const exists=DB.users.some(u=>u.role==='bu'&&u.bu===bu);
+    const unameTaken=DB.users.some(u=>u.username===uname);
+    if(!exists&&!unameTaken){
+      DB.users.push({id:uid(),username:uname,pass:uname,name:'BU '+bu,role:'bu',dept:'',func:'',bu:bu});
+      changed=true;
+    }
+  });
+  return changed;
+}
 
 /* ============ AUTH ============ */
 function uid(){return 'x'+Math.random().toString(36).slice(2,9);}
@@ -397,6 +438,7 @@ function doLogin(){
   DB.session=usr.id;try{localStorage.setItem(SESS_KEY,DB.session);}catch(e){}openApp();
 }
 document.getElementById('logoutBtn').onclick=()=>{DB.session=null;try{localStorage.setItem(SESS_KEY,'');}catch(e){}location.reload();};
+{const _bl=document.getElementById('buLogout');if(_bl)_bl.onclick=()=>{DB.session=null;try{localStorage.setItem(SESS_KEY,'');}catch(e){}location.reload();};}
 function me(){return DB.users.find(u=>u.id===DB.session);}
 
 /* ============ ROLE-BASED MENU ============ */
@@ -418,6 +460,7 @@ const NAV=[
   {v:'dept',ic:'⬡',t:'Departments',sec:'ADMIN',roles:['admin']},
   {v:'users',ic:'⚷',t:'Accounts & Roles',sec:'ADMIN',roles:['admin']},
   {v:'backup',ic:'⛃',t:'Sao lưu & Khôi phục',sec:'ADMIN',roles:['admin']},
+  {v:'agents',ic:'⚡',t:'Automation & API',sec:'ADMIN',roles:['admin','manager']},
   {v:'guide',ic:'◈',t:'Guide & Training',sec:'HELP',roles:['admin','manager','lead','staff']},
 ];
 function buildMenu(){
@@ -451,6 +494,13 @@ function buildMenu(){
 let VIEW='dash';
 function openApp(){
   document.getElementById('login').style.display='none';
+  const _me=me();
+  if(_me&&_me.role==='bu'){
+    document.getElementById('app').style.display='none';
+    document.getElementById('buPortal').style.display='block';
+    renderBuPortal();
+    return;
+  }
   document.getElementById('app').style.display='block';
   const sd=document.getElementById('syncDot');if(sd){sd.style.cursor='pointer';sd.title='Dữ liệu lưu trên Supabase — bấm để mở';sd.onclick=()=>window.open('https://supabase.com/dashboard/project/vxmuxorsnnharbrpygvw/editor','_blank');}
   const u=me();
@@ -523,7 +573,7 @@ function render(){
   const c=document.getElementById('content');
   const ta=document.getElementById('topActions');ta.innerHTML='';
   const u=me();
-  const T={dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Marketing Tasks','Task list & tracking'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],backup:['Sao lưu & Khôi phục','Tải bản sao lưu toàn bộ dữ liệu hoặc khôi phục từ file'],guide:['Guide & Training','How to use this CRM — at a glance']};
+  const T={dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Marketing Tasks','Task list & tracking'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],backup:['Sao lưu & Khôi phục','Tải bản sao lưu toàn bộ dữ liệu hoặc khôi phục từ file'],agents:['Automation & API','Ngân sách credit theo BU · endpoint agent (content/ảnh/video) · API đấu nối'],guide:['Guide & Training','How to use this CRM — at a glance']};
   document.getElementById('vtitle').textContent=T[VIEW][0];
   document.getElementById('vsub').textContent=T[VIEW][1];
   renderGFBar();
@@ -549,6 +599,7 @@ function render(){
   else if(VIEW==='users')rUsers(c,ta);
   else if(VIEW==='gsheet')rGSheet(c,ta);
   else if(VIEW==='backup')rBackup(c,ta);
+  else if(VIEW==='agents')rAgents(c,ta);
   else if(VIEW==='guide')rGuide(c);
 }
 
@@ -851,8 +902,9 @@ window.taskModal=(id,presetType)=>{
       <div class="fld"><label>Loại công việc</label><select id="t_type">${opt(CATS.TaskType,t.Type||presetType||'Một lần')}</select></div>
       <div class="fld"><label>Chu kỳ <span style="color:var(--muted);font-weight:400">(việc định kỳ)</span></label><select id="t_cad">${opt(CATS.Cadence,t.Cadence||'Hàng tháng')}</select></div>
       <div class="fld"><label>Chỉ tiêu/kỳ <span style="color:var(--muted);font-weight:400">(trống = duy trì)</span></label><input id="t_quota" type="number" min="0" value="${esc(t.Quota!=null?t.Quota:'')}" placeholder="vd 4 bài/tuần"></div>
-      <div class="fld"><label>Độ phức tạp <span style="color:var(--muted);font-weight:400">(tính credit)</span></label><select id="t_cx">${opt(CATS.Complexity,t.Complexity)}</select></div>
-      <div class="fld"><label>Credit <span style="color:var(--muted);font-weight:400">(trống = tự tính)</span></label><input id="t_credit" type="number" min="0" value="${esc(t.CreditOverride!=null?t.CreditOverride:'')}" placeholder="auto: S=1, M=3, L=8"></div>
+      <div class="fld"><label>Độ phức tạp <span style="color:var(--muted);font-weight:400">(S/M/L)</span></label><select id="t_cx" onchange="updCreditHint()">${opt(CATS.Complexity,t.Complexity)}</select></div>
+      <div class="fld"><label>Mức năng lực <span style="color:var(--muted);font-weight:400">(× độ phức tạp)</span></label><select id="t_cap" onchange="updCreditHint()">${CAP_LEVELS.map(v=>`<option value="${v}" ${(t['Capacity Level']||'Medium')===v?'selected':''}>${CAP_LABEL[v]} (${v})</option>`).join('')}</select></div>
+      <div class="fld"><label>Credit <span style="color:var(--muted);font-weight:400">(trống = tự tính)</span></label><input id="t_credit" type="number" min="0" oninput="updCreditHint()" value="${esc(t.CreditOverride!=null?t.CreditOverride:'')}" placeholder="auto theo ma trận"><div id="t_credit_hint" style="font-size:11px;color:var(--muted);margin-top:5px"></div></div>
       <div class="fld"><label>Tiến độ %</label><input id="t_prog" type="number" min="0" max="100" value="${esc(t.Progress!=null?t.Progress:'')}" placeholder="0–100"></div>`)}
     ${evalSection}
     <div style="margin-top:18px;border-top:1px solid var(--line);padding-top:16px">
@@ -865,19 +917,21 @@ window.taskModal=(id,presetType)=>{
         <button type="button" class="btn ghost" onclick="mSubAdd()">Thêm</button>
       </div>
     </div>
-    <div class="mfoot"><button class="btn ghost" id="tCancel">Cancel</button><button class="btn gold" id="tSave">${id?'Save':'Assign'}</button></div>`);
+    <div class="mfoot">${id?`<button class="btn ghost" onclick="sendToAgent('${id}')" title="POST task sang endpoint agent (content/ảnh/video)">⚡ Gửi tới Agent</button>`:''}<button class="btn ghost" id="tCancel">Cancel</button><button class="btn gold" id="tSave">${id?'Save':'Assign'}</button></div>`);
   document.getElementById('tCancel').addEventListener('click',mClose);
   document.getElementById('tSave').addEventListener('click',()=>saveTask(id||''));
   MSUBS=(t.subtasks||[]).map(s=>({...s}));
   renderMsubs();
+  if(window.updCreditHint)updCreditHint();
   const msi=document.getElementById('msub_name');if(msi)msi.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();mSubAdd();}});
 };
+window.updCreditHint=()=>{const cx=document.getElementById('t_cx'),cap=document.getElementById('t_cap'),cr=document.getElementById('t_credit'),h=document.getElementById('t_credit_hint');if(!h)return;const auto=creditFor(cx?cx.value:'',cap?cap.value:'');const raw=cr?cr.value.trim():'';const ov=raw!==''?Number(raw):null;h.innerHTML=(ov!=null&&!isNaN(ov))?('Đang dùng credit nhập tay <b>'+ov+'</b> · tự tính theo ma trận = '+auto):('Tự tính theo ma trận = <b>'+auto+'</b> credit');};
 window.saveTask=id=>{
   const g=x=>{const e=document.getElementById(x);return e?e.value.trim():'';};
   if(!g('t_name')){alert('Hãy nhập tên công việc');return;}
   if(!g('t_own')){alert('Hãy chọn người nhận việc (Lead hoặc nhân viên)');return;}
   const prev=id?DB.tasks.find(t=>t._id===id):null;
-  const o=Object.assign({},prev||{},{_id:id||uid(),'Request ID':g('t_id'),'Request Date':(prev&&prev['Request Date'])||today(),BU:g('t_bu'),'Project/Campaign':g('t_proj'),'Request Name':g('t_name'),Function:g('t_fn'),'Sub Function':g('t_sub'),Requestor:(prev&&prev.Requestor)||me().name,Source:g('t_src'),Priority:g('t_pr'),Owner:g('t_own'),Status:g('t_st'),'Due Date':g('t_due'),Complexity:g('t_cx'),CreditOverride:g('t_credit'),Progress:g('t_prog'),QC:g('t_qc'),Revisions:g('t_rev'),Satisfaction:g('t_sat'),Notes:g('t_note'),Type:g('t_type'),Cadence:g('t_cad'),Quota:g('t_quota')});
+  const o=Object.assign({},prev||{},{_id:id||uid(),'Request ID':g('t_id'),'Request Date':(prev&&prev['Request Date'])||today(),BU:g('t_bu'),'Project/Campaign':g('t_proj'),'Request Name':g('t_name'),Function:g('t_fn'),'Sub Function':g('t_sub'),Requestor:(prev&&prev.Requestor)||me().name,Source:g('t_src'),Priority:g('t_pr'),Owner:g('t_own'),Status:g('t_st'),'Due Date':g('t_due'),Complexity:g('t_cx'),'Capacity Level':g('t_cap'),CreditOverride:g('t_credit'),Progress:g('t_prog'),QC:g('t_qc'),Revisions:g('t_rev'),Satisfaction:g('t_sat'),Notes:g('t_note'),Type:g('t_type'),Cadence:g('t_cad'),Quota:g('t_quota')});
   o.comments=o.comments||[];o.history=o.history||[];
   o.subtasks=MSUBS.map(s=>({...s}));
   if(o.Status==='Done'&&!o['Close Date'])o['Close Date']=today();
@@ -894,6 +948,273 @@ window.saveTask=id=>{
   save();mClose();render();
 };
 function autoId(){return 'MKT-'+new Date().getFullYear()+'-'+String(DB.tasks.length+1).padStart(3,'0');}
+
+/* ===================== CỔNG BU (nhúng trực tiếp) ===================== */
+let BUVIEW='submit';
+function buName(){const u=me();return (u&&u.bu)||'';}
+function buToast(msg){let el=document.getElementById('buToast');if(!el){el=document.createElement('div');el.id='buToast';el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#17191f;color:#fff;padding:12px 20px;border-radius:10px;font-size:13.5px;font-weight:600;z-index:200;box-shadow:0 8px 30px rgba(0,0,0,.3);font-family:inherit;opacity:1';document.body.appendChild(el);}el.textContent=msg;el.style.transition='none';el.style.opacity='1';clearTimeout(el._t);el._t=setTimeout(()=>{el.style.transition='opacity .4s';el.style.opacity='0';},2800);}
+window.buGo=v=>{BUVIEW=v;renderBuPortal();};
+window.buLogout=()=>{DB.session=null;try{localStorage.setItem(SESS_KEY,'');}catch(e){}location.reload();};
+function buTab(v,label){const on=BUVIEW===v;return `<button onclick="buGo('${v}')" style="padding:9px 16px;border-radius:9px;border:1px solid ${on?'#17191f':'#dfe1e6'};background:${on?'#17191f':'#fff'};color:${on?'#fff':'#3b3f4a'};font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">${label}</button>`;}
+function buMatrixMini(){
+  const head=`<tr><th style="text-align:left;padding:3px 6px;color:#8c909c;font-weight:700"></th>${CAP_LEVELS.map(c=>`<th style="padding:3px 6px;color:#8c909c;font-weight:700;text-align:right">${CAP_LABEL[c]}</th>`).join('')}</tr>`;
+  const rows=['S','M','L'].map(k=>`<tr><td style="padding:3px 6px;font-weight:700">${k}</td>${CAP_LEVELS.map(c=>`<td style="padding:3px 6px;text-align:right;color:#3b3f4a">${CREDIT_MATRIX[k][c]}</td>`).join('')}</tr>`).join('');
+  return `<table style="width:100%;border-collapse:collapse;font-size:12px">${head}${rows}</table>`;
+}
+function buStatusPill(s){
+  const m={Open:['Chờ duyệt','#8a6516','#f7efe0'],WIP:['Đang làm','#345e8a','#e9eef5'],Waiting:['Tạm chờ','#6b7080','#eef0f3'],Done:['Hoàn thành','#2f6d4d','#e6f0ea'],Cancelled:['Đã hủy','#9c4441','#f6e7e6']};
+  const x=m[s]||[s||'—','#6b7080','#eef0f3'];
+  return `<span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:6px;font-size:11.5px;font-weight:700;background:${x[2]};color:${x[1]}"><span style="width:6px;height:6px;border-radius:50%;background:${x[1]}"></span>${x[0]}</span>`;
+}
+function buWalletCard(w){
+  const barCol=w.pct>=100?'#b4524f':(w.pct>=80?'#b58a3a':'#3f8a63');
+  return `<div style="background:#fff;border:1px solid #e3e5ea;border-radius:16px;padding:22px 26px;box-shadow:0 2px 10px rgba(23,25,31,.04)">
+    <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+      <div><div style="font-size:11px;font-weight:700;color:#8c909c;letter-spacing:.6px;text-transform:uppercase">Ví credit · tháng này</div>
+      <div style="font-size:30px;font-weight:800;letter-spacing:-1px;margin-top:3px">${w.remaining} <span style="font-size:15px;font-weight:600;color:#8c909c">/ ${w.budget} còn lại</span></div></div>
+      <div style="margin-left:auto;display:flex;gap:24px">
+        <div><div style="font-size:20px;font-weight:800;color:#345e8a">${w.used}</div><div style="font-size:10.5px;font-weight:700;color:#8c909c;text-transform:uppercase;letter-spacing:.3px">Đã dùng</div></div>
+        <div><div style="font-size:20px;font-weight:800;color:#8a6516">${w.pending}</div><div style="font-size:10.5px;font-weight:700;color:#8c909c;text-transform:uppercase;letter-spacing:.3px">Chờ duyệt</div></div>
+      </div>
+    </div>
+    <div style="height:10px;background:#eef0f3;border-radius:6px;overflow:hidden"><div style="height:100%;border-radius:6px;background:${barCol};width:${w.pct}%"></div></div>
+    <div style="font-size:11.5px;color:#9aa0ac;margin-top:9px;line-height:1.6">1 Credit = 15 phút. Credit chỉ bị trừ <b>khi task được duyệt / bắt đầu làm</b>. Yêu cầu đang chờ duyệt chưa trừ vào số dư.</div>
+  </div>`;
+}
+function buSubmitForm(w){
+  const fnOpts=CATS.Function.map(f=>`<option>${esc(f)}</option>`).join('');
+  const subOpts=CATS.SubFunction.map(f=>`<option>${esc(f)}</option>`).join('');
+  const cxOpts=CATS.Complexity.map(f=>`<option ${f==='M - 1 day'?'selected':''}>${esc(f)}</option>`).join('');
+  const capOpts=CAP_LEVELS.map(v=>`<option value="${v}" ${v==='Medium'?'selected':''}>${CAP_LABEL[v]} (${v})</option>`).join('');
+  const prOpts=CATS.Priority.map(f=>`<option ${f==='P2'?'selected':''}>${esc(f)}</option>`).join('');
+  const L='font-size:12px;font-weight:600;color:#3b3f4a;display:block;margin-bottom:6px';
+  const I='width:100%;padding:11px 13px;border:1px solid #dfe1e6;border-radius:9px;font-size:13.5px;outline:none;font-family:inherit;background:#fff;box-sizing:border-box';
+  return `<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+    <div style="flex:1 1 460px;background:#fff;border:1px solid #e3e5ea;border-radius:14px;padding:24px 26px">
+      <div style="font-size:10.5px;font-weight:700;letter-spacing:.8px;color:#8c909c;text-transform:uppercase;margin-bottom:14px">Thông tin yêu cầu</div>
+      <div style="margin-bottom:13px"><label style="${L}">Tên task / yêu cầu *</label><input id="bu_name" style="${I}" placeholder="VD: Chạy Google Ads ra mắt sản phẩm tháng 7"></div>
+      <div style="margin-bottom:13px"><label style="${L}">Dự án / Campaign</label><input id="bu_proj" style="${I}" placeholder="Tùy chọn"></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:13px">
+        <div style="flex:1 1 200px"><label style="${L}">Function *</label><select id="bu_fn" style="${I}" onchange="buUpdCost()"><option value="">— Chọn —</option>${fnOpts}</select></div>
+        <div style="flex:1 1 200px"><label style="${L}">Sub Function</label><select id="bu_sub" style="${I}"><option value="">—</option>${subOpts}</select></div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:13px">
+        <div style="flex:1 1 200px"><label style="${L}">Độ phức tạp *</label><select id="bu_cx" style="${I}" onchange="buUpdCost()">${cxOpts}</select></div>
+        <div style="flex:1 1 200px"><label style="${L}">Mức năng lực *</label><select id="bu_cap" style="${I}" onchange="buUpdCost()">${capOpts}</select></div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:13px">
+        <div style="flex:1 1 200px"><label style="${L}">Ưu tiên</label><select id="bu_pr" style="${I}">${prOpts}</select></div>
+        <div style="flex:1 1 200px"><label style="${L}">Deadline mong muốn</label><input id="bu_due" type="date" style="${I}"></div>
+      </div>
+      <div style="margin-bottom:16px"><label style="${L}">Ghi chú / link brief</label><textarea id="bu_note" rows="2" style="${I};resize:vertical" placeholder="Dán link Drive / mô tả ngắn…"></textarea></div>
+      <div id="bu_err" style="font-size:12.5px;color:#b4524f;font-weight:600;margin-bottom:10px;display:none"></div>
+      <button onclick="buSubmit()" style="width:100%;padding:14px;background:#17191f;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Gửi yêu cầu →</button>
+    </div>
+    <div style="flex:1 1 280px;position:sticky;top:84px">
+      <div style="background:#fafbfc;border:1px solid #e3e5ea;border-radius:14px;padding:20px 22px">
+        <div style="font-size:10.5px;font-weight:700;letter-spacing:1px;color:#8c909c;text-transform:uppercase;margin-bottom:12px">Chi phí credit dự kiến</div>
+        <div id="bu_cost" style="font-size:34px;font-weight:800;letter-spacing:-1.4px">—</div>
+        <div id="bu_cost_sub" style="font-size:12.5px;color:#6b7080;margin-top:4px;line-height:1.5">Chọn độ phức tạp & mức năng lực để tính credit.</div>
+        <div style="height:1px;background:#eef0f3;margin:16px 0"></div>
+        <div style="font-size:12.5px;color:#3b3f4a;line-height:1.7">Còn lại sau yêu cầu này: <b id="bu_after">${w.remaining}</b> credit</div>
+        <div id="bu_warn" style="display:none;font-size:12px;color:#b4524f;font-weight:600;margin-top:8px"></div>
+      </div>
+      <div style="background:#fff;border:1px solid #e3e5ea;border-radius:14px;padding:16px 18px;margin-top:13px">
+        <div style="font-size:10.5px;font-weight:700;letter-spacing:.6px;color:#8c909c;text-transform:uppercase;margin-bottom:10px">Ma trận credit (file)</div>
+        ${buMatrixMini()}
+      </div>
+    </div>
+  </div>`;
+}
+function buMyList(mine){
+  if(!mine.length)return `<div style="background:#fff;border:1px solid #e3e5ea;border-radius:14px;padding:50px;text-align:center;color:#9aa0ac;font-size:13.5px">Chưa có yêu cầu nào. Bấm <b>Gửi yêu cầu</b> để tạo.</div>`;
+  const rows=mine.slice().sort((a,b)=>(b['Request Date']||'').localeCompare(a['Request Date']||'')).map(t=>{
+    const ag=t.agent?` <span title="Agent" style="font-size:10px;font-weight:700;color:#574a82;background:#edeaf3;padding:1px 6px;border-radius:4px">⚡ ${esc(t.agent.status)}${t.agent.outputUrl?' ✓':''}</span>`:'';
+    return `<tr>
+      <td style="padding:11px 14px;border-bottom:1px solid #f1f2f5;font-weight:600">${esc(t['Request Name'])}${ag}<div style="font-size:11px;color:#9aa0ac;font-weight:500;margin-top:2px">${esc(t['Request ID'])} · ${esc(t.Function||'—')}</div></td>
+      <td style="padding:11px 14px;border-bottom:1px solid #f1f2f5;color:#6b7080;white-space:nowrap">${cxKey(t)} · ${CAP_LABEL[capKey(t)]}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #f1f2f5;font-weight:700;color:#46506b">${creditOf(t)}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #f1f2f5">${buStatusPill(t.Status)}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #f1f2f5;color:#6b7080">${esc(t.Owner||'—')}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #f1f2f5;color:#6b7080;white-space:nowrap">${esc(t['Due Date']||'—')}</td>
+    </tr>`;
+  }).join('');
+  return `<div style="background:#fff;border:1px solid #e3e5ea;border-radius:14px;overflow:hidden"><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr>${['Task','Loại','Credit','Trạng thái','Phụ trách','Hạn'].map(h=>`<th style="text-align:left;padding:10px 14px;font-size:10px;color:#8b8f9a;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:#fafbfc;border-bottom:1px solid #eef0f3">${h}</th>`).join('')}</tr></thead>
+    <tbody>${rows}</tbody></table></div></div>`;
+}
+window.buUpdCost=()=>{
+  const cx=document.getElementById('bu_cx'),cap=document.getElementById('bu_cap');
+  const cost=document.getElementById('bu_cost'),sub=document.getElementById('bu_cost_sub'),after=document.getElementById('bu_after'),warn=document.getElementById('bu_warn');
+  if(!cx||!cost)return;
+  const c=creditFor(cx.value,cap.value);
+  cost.textContent=c+' credit';
+  sub.innerHTML='≈ '+(c*15)+' phút · '+cxKey(cx.value)+' × '+capKey(cap.value);
+  const w=buWallet(buName());const rem=w.remaining-c;
+  if(after)after.textContent=rem;
+  if(warn){if(rem<0){warn.style.display='block';warn.textContent='⚠ Vượt ngân sách '+Math.abs(rem)+' credit. Vẫn gửi được — chờ MKT duyệt.';}else warn.style.display='none';}
+};
+window.buSubmit=()=>{
+  const g=x=>{const e=document.getElementById(x);return e?e.value.trim():'';};
+  const name=g('bu_name'),fn=g('bu_fn');
+  const err=document.getElementById('bu_err');
+  if(!name||!fn){if(err){err.style.display='block';err.textContent='Vui lòng nhập Tên task và chọn Function.';}return;}
+  const t={_id:uid(),'Request ID':autoId(),'Request Date':today(),BU:buName(),'Project/Campaign':g('bu_proj'),'Request Name':name,Function:fn,'Sub Function':g('bu_sub'),Requestor:me().name,Source:'New Request',Priority:g('bu_pr')||'P2',Owner:'',Status:'Open','Due Date':g('bu_due'),Complexity:g('bu_cx'),'Capacity Level':g('bu_cap'),Notes:g('bu_note'),Progress:'',comments:[],history:[]};
+  logHist(t,'BU gửi yêu cầu — chờ MKT duyệt');
+  DB.tasks.push(t);save();
+  BUVIEW='mine';renderBuPortal();
+  buToast('✓ Đã gửi '+t['Request ID']+' · '+creditOf(t)+' credit (chờ duyệt)');
+};
+function renderBuPortal(){
+  const host=document.getElementById('buPortal');if(!host)return;
+  const u=me();const bu=buName();
+  const w=bu?buWallet(bu):{budget:DEFAULT_BU_CREDIT,used:0,pending:0,remaining:DEFAULT_BU_CREDIT,pct:0};
+  const mine=DB.tasks.filter(t=>t.BU===bu);
+  host.innerHTML=`
+  <div style="min-height:100vh;background:#f1f2f4">
+    <div style="background:#17191f;color:#fff;padding:15px 30px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:5">
+      <div style="width:38px;height:38px;border-radius:9px;background:#fff;color:#17191f;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px">FM</div>
+      <div style="line-height:1.25"><b style="font-size:14px;display:block">Cổng yêu cầu Marketing</b><span style="font-size:11px;color:#9398a3;letter-spacing:.5px">BU · ${esc(bu||'(chưa gán BU)')}</span></div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+        <span style="font-size:12.5px;color:#c8cad2">${esc(u?u.name:'')}</span>
+        <button onclick="buLogout()" style="background:#2a2d36;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">⎋ Đăng xuất</button>
+      </div>
+    </div>
+    <div style="max-width:1060px;margin:0 auto;padding:26px 30px 80px">
+      ${buWalletCard(w)}
+      <div style="display:flex;gap:8px;margin:20px 0 16px">${buTab('submit','✎ Gửi yêu cầu')}${buTab('mine','▦ Yêu cầu của tôi ('+mine.length+')')}</div>
+      ${BUVIEW==='submit'?buSubmitForm(w):buMyList(mine)}
+    </div>
+  </div>`;
+  if(BUVIEW==='submit')setTimeout(buUpdCost,0);
+}
+
+/* ===================== AGENT AUTOMATION API ===================== */
+function agentEndpointFor(t){
+  const a=DB.agents||{};
+  const hay=((t.Function||'')+' '+(t['Sub Function']||'')+' '+(t['Request Name']||'')).toLowerCase();
+  if(/video/.test(hay)&&a.video)return {url:a.video,type:'video'};
+  if(/(image|ảnh|banner|design|thiết kế|photo|hình)/.test(hay)&&a.image)return {url:a.image,type:'image'};
+  if(/(content|seo|social|copy|bài|nội dung)/.test(hay)&&a.content)return {url:a.content,type:'content'};
+  if(a.content)return {url:a.content,type:'content'};
+  if(a.webhook)return {url:a.webhook,type:'general'};
+  return null;
+}
+function agentPayload(t){return {jobId:'JOB-'+Date.now().toString(36),source:'fado-mkt',taskId:t._id,requestId:t['Request ID'],bu:t.BU,title:t['Request Name'],function:t.Function,subFunction:t['Sub Function'],complexity:cxKey(t),capacity:capKey(t),credit:creditOf(t),priority:t.Priority,dueDate:t['Due Date']||'',notes:t.Notes||'',brief:t.Brief||''};}
+window.sendToAgent=async id=>{
+  const t=DB.tasks.find(x=>x._id===id);if(!t)return;
+  const ep=agentEndpointFor(t);const payload=agentPayload(t);
+  t.agent={status:'sent',type:ep?ep.type:'(chưa cấu hình)',jobId:payload.jobId,at:new Date().toISOString(),url:ep?ep.url:''};
+  if(ep&&ep.url){try{await fetch(ep.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});}catch(e){t.agent.status='error';t.agent.error=String(e&&e.message||e);}}
+  else{t.agent.status='queued';t.agent.note='Chưa cấu hình endpoint';}
+  logHist(t,'⚡ Gửi tới Agent ('+t.agent.type+') · '+payload.jobId);
+  save();if(document.getElementById('buPortal').style.display==='block')renderBuPortal();else render();
+  buToast(ep&&ep.url?('⚡ Đã gửi tới Agent ('+t.agent.type+')'):'Đã xếp hàng — chưa cấu hình endpoint (vào Automation & API)');
+};
+window.fadoMKT={
+  version:1,
+  listTasks:filter=>DB.tasks.filter(t=>!filter||Object.keys(filter).every(k=>String(t[k])===String(filter[k]))).map(t=>Object.assign({},t,{credit:creditOf(t)})),
+  getTask:id=>{const t=DB.tasks.find(x=>x._id===id||x['Request ID']===id);return t?Object.assign({},t,{credit:creditOf(t)}):null;},
+  ingestRequest:(o={})=>{const t={_id:uid(),'Request ID':o.requestId||autoId(),'Request Date':o.requestDate||today(),BU:o.bu||'','Project/Campaign':o.project||'','Request Name':o.title||o.name||'(no title)',Function:o.function||'','Sub Function':o.subFunction||'',Requestor:o.requestor||'API',Source:o.source||'New Request',Priority:o.priority||'P3',Owner:o.owner||'',Status:o.status||'Open','Due Date':o.dueDate||'',Complexity:o.complexity||'M - 1 day','Capacity Level':o.capacity||'Medium',Notes:o.notes||'',comments:[],history:[]};logHist(t,'Tạo qua API (ingestRequest)');DB.tasks.push(t);save();render();return t['Request ID'];},
+  updateAgentResult:(id,res={})=>{const t=DB.tasks.find(x=>x._id===id||x['Request ID']===id);if(!t)return false;t.agent=Object.assign({},t.agent,{status:res.status||'done',outputUrl:res.outputUrl||res.url||'',resultAt:new Date().toISOString(),meta:res.meta||null});if(res.complete)t.Status='Done';logHist(t,'Agent cập nhật: '+(res.status||'done')+(res.outputUrl?(' · '+res.outputUrl):''));save();render();return true;},
+  setStatus:(id,status)=>{const t=DB.tasks.find(x=>x._id===id||x['Request ID']===id);if(!t)return false;t.Status=status;logHist(t,'API setStatus → '+status);save();render();return true;},
+};
+
+/* ---- AUTOMATION & API PAGE ---- */
+function rAgents(c,ta){
+  const a=DB.agents||{webhook:'',content:'',image:'',video:''};
+  const buRows=CATS.BU.map(bu=>{const w=buWallet(bu);return `<tr>
+    <td style="padding:9px 12px;border-bottom:1px solid #f1f2f5;font-weight:600">${esc(bu)}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid #f1f2f5"><input data-bubudget="${esc(bu)}" type="number" min="0" value="${buBudget(bu)}" style="width:84px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit"></td>
+    <td style="padding:9px 12px;border-bottom:1px solid #f1f2f5;color:#345e8a;font-weight:700">${w.used}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid #f1f2f5;color:#8a6516;font-weight:700">${w.pending}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid #f1f2f5;font-weight:700;color:${w.remaining<0?'#b4524f':'#2f6d4d'}">${w.remaining}</td>
+  </tr>`;}).join('');
+  const F=(id,label,val,ph)=>`<div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:var(--ink2);display:block;margin-bottom:5px">${label}</label><input id="${id}" value="${esc(val||'')}" placeholder="${ph}" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;box-sizing:border-box"></div>`;
+  const sample=JSON.stringify({jobId:'JOB-xxx',source:'fado-mkt',taskId:'…',requestId:'MKT-2026-001',bu:'Proship',title:'Banner sale 7.7',function:'Content & Creative',subFunction:'Design',complexity:'S',capacity:'Medium',credit:4,priority:'P2',dueDate:'',notes:''},null,2);
+  // ==== AI AGENT CONTROL CENTER (theo so do multi-agent) ====
+  const AG_KEYS=[
+    {grp:'Chuỗi Nội Dung (Content)',c:'#3b6ea5',items:[
+      ['content','✍️','Copy Agent','Viết text · caption · hashtag','Claude API + skill brand'],
+      ['image','🎨','Photo Agent','Tạo ảnh · thiết kế banner','Canva connector ✓'],
+      ['video','🎬','Video Agent','Tạo video · phụ đề','Canva / tool video ngoài'],
+    ]},
+    {grp:'Chuỗi Campaign',c:'#6b5e9c',items:[
+      ['planning','📅','Planning Agent','Plan · calendar · timeline','Claude API'],
+      ['tracking','📈','Tracking Agent','CTR · engagement real-time','Supermetrics ✓'],
+      ['budget','💰','Budget Agent','Spend · ROAS · pacing','Supermetrics + credit CRM'],
+      ['report','📊','Report Agent','Tổng hợp · insight','Claude API'],
+    ]},
+    {grp:'Điều phối & Kiểm soát',c:'#b58a3a',items:[
+      ['manager','🧠','Operation Manager','Bộ não điều phối toàn bộ','n8n / Edge Function'],
+      ['qa','✅','AI QA Agent','Chấm KPI · PASS ≥ 80%','Claude API + rubric'],
+      ['publish','🚀','Publish Agent','Đăng FB/IG/TikTok','n8n + connector MXH'],
+      ['performance','📡','Performance Agent','Theo dõi hiệu suất','Supermetrics ✓'],
+    ]},
+  ];
+  let _nConf=0;
+  const chainHTML=AG_KEYS.map(g=>`
+    <div style="margin-bottom:4px">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:${g.c};margin:16px 0 9px">${g.grp}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
+        ${g.items.map(([k,ic,nm,role,pw])=>{const on=!!(a[k]&&String(a[k]).trim());if(on)_nConf++;return `
+        <div style="border:1px solid var(--line);border-radius:11px;padding:12px 13px;background:#fff">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+            <span style="font-size:16px">${ic}</span><b style="font-size:13px">${nm}</b>
+            <span style="margin-left:auto;width:9px;height:9px;border-radius:50%;background:${on?'#3f8a63':'#cfd2da'}" title="${on?'Đã cấu hình':'Chưa cắm endpoint'}"></span>
+          </div>
+          <div style="font-size:11.5px;color:var(--ink2);font-weight:500">${role}</div>
+          <div style="font-size:10.5px;color:var(--muted);margin:2px 0 8px">⚙ ${pw}</div>
+          <input id="ag_${k}" value="${esc(a[k]||'')}" placeholder="https://…/${k}" style="width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:11.5px;box-sizing:border-box">
+        </div>`;}).join('')}
+      </div>
+    </div>`).join('');
+  const kpiBands=[['≥ 90','Excellent','#2f6d4d','#e6f0ea'],['80–89','Good','#345e8a','#e9eef5'],['70–79','Accept','#8a6516','#f7efe0'],['60–69','Need Improve','#9c6a1f','#f3ead6'],['< 60','Reject','#9c4441','#f6e7e6']];
+  c.innerHTML=`
+  <div class="panel" style="margin-bottom:16px">
+    <h3><span class="dot" style="background:var(--navy)"></span>AI Agent Control Center <span style="font-size:11.5px;color:var(--muted);font-weight:500">· ${_nConf}/12 agent đã cắm endpoint</span></h3>
+    ${_nConf===0?`<div style="background:#f7efe0;border:1px solid #ecd9ad;border-radius:9px;padding:10px 13px;font-size:12px;color:#7a5a12;margin-bottom:4px">⚠️ Chưa có "bộ não" — hãy cắm endpoint <b>Operation Manager</b> (n8n / Supabase Edge Function) để các agent hoạt động. Xem file kế hoạch để biết cách dựng.</div>`:''}
+    ${chainHTML}
+    <div style="margin-top:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <button class="btn gold" id="agSave">Lưu tất cả endpoint</button>
+      <label style="font-size:11.5px;color:var(--muted);font-weight:600">Webhook chung (fallback)</label>
+      <input id="ag_webhook" value="${esc(a.webhook||'')}" placeholder="https://n8n…/webhook/…" style="flex:1;min-width:220px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:12px">
+    </div>
+  </div>
+  <div class="panel" style="margin-bottom:16px">
+    <h3><span class="dot" style="background:#6b5e9c"></span>AI QA Agent — Thang chấm điểm KPI</h3>
+    <div style="font-size:12.5px;color:var(--ink2);line-height:1.9;margin-bottom:10px">
+      <b>Product Score</b> = Visual × 40% + Marketing Messenger × 40% + Business Potential × 20% &nbsp;·&nbsp;
+      <span style="color:#2f6d4d;font-weight:700">PASS khi ≥ 80</span> → Human review → Publish. Dưới ngưỡng → agent tự sửa (tối đa 3 vòng).
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap">${kpiBands.map(([s,l,fg,bg])=>`<span style="padding:4px 11px;border-radius:6px;font-size:11px;font-weight:700;background:${bg};color:${fg}">${s} · ${l}</span>`).join('')}</div>
+  </div>
+  <div class="panel" style="margin-bottom:16px">
+    <h3><span class="dot" style="background:var(--navy)"></span>Ngân sách credit theo BU <span style="font-size:11.5px;color:var(--muted);font-weight:500">· mặc định ${DEFAULT_BU_CREDIT}/tháng</span></h3>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr>${['BU','Ngân sách','Đã dùng','Chờ duyệt','Còn lại'].map(h=>`<th style="text-align:left;padding:8px 12px;font-size:10px;color:#8b8f9a;font-weight:700;text-transform:uppercase;background:#fafbfc;border-bottom:1px solid #eef0f3">${h}</th>`).join('')}</tr></thead><tbody>${buRows}</tbody></table></div>
+    <div style="margin-top:14px"><button class="btn gold" id="buSaveBudgets">Lưu ngân sách</button></div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h3><span class="dot" style="background:var(--green)"></span>API đấu nối (gọi từ agent / hệ thống ngoài)</h3>
+    <p style="font-size:12.5px;color:var(--muted);margin:-4px 0 12px;line-height:1.6">Mỗi task có nút <b>⚡ Gửi tới Agent</b> (trong cửa sổ chỉnh sửa task) để POST payload sang endpoint. Agent gọi lại đối tượng toàn cục <code>fadoMKT</code> để cập nhật kết quả vào đúng task.</p>
+    <pre style="background:#0f1115;color:#cfe3ff;padding:16px 18px;border-radius:10px;overflow:auto;font-size:12px;line-height:1.7;font-family:ui-monospace,Menlo,monospace">// Lấy task đang làm (kèm credit)
+fadoMKT.listTasks({ Status:'WIP' })
+
+// Tạo yêu cầu mới từ hệ thống ngoài → trả về Request ID
+fadoMKT.ingestRequest({ bu:'Proship', title:'Banner sale 7.7', function:'Content & Creative', subFunction:'Design', complexity:'S - <4h', capacity:'Medium' })
+
+// Agent gửi kết quả về (2 chiều)
+fadoMKT.updateAgentResult('MKT-2026-001', { status:'done', outputUrl:'https://…/out.mp4', complete:true })
+
+// Đổi trạng thái
+fadoMKT.setStatus('MKT-2026-001', 'Done')
+
+// Payload webhook khi bấm "⚡ Gửi tới Agent":
+${esc(sample)}</pre>
+  </div>`;
+  document.getElementById('buSaveBudgets').addEventListener('click',()=>{document.querySelectorAll('[data-bubudget]').forEach(i=>{const bu=i.dataset.bubudget,v=i.value.trim();DB.buCredits[bu]=Object.assign({},DB.buCredits[bu],{budget:v===''?null:Number(v)});});save();render();alert('✓ Đã lưu ngân sách credit theo BU.');});
+  document.getElementById('agSave').addEventListener('click',()=>{const g=k=>{const e=document.getElementById('ag_'+k);return e?e.value.trim():((DB.agents&&DB.agents[k])||'');};DB.agents=Object.assign({},DB.agents,{webhook:g('webhook'),content:g('content'),image:g('image'),video:g('video'),planning:g('planning'),tracking:g('tracking'),budget:g('budget'),report:g('report'),manager:g('manager'),qa:g('qa'),publish:g('publish'),performance:g('performance')});save();render();alert('✓ Đã lưu cấu hình AI Agent.');});
+}
 
 /* ---- BACKUP / RESTORE (sao lưu & khôi phục toàn bộ dữ liệu) ---- */
 function doBackup(){
@@ -913,7 +1234,7 @@ function doRestore(e){
       if(!d||!Array.isArray(d.tasks))throw new Error('File không đúng định dạng sao lưu.');
       const when=j&&j._at?(' (sao lưu lúc '+new Date(j._at).toLocaleString('vi-VN')+')'):'';
       if(!confirm('⚠️ KHÔI PHỤC sẽ GHI ĐÈ toàn bộ dữ liệu hiện tại (kể cả trên cloud) bằng dữ liệu trong file'+when+':\n\n• '+(d.tasks||[]).length+' task\n• '+(d.staff||[]).length+' nhân sự\n• '+(d.users||[]).length+' tài khoản\n\nTiếp tục?'))return;
-      DB.users=d.users||DB.users;DB.depts=d.depts||DB.depts;DB.staff=d.staff||DB.staff;DB.tasks=d.tasks||[];if(d.gsheet)DB.gsheet=d.gsheet;
+      DB.users=d.users||DB.users;DB.depts=d.depts||DB.depts;DB.staff=d.staff||DB.staff;DB.tasks=d.tasks||[];if(d.gsheet)DB.gsheet=d.gsheet;if(d.buCredits)DB.buCredits=d.buCredits;if(d.agents)DB.agents=d.agents;
       save();buildMenu();render();
       alert('✓ Đã khôi phục '+(d.tasks||[]).length+' task. Dữ liệu đã được lưu lên cloud.');
     }catch(err){alert('Không đọc được file: '+err.message);}
@@ -1801,7 +2122,7 @@ function rUsers(c,ta){
   ta.innerHTML=`<button class="btn gold" onclick="userModal()">+ Create Account</button>`;
   c.innerHTML=`<div class="tablewrap"><table><thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Function</th><th></th></tr></thead><tbody>
     ${DB.users.map(u=>`<tr><td class="name-cell">${esc(u.name)}</td><td><span class="rid">${esc(u.username)}</span></td>
-    <td><span class="role-badge role-${u.role}">${roleLabel(u.role)}</span></td><td><span class="bu-tag">${esc(u.func||'—')}</span></td>
+    <td><span class="role-badge role-${u.role}">${roleLabel(u.role)}</span></td><td><span class="bu-tag">${esc(u.func||u.bu||'—')}</span></td>
     <td><div class="acts"><span class="ico" onclick="userModal('${u.id}')">✎</span>${u.username==='admin'?'':`<span class="ico" onclick="delUser('${u.id}')">🗑</span>`}</div></td></tr>`).join('')}
     </tbody></table></div>`;
 }
@@ -1813,24 +2134,26 @@ window.userModal=id=>{
     <div class="fld"><label>Password *</label><input id="u_pass" value="${esc(u.pass||'')}"></div>
     <div class="fld"><label>Role *</label><select id="u_role" onchange="syncUserScope()">${Object.entries(ROLES).map(([k,v])=>`<option value="${k}" ${u.role===k?'selected':''}>${v}</option>`).join('')}</select></div>
     <div class="fld full" id="u_fnFld"><label>Function phụ trách <span style="color:var(--muted);font-weight:400">(chỉ dành cho Function Lead)</span></label><select id="u_func"><option value="">— Không phụ trách function nào · nhận task được giao —</option>${CATS.Function.map(f=>`<option ${u.func===f?'selected':''}>${esc(f)}</option>`).join('')}</select></div>
+    <div class="fld full" id="u_buFld"><label>BU phụ trách <span style="color:var(--muted);font-weight:400">(dành cho tài khoản Business Unit — quyết định ví credit)</span></label><select id="u_bu"><option value="">— Chọn BU —</option>${CATS.BU.map(b=>`<option ${u.bu===b?'selected':''}>${esc(b)}</option>`).join('')}</select></div>
     </div><div class="mfoot"><button class="btn ghost" onclick="mClose()">Cancel</button><button class="btn gold" onclick="saveUser('${id||''}')">Save</button></div>`);
   syncUserScope();
 };
 window.syncUserScope=()=>{
-  const r=document.getElementById('u_role'),fld=document.getElementById('u_fnFld'),sel=document.getElementById('u_func');
+  const r=document.getElementById('u_role'),fld=document.getElementById('u_fnFld'),sel=document.getElementById('u_func'),buFld=document.getElementById('u_buFld');
   if(!r||!fld||!sel)return;
   const isLead=r.value==='lead';
   fld.style.opacity=isLead?'1':'.45';
   fld.style.pointerEvents=isLead?'auto':'none';
   sel.disabled=!isLead;
   if(!isLead)sel.value='';
+  if(buFld){const isBu=r.value==='bu';buFld.style.display=isBu?'':'none';}
 };
 window.saveUser=id=>{
   const g=x=>document.getElementById(x).value.trim();
   if(!g('u_name')||!g('u_user')||!g('u_pass')){alert('Enter name, username and password');return;}
   const uname=id&&DB.users.find(x=>x.id===id).username==='admin'?'admin':g('u_user');
   if(!id&&DB.users.some(x=>x.username===uname)){alert('Username already exists');return;}
-  const o={id:id||uid(),name:g('u_name'),username:uname,pass:g('u_pass'),role:g('u_role'),func:g('u_func'),bu:'',dept:''};
+  const o={id:id||uid(),name:g('u_name'),username:uname,pass:g('u_pass'),role:g('u_role'),func:g('u_func'),bu:g('u_bu'),dept:''};
   if(id){const i=DB.users.findIndex(x=>x.id===id);o.session;DB.users[i]={...DB.users[i],...o};}else DB.users.push(o);
   save();mClose();render();
 };
@@ -2017,7 +2340,7 @@ function importBackup(e){
       const d=JSON.parse(ev.target.result);
       const n=(d.tasks||[]).length,u=(d.users||[]).length;
       if(!confirm('Phục hồi từ file này? Sẽ GHI ĐÈ toàn bộ dữ liệu hiện tại bằng: '+u+' tài khoản, '+n+' task.'))return;
-      if(d.users)DB.users=d.users;if(d.depts)DB.depts=d.depts;if(d.staff)DB.staff=d.staff;if(d.tasks)DB.tasks=d.tasks;if(d.gsheet)DB.gsheet=d.gsheet;
+      if(d.users)DB.users=d.users;if(d.depts)DB.depts=d.depts;if(d.staff)DB.staff=d.staff;if(d.tasks)DB.tasks=d.tasks;if(d.gsheet)DB.gsheet=d.gsheet;if(d.buCredits)DB.buCredits=d.buCredits;if(d.agents)DB.agents=d.agents;
       save();render();alert('✓ Đã phục hồi dữ liệu.');
     }catch(err){alert('File không hợp lệ (không phải file sao lưu .json).');}
   };
@@ -2220,6 +2543,7 @@ document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')mClose();}
   const wasEmpty=!DB.users.length;
   seed();
   if(migrateRoles())save();
+  if(seedBUs())save();
   if(wasEmpty)save();
   if(DB.session&&me())openApp();
 })();
