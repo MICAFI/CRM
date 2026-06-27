@@ -186,13 +186,18 @@
   .theme-row span[data-th].on{border-color:#fff}
   /* ===== LOGIN 2-PANEL ===== */
   #login{position:fixed;inset:0;display:flex;background:var(--bg);z-index:100}
-  .login-hero{flex:1.2;background:var(--side-bg);color:#e9ecf5;padding:56px 60px;display:flex;flex-direction:column;justify-content:center;position:relative}
+  .login-hero{flex:1.2;background:var(--side-bg);color:#e9ecf5;padding:56px 60px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow-y:auto}
   .login-hero .lh-brand{display:flex;align-items:center;gap:13px;margin-bottom:50px}
   .lh-logo{width:46px;height:46px;border-radius:11px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:16px}
   .lh-name{font-size:20px;font-weight:800;letter-spacing:-.3px;line-height:1.1}.lh-name span{color:var(--accent-soft)}
   .lh-tag{font-size:10.5px;color:#8b93a7;letter-spacing:1.4px;text-transform:uppercase;font-weight:600;margin-top:2px}
   .lh-title{font-size:43px;line-height:1.12;font-weight:800;letter-spacing:-1.2px;margin-bottom:18px;color:#fff}
-  .lh-sub{font-size:14.5px;color:#aab3c7;line-height:1.7;max-width:540px;margin-bottom:40px}
+  .lh-sub{font-size:14.5px;color:#aab3c7;line-height:1.7;max-width:540px;margin-bottom:22px}
+  .lh-flows{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;max-width:560px}
+  .lh-flow{display:flex;gap:11px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:14px 15px}
+  .lh-flow .lf-ic{width:32px;height:32px;border-radius:9px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+  .lf-t{font-size:13px;font-weight:700;color:#fff;margin-bottom:3px}
+  .lf-d{font-size:11px;color:#9aa3b8;line-height:1.55}
   .lh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
   .lh-stat{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:13px;padding:17px 16px}
   .lh-stat .lh-ic{color:var(--accent-soft);font-size:17px;margin-bottom:7px;line-height:1}
@@ -229,6 +234,10 @@
     <div class="lh-brand"><div class="lh-logo">FM</div><div><div class="lh-name">FADO <span>MKT</span></div><div class="lh-tag">Marketing Work Management</div></div></div>
     <div class="lh-title">Nền tảng điều phối<br>công việc Marketing</div>
     <div class="lh-sub">Quản lý công việc, hàng đợi yêu cầu, giao việc theo từng BU và theo dõi hiệu suất tổng quan — trên một nền tảng duy nhất.</div>
+    <div class="lh-flows">
+      <div class="lh-flow"><div class="lf-ic">✉</div><div><div class="lf-t">BU gửi yêu cầu</div><div class="lf-d">Các đơn vị (Proship, MICAFI, FDS…) đăng nhập gửi yêu cầu công việc và theo dõi tiến độ, credit.</div></div></div>
+      <div class="lh-flow"><div class="lf-ic">◆</div><div><div class="lf-t">MKT quản trị nội bộ</div><div class="lf-d">Đội Marketing tiếp nhận, duyệt, giao việc, thực thi và báo cáo hiệu suất tổng quan.</div></div></div>
+    </div>
     <div class="lh-stats">
       <div class="lh-stat"><div class="lh-ic">▦</div><div class="lh-lab">Tổng công việc</div><div class="lh-num" id="st_total">—</div></div>
       <div class="lh-stat"><div class="lh-ic">◐</div><div class="lh-lab">Đang xử lý</div><div class="lh-num" id="st_wip">—</div></div>
