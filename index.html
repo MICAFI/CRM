@@ -210,12 +210,17 @@
   .lh-foot{margin-top:24px;font-size:11px;color:#5f6678;letter-spacing:.2px}
   .lh-chart{margin-top:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:14px 16px;max-width:540px}
   .lh-chart-h{font-size:11.5px;color:#8b93a7;font-weight:600;margin-bottom:11px}
-  .lc-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-  .lc-row:last-child{margin-bottom:0}
-  .lc-name{font-size:11px;color:#aab3c7;width:78px;flex-shrink:0}
-  .lc-track{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:5px;overflow:hidden}
-  .lc-fill{height:100%;border-radius:5px;transition:width .5s}
-  .lc-val{font-size:11px;font-weight:700;color:#eaeef5;width:26px;text-align:right}
+  .lh-donut-wrap{display:flex;align-items:center;gap:20px}
+  .lh-donut{position:relative;width:112px;height:112px;flex-shrink:0}
+  .lh-donut svg{width:100%;height:100%}
+  .lh-donut-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .lh-donut-c .t{font-size:24px;font-weight:800;color:#fff;line-height:1}
+  .lh-donut-c .l{font-size:10px;color:#8b93a7;margin-top:2px}
+  .lh-legend{flex:1;display:flex;flex-direction:column;gap:7px}
+  .lc-li{display:flex;align-items:center;gap:9px;font-size:11.5px}
+  .lc-dot{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+  .lc-nm{color:#aab3c7;flex:1}
+  .lc-ct{color:#fff;font-weight:700}
   .login-form{flex:1;display:flex;align-items:center;justify-content:center;padding:30px;background:var(--bg)}
   .lf-inner{width:384px;max-width:100%}
   .lf-inner h2{font-size:24px;font-weight:800;color:var(--ink);margin-bottom:6px;letter-spacing:-.4px}
@@ -2664,7 +2669,7 @@ function applyTheme(t){t=t||localStorage.getItem('fado_theme')||'coral';document
 window.setTheme=applyTheme;
 document.addEventListener('click',function(e){var s=e.target&&e.target.closest?e.target.closest('#themePick span[data-th]'):null;if(s)applyTheme(s.dataset.th);});
 function renderLoginStats(){try{var ts=DB.tasks||[];var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};set('st_total',ts.length);set('st_wip',ts.filter(function(t){return t.Status==='WIP';}).length);set('st_queue',ts.filter(function(t){return t.Status==='Open';}).length);var bus=new Set(ts.map(function(t){return t.BU;}).filter(Boolean)).size;set('st_bu',bus||(CATS.BU?CATS.BU.length:0));renderLoginChart();}catch(e){}}
-function renderLoginChart(){try{var el=document.getElementById('loginChart');if(!el)return;var ts=DB.tasks||[];var order=[['Open','Chờ duyệt'],['WIP','Đang làm'],['Waiting','Tạm chờ'],['Done','Hoàn thành'],['Cancelled','Đã hủy']];var col={Open:'#e0a23c',WIP:'#5b9bd5',Waiting:'#b08cf0',Done:'#4cc28a',Cancelled:'#7e889a'};var counts=order.map(function(o){return ts.filter(function(t){return t.Status===o[0];}).length;});var max=Math.max.apply(null,counts.concat([1]));el.innerHTML=order.map(function(o,i){var c=counts[i];return '<div class="lc-row"><div class="lc-name">'+o[1]+'</div><div class="lc-track"><div class="lc-fill" style="width:'+Math.round(c/max*100)+'%;background:'+col[o[0]]+'"></div></div><div class="lc-val">'+c+'</div></div>';}).join('');}catch(e){}}
+function renderLoginChart(){try{var el=document.getElementById('loginChart');if(!el)return;var ts=DB.tasks||[];var order=[['Open','Chờ duyệt','#e0a23c'],['WIP','Đang làm','#5b9bd5'],['Waiting','Tạm chờ','#b08cf0'],['Done','Hoàn thành','#4cc28a'],['Cancelled','Đã hủy','#7e889a']];var counts=order.map(function(o){return ts.filter(function(t){return t.Status===o[0];}).length;});var total=counts.reduce(function(a,b){return a+b;},0);var segs='',off=0;if(total>0){order.forEach(function(o,i){var p=counts[i]/total*100;if(p<=0)return;segs+='<circle cx="18" cy="18" r="15.9155" fill="none" stroke="'+o[2]+'" stroke-width="4" stroke-dasharray="'+p.toFixed(2)+' '+(100-p).toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'" transform="rotate(-90 18 18)"></circle>';off+=p;});}else{segs='<circle cx="18" cy="18" r="15.9155" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="4"></circle>';}var legend=order.map(function(o,i){return '<div class="lc-li"><span class="lc-dot" style="background:'+o[2]+'"></span><span class="lc-nm">'+o[1]+'</span><span class="lc-ct">'+counts[i]+'</span></div>';}).join('');el.innerHTML='<div class="lh-donut-wrap"><div class="lh-donut"><svg viewBox="0 0 36 36">'+segs+'</svg><div class="lh-donut-c"><div class="t">'+total+'</div><div class="l">việc</div></div></div><div class="lh-legend">'+legend+'</div></div>';}catch(e){}}
 (async function(){
   applyTheme();
   const ok=await load();
