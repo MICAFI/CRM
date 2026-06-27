@@ -702,6 +702,7 @@ function gc(arr,f){const m={};arr.forEach(t=>{const k=t[f]||'(empty)';m[k]=(m[k]
 function bars(m,cf){const tot=Object.values(m).reduce((a,b)=>a+b,0)||1;return Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([k,v],i)=>`<div class="row"><div class="name">${esc(k)}</div><div class="track"><div class="fill" style="width:${v/tot*100}%;background:${cf(k,i)}"></div></div><div class="val">${v}</div></div>`).join('')||'<div style="color:var(--muted);font-size:12.5px">No data yet</div>';}
 
 /* ============ RENDER ROUTER ============ */
+function buTips(){try{var TIP='Business Unit — đơn vị kinh doanh gửi yêu cầu cho Marketing (Proship, Ratraco, MICAFI, FDS, Fado168, EuroGo, Fado VN, The Winds, GoPrint).';document.querySelectorAll('th,label,span,div,option,h3').forEach(function(e){if(e.children.length)return;var x=(e.textContent||'').trim();if((x==='BU'||x==='All BUs'||x==='BU *'||x==='Ngân sách credit theo BU')&&!e.getAttribute('title'))e.setAttribute('title',TIP);});}catch(e){}}
 function render(){
   const c=document.getElementById('content');
   const ta=document.getElementById('topActions');ta.innerHTML='';
@@ -734,6 +735,7 @@ function render(){
   else if(VIEW==='backup')rBackup(c,ta);
   else if(VIEW==='agents')rAgents(c,ta);
   else if(VIEW==='guide')rGuide(c);
+  buTips();
 }
 
 /* ---- GLOBAL DATE FILTER BAR ---- */
