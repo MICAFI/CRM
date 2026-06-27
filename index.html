@@ -186,7 +186,7 @@
   .theme-row span[data-th].on{border-color:#fff}
   /* ===== LOGIN 2-PANEL ===== */
   #login{position:fixed;inset:0;display:flex;background:var(--bg);z-index:100}
-  .login-hero{flex:1;background:var(--side-bg);color:#e9ecf5;padding:54px 56px;display:flex;flex-direction:column;justify-content:center;max-width:55%}
+  .login-hero{flex:1;background:var(--side-bg);color:#e9ecf5;padding:54px 56px;display:flex;flex-direction:column;justify-content:center;max-width:55%;position:relative}
   .login-hero .lh-brand{display:flex;align-items:center;gap:13px;margin-bottom:50px}
   .lh-logo{width:46px;height:46px;border-radius:11px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:16px}
   .lh-name{font-size:20px;font-weight:800;letter-spacing:-.3px;line-height:1.1}.lh-name span{color:var(--accent-soft)}
@@ -198,6 +198,7 @@
   .lh-stat .lh-ic{color:var(--accent-soft);font-size:17px;margin-bottom:7px;line-height:1}
   .lh-lab{font-size:11.5px;color:#8b93a7;font-weight:500}
   .lh-num{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-top:3px;color:#fff}
+  .lh-foot{position:absolute;left:56px;right:56px;bottom:24px;font-size:11px;color:#5f6678;letter-spacing:.2px}
   .login-form{flex:1;display:flex;align-items:center;justify-content:center;padding:30px;background:var(--bg)}
   .lf-inner{width:362px;max-width:100%}
   .lf-inner h2{font-size:24px;font-weight:800;color:var(--ink);margin-bottom:6px;letter-spacing:-.4px}
@@ -226,6 +227,7 @@
       <div class="lh-stat"><div class="lh-ic">✉</div><div class="lh-lab">Hàng đợi yêu cầu</div><div class="lh-num" id="st_queue">—</div></div>
       <div class="lh-stat"><div class="lh-ic">⬡</div><div class="lh-lab">BU đang phục vụ</div><div class="lh-num" id="st_bu">—</div></div>
     </div>
+    <div class="lh-foot">© FADO MKT v1.0 · Được phát triển và vận hành bởi MKT FADO Group</div>
   </div>
   <div class="login-form">
     <div class="lf-inner">
