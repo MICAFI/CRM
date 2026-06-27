@@ -115,7 +115,7 @@
   .gfbar .gfwrap{display:flex;align-items:center;gap:10px;padding:8px 13px;border:1px solid var(--line);border-radius:10px;background:var(--card);box-shadow:0 1px 2px rgba(23,25,31,.03)}
   .gfbar select,.gfbar input{border:none;background:transparent;font-size:12.5px;color:var(--ink);outline:none;font-family:inherit;font-weight:600;cursor:pointer}
   .gfbar input[type=date]{border:1px solid var(--line);border-radius:6px;padding:4px 7px;font-weight:500;cursor:text}
-  .gfbar .gfdiv{width:1px;height:17px;background:#e3e5ea;flex-shrink:0}
+  .gfbar .gfdiv{width:1px;height:17px;background:var(--line);flex-shrink:0}
   .gfbar .gfcount{font-size:11.5px;color:var(--muted);font-weight:600;white-space:nowrap}
   table{width:100%;border-collapse:collapse;font-size:13px}
   thead th{background:var(--card2);text-align:left;padding:11px 14px;font-size:10.5px;color:#7b8090;font-weight:700;letter-spacing:.4px;text-transform:uppercase;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}
@@ -288,7 +288,7 @@
     <aside class="sidebar">
       <div class="brand"><div class="logo">FM</div><div><b>FADO MKT</b><span>WORK MANAGEMENT</span></div></div>
       <nav class="menu" id="menu"></nav>
-      <div class="theme-row" id="themePick"><span class="tl">THEME</span><span data-th="navy" title="Indigo" style="background:#6366f1"></span><span data-th="white" title="Trắng" style="background:#e8ebf2"></span><span data-th="violet" title="Tím" style="background:#8b5cf6"></span><span data-th="coral" title="Coral" style="background:#e0564f"></span></div>
+      <div class="theme-row" id="themePick"><span class="tl">THEME</span><span data-th="navy" title="Indigo" style="background:#6366f1"></span><span data-th="white" title="Trắng" style="background:var(--track)"></span><span data-th="violet" title="Tím" style="background:#8b5cf6"></span><span data-th="coral" title="Coral" style="background:#e0564f"></span></div>
       <div class="side-foot">
         <div class="av" id="meAv">A</div>
         <div><b id="meName">Admin</b><span id="meRole">Administrator</span></div>
@@ -310,7 +310,7 @@
 </div>
 
 <!-- CỔNG BU (nhúng trực tiếp — không còn iframe, đúng nghĩa 1 file) -->
-<div id="buPortal" style="display:none;position:fixed;inset:0;z-index:50;background:#f1f2f4;overflow:auto"></div>
+<div id="buPortal" style="display:none;position:fixed;inset:0;z-index:50;background:var(--track);overflow:auto"></div>
 
 <!-- MODAL -->
 <div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
@@ -409,7 +409,7 @@ function dueBadge(t){
   const wrap=(bg,fg,txt,tip)=>`<span title="${tip||''}" style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;background:${bg};color:${fg};white-space:nowrap">${txt}</span>`;
   if(s==='overdue')return wrap('#f6e7e6','#9c4441','⏰ QUÁ HẠN '+(n==null?'':Math.abs(n)+'N'),'Đã quá hạn '+(n==null?'':Math.abs(n)+' ngày'));
   if(s==='soon'){const txt=n===0?'HẾT HẠN HÔM NAY':'CÒN '+n+'N';return wrap('#f7efe0','#956511',txt,'Còn '+n+' ngày đến hạn');}
-  if(s==='ok')return wrap('#eef1f7','#5b6478','còn '+n+'N','Còn '+n+' ngày đến hạn');
+  if(s==='ok')return wrap('var(--card2)','#5b6478','còn '+n+'N','Còn '+n+' ngày đến hạn');
   return '';
 }
 function logHist(t,text){t.Updated=new Date().toISOString();(t.history=t.history||[]).push({by:me().name,at:new Date().toLocaleString('en-GB'),text});}
@@ -852,11 +852,11 @@ function rTasks(c,ta){
   let scopeBar='';
   if(isLead){
     const sseg=(v,lab,sub)=>`<button data-ls="${v}" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;background:${LEADSCOPE===v?'#17191f':'transparent'};color:${LEADSCOPE===v?'#fff':'var(--muted)'}">${lab}</button>`;
-    scopeBar=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="display:inline-flex;gap:3px;padding:3px;background:#eceef1;border-radius:9px">${sseg('func','① Function của tôi')}${sseg('all','② Cả team MKT')}</div><span style="font-size:11.5px;color:var(--muted)">${LEADSCOPE==='all'?'Xem toàn bộ task team Marketing · chỉ sửa được task thuộc function bạn':'Chỉ task trong function '+esc(u.func||'')+' + việc của bạn'}</span></div>`;
+    scopeBar=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="display:inline-flex;gap:3px;padding:3px;background:var(--track);border-radius:9px">${sseg('func','① Function của tôi')}${sseg('all','② Cả team MKT')}</div><span style="font-size:11.5px;color:var(--muted)">${LEADSCOPE==='all'?'Xem toàn bộ task team Marketing · chỉ sửa được task thuộc function bạn':'Chỉ task trong function '+esc(u.func||'')+' + việc của bạn'}</span></div>`;
   }
   // ---- Toggle chế độ xem: Danh sách / Theo dự án ----
   const seg=(v,ic,lab)=>`<button data-tv="${v}" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;background:${TASKVIEW===v?'#fff':'transparent'};color:${TASKVIEW===v?'var(--ink)':'var(--muted)'};box-shadow:${TASKVIEW===v?'0 1px 2px rgba(23,25,31,.08)':'none'}">${ic} ${lab}</button>`;
-  const toggle=scopeBar+`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="display:inline-flex;gap:3px;padding:3px;background:#eceef1;border-radius:9px">${seg('list','☷','Danh sách')}${seg('project','❒','Theo dự án')}</div><span style="font-size:11.5px;color:var(--muted)">${TASKVIEW==='project'?'Task gom theo Project / Campaign':'Toàn bộ task dạng bảng, có bộ lọc'}</span></div>`;
+  const toggle=scopeBar+`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="display:inline-flex;gap:3px;padding:3px;background:var(--track);border-radius:9px">${seg('list','☷','Danh sách')}${seg('project','❒','Theo dự án')}</div><span style="font-size:11.5px;color:var(--muted)">${TASKVIEW==='project'?'Task gom theo Project / Campaign':'Toàn bộ task dạng bảng, có bộ lọc'}</span></div>`;
   if(!ts.length){c.innerHTML=toggle+emptyBox('Không có task trong phạm vi này.');c.querySelectorAll('[data-tv]').forEach(b=>b.onclick=()=>{TASKVIEW=b.dataset.tv;render();});c.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{LEADSCOPE=b.dataset.ls;render();});return;}
   if(TASKVIEW==='project'){
     c.innerHTML=toggle+projectsHtml(ts);
@@ -1011,7 +1011,7 @@ window.taskModal=(id,presetType)=>{
   // Phần đánh giá chỉ hiện khi việc đã bắt đầu/xong (không hiện lúc mới giao), và chỉ cho admin/manager/lead
   const hasEvalVal=(t.QC&&t.QC!=='—')||t.Satisfaction||(t.Revisions&&+t.Revisions>0);
   const showEval=['admin','manager','lead'].includes(role)&&(['WIP','Done'].includes(t.Status)||hasEvalVal);
-  const sec=(title,sub,body,tint)=>`<div style="margin-top:18px;${tint?'background:#f8f6fb;border:1px solid #e7e2f0;border-radius:10px;padding:14px 15px':''}"><div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:${tint?'#6b5e9c':'var(--muted)'};margin-bottom:12px">${title}${sub?` <span style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted)">— ${sub}</span>`:''}</div><div class="mgrid">${body}</div></div>`;
+  const sec=(title,sub,body,tint)=>`<div style="margin-top:18px;${tint?'background:var(--card2);border:1px solid #e7e2f0;border-radius:10px;padding:14px 15px':''}"><div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:${tint?'#6b5e9c':'var(--muted)'};margin-bottom:12px">${title}${sub?` <span style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted)">— ${sub}</span>`:''}</div><div class="mgrid">${body}</div></div>`;
   const evalSection=showEval?sec('⚖ Đánh giá chất lượng','Quản lý điền khi nghiệm thu',`
       <div class="fld"><label>Kết quả QC</label><select id="t_qc">${opt(CATS.QC,t.QC||'—')}</select></div>
       <div class="fld"><label>Số lần chỉnh sửa</label><input id="t_rev" type="number" min="0" value="${esc(t.Revisions!=null?t.Revisions:'')}" placeholder="0"></div>
@@ -1101,7 +1101,7 @@ function buStatusPill(s){
 }
 function buWalletCard(w){
   const barCol=w.pct>=100?'#b4524f':(w.pct>=80?'#b58a3a':'#3f8a63');
-  return `<div style="background:var(--card);border:1px solid #e3e5ea;border-radius:16px;padding:22px 26px;box-shadow:0 2px 10px rgba(23,25,31,.04)">
+  return `<div style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 26px;box-shadow:0 2px 10px rgba(23,25,31,.04)">
     <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:16px">
       <div><div style="font-size:11px;font-weight:700;color:#8c909c;letter-spacing:.6px;text-transform:uppercase">Ví credit · tháng này</div>
       <div style="font-size:30px;font-weight:800;letter-spacing:-1px;margin-top:3px">${w.remaining} <span style="font-size:15px;font-weight:600;color:#8c909c">/ ${w.budget} còn lại</span></div></div>
@@ -1123,7 +1123,7 @@ function buSubmitForm(w){
   const L='font-size:12px;font-weight:600;color:#3b3f4a;display:block;margin-bottom:6px';
   const I='width:100%;padding:11px 13px;border:1px solid #dfe1e6;border-radius:9px;font-size:13.5px;outline:none;font-family:inherit;background:var(--card);box-sizing:border-box';
   return `<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
-    <div style="flex:1 1 460px;background:var(--card);border:1px solid #e3e5ea;border-radius:14px;padding:24px 26px">
+    <div style="flex:1 1 460px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 26px">
       <div style="font-size:10.5px;font-weight:700;letter-spacing:.8px;color:#8c909c;text-transform:uppercase;margin-bottom:14px">Thông tin yêu cầu</div>
       <div style="margin-bottom:13px"><label style="${L}">Tên task / yêu cầu *</label><input id="bu_name" style="${I}" placeholder="VD: Chạy Google Ads ra mắt sản phẩm tháng 7"></div>
       <div style="margin-bottom:13px"><label style="${L}">Dự án / Campaign</label><input id="bu_proj" style="${I}" placeholder="Tùy chọn"></div>
@@ -1144,7 +1144,7 @@ function buSubmitForm(w){
       <button onclick="buSubmit()" style="width:100%;padding:14px;background:#17191f;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Gửi yêu cầu →</button>
     </div>
     <div style="flex:1 1 280px;position:sticky;top:84px">
-      <div style="background:var(--card2);border:1px solid #e3e5ea;border-radius:14px;padding:20px 22px">
+      <div style="background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:20px 22px">
         <div style="font-size:10.5px;font-weight:700;letter-spacing:1px;color:#8c909c;text-transform:uppercase;margin-bottom:12px">Chi phí credit dự kiến</div>
         <div id="bu_cost" style="font-size:34px;font-weight:800;letter-spacing:-1.4px">—</div>
         <div id="bu_cost_sub" style="font-size:12.5px;color:#6b7080;margin-top:4px;line-height:1.5">Chọn độ phức tạp & mức năng lực để tính credit.</div>
@@ -1152,7 +1152,7 @@ function buSubmitForm(w){
         <div style="font-size:12.5px;color:#3b3f4a;line-height:1.7">Còn lại sau yêu cầu này: <b id="bu_after">${w.remaining}</b> credit</div>
         <div id="bu_warn" style="display:none;font-size:12px;color:#b4524f;font-weight:600;margin-top:8px"></div>
       </div>
-      <div style="background:var(--card);border:1px solid #e3e5ea;border-radius:14px;padding:16px 18px;margin-top:13px">
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:13px">
         <div style="font-size:10.5px;font-weight:700;letter-spacing:.6px;color:#8c909c;text-transform:uppercase;margin-bottom:10px">Ma trận credit (file)</div>
         ${buMatrixMini()}
       </div>
@@ -1160,7 +1160,7 @@ function buSubmitForm(w){
   </div>`;
 }
 function buMyList(mine){
-  if(!mine.length)return `<div style="background:var(--card);border:1px solid #e3e5ea;border-radius:14px;padding:50px;text-align:center;color:#9aa0ac;font-size:13.5px">Chưa có yêu cầu nào. Bấm <b>Gửi yêu cầu</b> để tạo.</div>`;
+  if(!mine.length)return `<div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:50px;text-align:center;color:#9aa0ac;font-size:13.5px">Chưa có yêu cầu nào. Bấm <b>Gửi yêu cầu</b> để tạo.</div>`;
   const rows=mine.slice().sort((a,b)=>(b['Request Date']||'').localeCompare(a['Request Date']||'')).map(t=>{
     const ag=t.agent?` <span title="Agent" style="font-size:10px;font-weight:700;color:#574a82;background:#edeaf3;padding:1px 6px;border-radius:4px">⚡ ${esc(t.agent.status)}${t.agent.outputUrl?' ✓':''}</span>`:'';
     return `<tr>
@@ -1172,7 +1172,7 @@ function buMyList(mine){
       <td style="padding:11px 14px;border-bottom:1px solid var(--line);color:#6b7080;white-space:nowrap">${esc(t['Due Date']||'—')}</td>
     </tr>`;
   }).join('');
-  return `<div style="background:var(--card);border:1px solid #e3e5ea;border-radius:14px;overflow:hidden"><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+  return `<div style="background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden"><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead><tr>${['Task','Loại','Credit','Trạng thái','Phụ trách','Hạn'].map(h=>`<th style="text-align:left;padding:10px 14px;font-size:10px;color:#8b8f9a;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:var(--card2);border-bottom:1px solid var(--track)">${h}</th>`).join('')}</tr></thead>
     <tbody>${rows}</tbody></table></div></div>`;
 }
@@ -1204,7 +1204,7 @@ function renderBuPortal(){
   const w=bu?buWallet(bu):{budget:DEFAULT_BU_CREDIT,used:0,pending:0,remaining:DEFAULT_BU_CREDIT,pct:0};
   const mine=DB.tasks.filter(t=>t.BU===bu);
   host.innerHTML=`
-  <div style="min-height:100vh;background:#f1f2f4">
+  <div style="min-height:100vh;background:var(--track)">
     <div style="background:#17191f;color:#fff;padding:15px 30px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:5">
       <div style="width:38px;height:38px;border-radius:9px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px">FM</div>
       <div style="line-height:1.25"><b style="font-size:14px;display:block">Cổng yêu cầu Marketing</b><span style="font-size:11px;color:#9398a3;letter-spacing:.5px">BU · ${esc(bu||'(chưa gán BU)')}</span></div>
@@ -1485,12 +1485,12 @@ window.taskDetail=id=>{
     </div>
     <div style="margin:16px 0">${progBar(progressOf(t))}</div>
     ${t.Status==='Cancelled'&&t['Cancel Reason']?`<div style="margin-bottom:16px;background:#fbeeed;border:1px solid #f0d4d2;border-radius:10px;padding:11px 14px"><div style="font-size:11px;font-weight:700;color:#b4524f;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">⊘ Đã bỏ qua — lý do</div><div style="font-size:13px;color:#8a4340;line-height:1.5">${esc(t['Cancel Reason'])}</div></div>`:''}
-    ${canCheck?`<div style="margin-bottom:16px;background:#f8f9fc;border:1px solid var(--line);border-radius:10px;padding:13px 14px">
+    ${canCheck?`<div style="margin-bottom:16px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:13px 14px">
       <div style="font-size:12px;font-weight:700;margin-bottom:9px">Owner check-in <span style="color:var(--muted);font-weight:500">— how is this going?</span></div>
       <div style="display:flex;gap:8px;margin-bottom:10px">${['On track','Difficulty','Blocked'].map(h=>{const sel=t.Health===h;return `<button data-h="${h}" class="ckbtn" style="flex:1;padding:8px;border-radius:8px;border:1px solid ${sel?HEALTH[h]:'var(--line)'};background:${sel?HEALTH[h]:'#fff'};color:${sel?'#fff':'var(--ink2)'};font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">${h==='On track'?'🟢 On track':(h==='Difficulty'?'🟡 Difficulty':'🔴 Blocked')}</button>`;}).join('')}</div>
       <textarea id="ck_note" rows="2" placeholder="What's the difficulty / blocker? (optional)" style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none;font-family:inherit;resize:vertical">${esc(t.Blocker||'')}</textarea>
       <div style="display:flex;justify-content:flex-end;margin-top:9px"><button class="btn sm" id="ck_save">Save check-in</button></div>
-    </div>`:(t.Health&&t.Health!=='On track'?`<div style="margin-bottom:16px">${healthPill(t.Health)}${t.Blocker?`<div style="font-size:13px;margin-top:7px;background:#f8f9fc;border:1px solid var(--line);border-radius:8px;padding:9px 11px">${esc(t.Blocker)}</div>`:''}</div>`:'')}
+    </div>`:(t.Health&&t.Health!=='On track'?`<div style="margin-bottom:16px">${healthPill(t.Health)}${t.Blocker?`<div style="font-size:13px;margin-top:7px;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:9px 11px">${esc(t.Blocker)}</div>`:''}</div>`:'')}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 22px">
       ${row('Owner',esc(t.Owner||'—'))}${row('Requestor',esc(t.Requestor||'—'))}
       ${row('Project / Campaign',esc(t['Project/Campaign']||'—'))}${row('Function',esc(t.Function||'—'))}
@@ -1498,11 +1498,11 @@ window.taskDetail=id=>{
       ${row('QC',`<span style="color:${qcColor};font-weight:700">${esc(t.QC||'—')}</span>`)}${row('Revisions',t.Revisions!=null&&t.Revisions!==''?esc(t.Revisions):'—')}
       ${row('Satisfaction',`<span style="color:#b58a3a">${sat}</span>`)}${row('Source',esc(t.Source||'—'))}
     </div>
-    ${t.Notes?`<div style="margin-top:14px"><div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:5px">Notes</div><div style="font-size:13px;line-height:1.6;background:#f8f9fc;border:1px solid var(--line);border-radius:8px;padding:10px 12px">${esc(t.Notes)}</div></div>`:''}
-    ${t.Attachment?`<div style="margin-top:12px">${(t.Attachment.slice(0,10)==='data:image'||/\.(png|jpe?g|webp|gif)(\?|$)/i.test(t.Attachment))?`<div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:5px">Ảnh đính kèm</div><a href="${esc(t.Attachment)}" target="_blank" rel="noopener" title="Bấm để mở ảnh đầy đủ"><img src="${esc(t.Attachment)}" style="max-width:100%;max-height:280px;border-radius:8px;border:1px solid var(--line);display:block"></a>`:`<a href="${esc(t.Attachment)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#3b6ea5;text-decoration:none;background:#eef3f9;border:1px solid #d6e2ef;border-radius:8px;padding:8px 12px">📎 Tài liệu / link đính kèm →</a>`}</div>`:''}
+    ${t.Notes?`<div style="margin-top:14px"><div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:5px">Notes</div><div style="font-size:13px;line-height:1.6;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:10px 12px">${esc(t.Notes)}</div></div>`:''}
+    ${t.Attachment?`<div style="margin-top:12px">${(t.Attachment.slice(0,10)==='data:image'||/\.(png|jpe?g|webp|gif)(\?|$)/i.test(t.Attachment))?`<div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:5px">Ảnh đính kèm</div><a href="${esc(t.Attachment)}" target="_blank" rel="noopener" title="Bấm để mở ảnh đầy đủ"><img src="${esc(t.Attachment)}" style="max-width:100%;max-height:280px;border-radius:8px;border:1px solid var(--line);display:block"></a>`:`<a href="${esc(t.Attachment)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#3b6ea5;text-decoration:none;background:var(--card2);border:1px solid #d6e2ef;border-radius:8px;padding:8px 12px">📎 Tài liệu / link đính kèm →</a>`}</div>`:''}
     ${subSection}
     <div style="margin-top:18px"><div style="font-size:13px;font-weight:700;margin-bottom:9px">Comments (${comments.length})</div>
-      <div style="display:flex;flex-direction:column;gap:8px;max-height:180px;overflow-y:auto;margin-bottom:10px">${comments.length?comments.map(cm=>`<div style="background:#f8f9fc;border:1px solid var(--line);border-radius:8px;padding:8px 11px"><div style="display:flex;justify-content:space-between"><b style="font-size:12px">${esc(cm.by)}</b><span style="font-size:11px;color:var(--muted)">${esc(cm.at)}</span></div><div style="font-size:13px;margin-top:3px">${esc(cm.text)}</div></div>`).join(''):'<div style="font-size:12.5px;color:var(--muted)">No comments yet.</div>'}</div>
+      <div style="display:flex;flex-direction:column;gap:8px;max-height:180px;overflow-y:auto;margin-bottom:10px">${comments.length?comments.map(cm=>`<div style="background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 11px"><div style="display:flex;justify-content:space-between"><b style="font-size:12px">${esc(cm.by)}</b><span style="font-size:11px;color:var(--muted)">${esc(cm.at)}</span></div><div style="font-size:13px;margin-top:3px">${esc(cm.text)}</div></div>`).join(''):'<div style="font-size:12.5px;color:var(--muted)">No comments yet.</div>'}</div>
       <div style="display:flex;gap:8px"><input id="dc_in" placeholder="Write a comment..." style="flex:1;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none;font-family:inherit"><button class="btn" id="dc_add">Send</button></div>
     </div>
     <div style="margin-top:18px"><div style="font-size:13px;font-weight:700;margin-bottom:9px">Activity</div>
@@ -1541,7 +1541,7 @@ function rRecurring(c,ta){
         <button onclick="recSet('${t._id}','${s.key}',${s.done+1})" style="width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:15px;font-weight:700">+</button>
       </div>`:
       `<button onclick="recSet('${t._id}','${s.key}',${s.ok?0:1})" style="padding:7px 13px;border-radius:8px;border:1px solid ${s.ok?'#3f8a63':'var(--line)'};background:${s.ok?'#3f8a63':'#fff'};color:${s.ok?'#fff':'var(--ink2)'};font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">${s.ok?'✓ Đã làm kỳ này':'Đánh dấu đã làm'}</button>`);
-    const hist=recentPeriods(s.cad,10).map(k=>{const cnt=periodCount(t,k),met=s.q?cnt>=s.q:cnt>=1,par=cnt>0&&!met,cur=k===s.key;return `<span title="${periodLabel(s.cad,k)}: ${cnt}${s.q?'/'+s.q:''}" style="width:14px;height:14px;border-radius:3px;background:${met?'#3f8a63':(par?'#d8b772':'#e9ebef')};display:inline-block;${cur?'outline:2px solid #17191f;outline-offset:1px':''}"></span>`;}).join('');
+    const hist=recentPeriods(s.cad,10).map(k=>{const cnt=periodCount(t,k),met=s.q?cnt>=s.q:cnt>=1,par=cnt>0&&!met,cur=k===s.key;return `<span title="${periodLabel(s.cad,k)}: ${cnt}${s.q?'/'+s.q:''}" style="width:14px;height:14px;border-radius:3px;background:${met?'#3f8a63':(par?'#d8b772':'var(--track)')};display:inline-block;${cur?'outline:2px solid #17191f;outline-offset:1px':''}"></span>`;}).join('');
     return `<div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--line);${miss?'border-left:3px solid #b4524f;':''}border-radius:10px;background:var(--card)">
       <div style="flex:1;min-width:0">
         <div data-open="${t._id}" style="font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:${bg};flex-shrink:0"></span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t['Request Name'])}</span>${miss?`<span style="font-size:10px;font-weight:700;color:#9c4441;background:#f6e7e6;padding:2px 7px;border-radius:5px;white-space:nowrap">⚠ Trễ kỳ trước</span>`:''}</div>
@@ -1561,7 +1561,7 @@ function rRecurring(c,ta){
     ${k('ĐẠT KỲ NÀY',ok,pct(ok,all.length)+'% đạt chỉ tiêu kỳ','var(--green)')}
     ${k('⚠ TRỄ KỲ TRƯỚC',missTot,(behind+partial)+' chưa đạt kỳ này','var(--red)')}
   </div>
-  <div style="display:flex;align-items:center;gap:14px;margin:2px 2px 16px;font-size:11.5px;color:var(--muted);flex-wrap:wrap"><b style="color:var(--ink2)">Lịch sử kỳ:</b><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:#3f8a63;display:inline-block"></span>đạt</span><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:#d8b772;display:inline-block"></span>làm dở</span><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:#e9ebef;display:inline-block"></span>chưa</span><span style="margin-left:auto">Ô viền đậm = kỳ hiện tại</span></div>
+  <div style="display:flex;align-items:center;gap:14px;margin:2px 2px 16px;font-size:11.5px;color:var(--muted);flex-wrap:wrap"><b style="color:var(--ink2)">Lịch sử kỳ:</b><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:#3f8a63;display:inline-block"></span>đạt</span><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:#d8b772;display:inline-block"></span>làm dở</span><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:var(--track);display:inline-block"></span>chưa</span><span style="margin-left:auto">Ô viền đậm = kỳ hiện tại</span></div>
   ${owners.map(o=>{const list=all.filter(t=>(t.Owner||'(chưa giao)')===o).sort((a,b)=>(recMissedPrev(b)-recMissedPrev(a))||(recStatus(a).ok-recStatus(b).ok));const okN=list.filter(t=>recStatus(t).ok).length;const missN=list.filter(recMissedPrev).length;return `<div class="panel" style="margin-bottom:14px"><h3 style="margin-bottom:14px"><span class="dot" style="background:var(--purple)"></span>${esc(o)} <span style="color:var(--muted);font-weight:500;font-size:12px">· ${okN}/${list.length} đạt kỳ này</span>${missN?` <span style="font-size:11px;font-weight:700;color:#9c4441;background:#f6e7e6;padding:2px 8px;border-radius:5px">⚠ ${missN} trễ kỳ trước</span>`:''}</h3><div style="display:flex;flex-direction:column;gap:9px">${list.map(card).join('')}</div></div>`;}).join('')}`;
   c.querySelectorAll('[data-open]').forEach(e=>e.addEventListener('click',()=>taskDetail(e.dataset.open)));
 }
@@ -1654,7 +1654,7 @@ function rLeadHome(c,ta){
       ${k('CHƯA CẬP NHẬT',stale.length,'≥'+STALE_DAYS+' ngày không động','#6b5e9c')}
       ${k('XONG THÁNG NÀY',doneMonth,'đã hoàn thành','#3f8a63')}
     </div>
-    <div style="font-size:11.5px;color:#56617e;background:#eef3f9;border:1px solid #d6e2ef;border-radius:9px;padding:9px 12px;margin-bottom:14px;line-height:1.55">💡 Mở bất kỳ task để <b>cập nhật tiến độ</b>, <b>check-in</b> (🟢🟡🔴) hoặc <b>ghi chú</b> — admin sẽ thấy ngay. Dùng <b>+ Giao việc cho NV</b> để chia việc cho nhân viên dưới bạn.</div>
+    <div style="font-size:11.5px;color:#56617e;background:var(--card2);border:1px solid #d6e2ef;border-radius:9px;padding:9px 12px;margin-bottom:14px;line-height:1.55">💡 Mở bất kỳ task để <b>cập nhật tiến độ</b>, <b>check-in</b> (🟢🟡🔴) hoặc <b>ghi chú</b> — admin sẽ thấy ngay. Dùng <b>+ Giao việc cho NV</b> để chia việc cho nhân viên dưới bạn.</div>
     ${sec('🙋 Việc tôi trực tiếp phụ trách','',mine,'#3b6ea5','Bạn không có việc tự làm — chủ yếu điều phối.')}
     <div class="panel" style="margin-bottom:14px"><h3><span class="dot" style="background:#caa83d"></span>👥 Việc tôi đã giao cho nhân viên <span style="color:var(--muted);font-weight:500;font-size:12px">(${delegated.length})</span></h3>${delHtml}</div>
     ${sec('📥 Chưa giao trong function','— bấm để giao người làm',unassigned,'#b4524f','Mọi việc đã có người làm. 🎉')}`;
@@ -1685,7 +1685,7 @@ function projectsHtml(ts){
   const projKeys=Object.keys(groups).filter(k=>k!==NOPROJ).sort((a,b)=>groups[b].length-groups[a].length);
   const loose=groups[NOPROJ]||[];
   const meName=me().name;
-  const stRow=t=>{const mine=t.Owner===meName||(t.subtasks||[]).some(s=>s.owner===meName);return `<div data-open="${t._id}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:7px 9px;border-radius:7px;background:${mine?'#fff8ec':'var(--card2)'};${mine?'box-shadow:inset 3px 0 0 #caa83d':''}"><span class="pr pr-${t.Priority}">${esc(t.Priority)}</span><span style="flex:1;font-size:12.5px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t['Request Name'])}</span>${staleBadge(t)}${dueBadge(t)}<span class="pill st-${t.Status}">${esc(t.Status)}</span><span style="font-size:11px;color:${mine?'#8a6d1f':'var(--muted)'};font-weight:${mine?'700':'400'};width:110px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${mine?'★ '+esc(t.Owner):esc(t.Owner||'chưa giao')}</span><span style="font-size:11px;font-weight:700;width:40px;text-align:right">${progressOf(t)}%</span></div>`;};
+  const stRow=t=>{const mine=t.Owner===meName||(t.subtasks||[]).some(s=>s.owner===meName);return `<div data-open="${t._id}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:7px 9px;border-radius:7px;background:${mine?'rgba(202,168,61,.10)':'var(--card2)'};${mine?'box-shadow:inset 3px 0 0 #caa83d':''}"><span class="pr pr-${t.Priority}">${esc(t.Priority)}</span><span style="flex:1;font-size:12.5px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t['Request Name'])}</span>${staleBadge(t)}${dueBadge(t)}<span class="pill st-${t.Status}">${esc(t.Status)}</span><span style="font-size:11px;color:${mine?'#8a6d1f':'var(--muted)'};font-weight:${mine?'700':'400'};width:110px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${mine?'★ '+esc(t.Owner):esc(t.Owner||'chưa giao')}</span><span style="font-size:11px;font-weight:700;width:40px;text-align:right">${progressOf(t)}%</span></div>`;};
   // ---- Real projects ----
   const projHtml=projKeys.map(k=>{
     const arr=groups[k];const done=arr.filter(t=>t.Status==='Done').length;
@@ -1709,14 +1709,14 @@ function projectsHtml(ts){
     const byBU={};loose.forEach(t=>{const b=(t.BU||'(Không BU)').trim();(byBU[b]=byBU[b]||[]).push(t);});
     const buKeys=Object.keys(byBU).sort((a,b)=>byBU[b].length-byBU[a].length);
     const looseDone=loose.filter(t=>t.Status==='Done').length,looseOv=overdueList(loose).length;
-    looseHtml=`<div class="panel" style="border-style:dashed;background:#fcfcfb">
+    looseHtml=`<div class="panel" style="border-style:dashed;background:var(--card)">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px">
         <div style="display:flex;align-items:flex-start;gap:11px">
           <div style="width:34px;height:34px;border-radius:9px;background:#eceaf3;color:#6b5e9c;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⊟</div>
           <div><div style="font-size:15px;font-weight:700;letter-spacing:-.2px">Việc lẻ — chưa gắn dự án</div><div style="font-size:12px;color:var(--muted);margin-top:3px">${loose.length} task · ${looseDone} done${looseOv?` · <span style="color:var(--red);font-weight:700">${looseOv} quá hạn</span>`:''} · nhóm theo BU</div></div>
         </div>
       </div>
-      <div style="font-size:11.5px;color:var(--muted);background:#f4f2fa;border:1px solid #e4e0ef;border-radius:8px;padding:8px 11px;margin:8px 0 14px;line-height:1.5">💡 Đây là task chưa điền <b>Project / Campaign</b>. Mở task → Edit → đặt tên dự án để gom chúng thành 1 nhóm dự án riêng.</div>
+      <div style="font-size:11.5px;color:var(--muted);background:var(--track);border:1px solid #e4e0ef;border-radius:8px;padding:8px 11px;margin:8px 0 14px;line-height:1.5">💡 Đây là task chưa điền <b>Project / Campaign</b>. Mở task → Edit → đặt tên dự án để gom chúng thành 1 nhóm dự án riêng.</div>
       <div style="display:flex;flex-direction:column;gap:14px">${buKeys.map(b=>`<div>
         <div style="font-size:11.5px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px;display:flex;align-items:center;gap:8px"><span class="bu-tag">${esc(b)}</span><span style="color:var(--muted);font-weight:500">${byBU[b].length} task</span></div>
         <div style="display:flex;flex-direction:column;gap:6px">${byBU[b].slice().sort((a,b)=>progressOf(a)-progressOf(b)).map(stRow).join('')}</div>
@@ -1873,7 +1873,7 @@ function rPerf(c,ta){
   const totMicro=rows.reduce((s,r)=>s+r.micro,0),totHrs=(totMicro*0.75).toFixed(1);
   const totDone=rows.reduce((s,r)=>s+r.done,0),totCredit=rows.reduce((s,r)=>s+r.credit,0),totRec=rows.reduce((s,r)=>s+r.recUnits,0);
   const k=(lab,num,note,col)=>`<div class="kpi"><div class="bar" style="background:${col}"></div><div class="lab">${lab}</div><div class="num">${num}</div><div class="note">${note}</div></div>`;
-  const medal=i=>i===0?'#caa83d':(i===1?'#9aa0ac':(i===2?'#b08355':'#e9ebef'));
+  const medal=i=>i===0?'#caa83d':(i===1?'#9aa0ac':(i===2?'#b08355':'var(--track)'));
   const chip=(lab,val,col)=>`<div style="text-align:center;min-width:64px"><div style="font-size:19px;font-weight:800;letter-spacing:-.5px;color:${col||'var(--ink)'}">${val}</div><div style="font-size:9.5px;color:var(--muted);font-weight:700;letter-spacing:.3px;text-transform:uppercase;margin-top:2px">${lab}</div></div>`;
   c.innerHTML=`<div class="kpis" style="grid-template-columns:repeat(3,1fr)">
     ${k('VIỆC HOÀN THÀNH',totDone,'trong '+rangeLbl,'var(--navy)')}
@@ -1944,7 +1944,7 @@ function rRequests(c,ta){
   const reqs=roleTasks().filter(t=>!isClosed(t)&&!t.Owner)
     .sort((a,b)=>(b['Request Date']||'').localeCompare(a['Request Date']||''));
   const msg=REQMSG;REQMSG='';
-  c.innerHTML=`<div style="display:flex;align-items:center;gap:10px;background:#f8f9fc;border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin-bottom:14px">
+  c.innerHTML=`<div style="display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin-bottom:14px">
       <span style="font-size:18px">📥</span>
       <span style="font-size:12.5px;color:var(--ink2);line-height:1.55">Yêu cầu từ <b>Cổng yêu cầu BU</b> đổ về đây tự động. Bấm <b>✓ Xác nhận hợp lệ</b> để duyệt, rồi <b>Giao cho Lead</b> để chọn Function & người phụ trách — task chuyển sang luồng làm việc.</span>
       <span style="margin-left:auto;background:#17191f;color:#fff;border-radius:20px;font-size:12px;font-weight:700;padding:4px 12px;flex-shrink:0">${reqs.length} chờ giao</span>
@@ -1959,8 +1959,8 @@ function reqCard(t){
     <div style="font-size:14px;font-weight:600;line-height:1.4">${esc(t['Request Name']||'(không tên)')}</div>
     <div>${t.Confirmed?'<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#2f6d4d;background:#e6f0ea;padding:3px 9px;border-radius:6px">✓ Đã xác nhận hợp lệ</span>':'<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#8a6516;background:#f7efe0;padding:3px 9px;border-radius:6px">⏳ Chờ xác nhận hợp lệ</span>'}</div>
     <div style="font-size:12px;color:var(--muted)">Người yêu cầu: <b style="color:var(--ink2)">${esc(t.Requestor||'—')}</b></div>
-    ${t.Function?`<div style="display:flex;align-items:center;gap:7px;font-size:11.5px;flex-wrap:wrap"><span style="background:#eef3f9;color:#3b6ea5;border:1px solid #d6e2ef;border-radius:6px;padding:3px 8px;font-weight:700">⊚ ${esc(t.Function)}</span><span style="color:var(--muted)">→ Lead: <b style="color:var(--ink2)">${leadOf(t.Function)}</b></span></div>`:''}
-    ${note?`<div style="font-size:12.5px;line-height:1.55;background:#f8f9fc;border:1px solid var(--line);border-radius:8px;padding:8px 10px">${esc(note)}</div>`:''}
+    ${t.Function?`<div style="display:flex;align-items:center;gap:7px;font-size:11.5px;flex-wrap:wrap"><span style="background:var(--card2);color:#3b6ea5;border:1px solid #d6e2ef;border-radius:6px;padding:3px 8px;font-weight:700">⊚ ${esc(t.Function)}</span><span style="color:var(--muted)">→ Lead: <b style="color:var(--ink2)">${leadOf(t.Function)}</b></span></div>`:''}
+    ${note?`<div style="font-size:12.5px;line-height:1.55;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 10px">${esc(note)}</div>`:''}
     ${t.Attachment?`<a href="${esc(t.Attachment)}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:#3b6ea5;text-decoration:none">📎 Tài liệu đính kèm →</a>`:''}
     <div style="display:flex;gap:8px;margin-top:3px">
       ${t.Confirmed
@@ -2311,13 +2311,13 @@ function rKanban(c,ta){
   c.innerHTML=`<div style="overflow-x:auto;padding-bottom:10px"><div style="display:flex;gap:13px;min-width:max-content">
     ${cols.map(st=>{
       const items=ts.filter(t=>t.Status===st);
-      return `<div class="kcol" data-st="${st}" style="width:265px;flex-shrink:0;background:#eef1f7;border-radius:13px;padding:10px">
+      return `<div class="kcol" data-st="${st}" style="width:265px;flex-shrink:0;background:var(--card2);border-radius:13px;padding:10px">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px 10px">
           <span style="font-weight:700;font-size:13px;display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:${STCOLOR[st]||'#9aa3b8'}"></span>${st}</span>
           <span style="background:var(--card);border-radius:20px;font-size:11px;font-weight:700;padding:2px 9px;color:var(--muted)">${items.length}</span>
         </div>
         <div class="kdrop" data-st="${st}" style="min-height:60px">
-          ${items.map(t=>{const dg=canDragTask(t);const mine=t.Owner===u.name||(t.subtasks||[]).some(s=>s.owner===u.name);return `<div class="kcard" draggable="${dg}" data-id="${t._id}" data-drag="${dg?1:0}" onclick="taskDetail('${t._id}')" style="background:${mine?'#fff8ec':'#fff'};border-radius:10px;padding:11px 12px;margin-bottom:9px;border:1px solid ${mine?'#e9cf94':'var(--line)'};${mine?'border-left:3px solid #caa83d;':''}cursor:${dg?'grab':'pointer'};${dg?'':'opacity:.82'}">
+          ${items.map(t=>{const dg=canDragTask(t);const mine=t.Owner===u.name||(t.subtasks||[]).some(s=>s.owner===u.name);return `<div class="kcard" draggable="${dg}" data-id="${t._id}" data-drag="${dg?1:0}" onclick="taskDetail('${t._id}')" style="background:${mine?'rgba(202,168,61,.10)':'var(--card)'};border-radius:10px;padding:11px 12px;margin-bottom:9px;border:1px solid ${mine?'#e9cf94':'var(--line)'};${mine?'border-left:3px solid #caa83d;':''}cursor:${dg?'grab':'pointer'};${dg?'':'opacity:.82'}">
             ${mine?'<div style="display:inline-block;background:#caa83d;color:#1c1a12;font-size:9.5px;font-weight:800;letter-spacing:.3px;padding:2px 7px;border-radius:5px;margin-bottom:7px">★ CỦA TÔI</div>':''}
             <div style="font-size:12.5px;font-weight:600;line-height:1.35;margin-bottom:7px">${dg?'':'<span title="Bạn không có quyền kéo task này" style="color:#aab2c5">🔒 </span>'}${esc(t['Request Name'])}</div>
             <div style="display:flex;align-items:center;justify-content:space-between">
@@ -2340,10 +2340,10 @@ function wireDrag(canDragTask){
     card.addEventListener('dragend',e=>{card.style.opacity='1';});
   });
   document.querySelectorAll('.kdrop').forEach(drop=>{
-    drop.addEventListener('dragover',e=>{e.preventDefault();drop.parentElement.style.background='#e3e9f5';});
-    drop.addEventListener('dragleave',e=>{drop.parentElement.style.background='#eef1f7';});
+    drop.addEventListener('dragover',e=>{e.preventDefault();drop.parentElement.style.background='rgba(255,255,255,.08)';});
+    drop.addEventListener('dragleave',e=>{drop.parentElement.style.background='var(--card2)';});
     drop.addEventListener('drop',e=>{
-      e.preventDefault();drop.parentElement.style.background='#eef1f7';
+      e.preventDefault();drop.parentElement.style.background='var(--card2)';
       if(!dragId)return;
       const t=DB.tasks.find(x=>x._id===dragId);
       if(t&&canDragTask&&!canDragTask(t)){dragId=null;return;} // chặn kéo task không thuộc quyền
@@ -2437,7 +2437,7 @@ function rGSheet(c,ta){
           <li>Dán vào ô ở "Option 1" → <b>Save link</b>.</li>
           <li>Vào <b>Yêu cầu mới</b> → <b>Lấy từ Google Sheet</b> (hoặc đợi tự đồng bộ mỗi giờ).</li>
         </ol>
-        <div style="background:#f8f9fc;border-radius:9px;padding:11px;font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6">✓ Tiêu đề cột tiếng Việt tự hiểu · dòng trùng (cùng tên+người+ngày) tự bỏ qua · tự gắn Function theo từ khóa.</div>
+        <div style="background:var(--card2);border-radius:9px;padding:11px;font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.6">✓ Tiêu đề cột tiếng Việt tự hiểu · dòng trùng (cùng tên+người+ngày) tự bỏ qua · tự gắn Function theo từ khóa.</div>
       </div>
       <div class="panel" style="margin-top:15px">
         <h3>🕘 Sync history</h3>
