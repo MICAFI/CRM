@@ -234,8 +234,10 @@
   .lf-inner .hint{margin-top:14px;padding:13px 15px;background:var(--card2);border:1px solid var(--line);border-radius:10px;font-size:11.5px;color:var(--muted);line-height:1.7}
   .lf-flow{margin-top:22px;border:1px solid var(--line);border-radius:12px;padding:15px 16px;background:var(--card2)}
   .lf-flow-h{font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--muted);text-transform:uppercase;margin-bottom:11px}
-  .lf-fnode{background:var(--accent);color:#fff;font-size:12.5px;font-weight:700;padding:10px 12px;border-radius:9px;text-align:center}
-  .lf-fnode.mkt{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ink)}
+  .lf-fnode{background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--ink);font-size:12.5px;font-weight:700;padding:10px 12px;border-radius:9px;display:flex;align-items:center;gap:9px}
+  .lf-fnode .d{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+  .lf-fnode.bu .d{background:var(--hover);color:var(--accent)}
+  .lf-fnode.mkt .d{background:var(--hover);color:var(--ink2)}
   .lf-farrow{display:flex;justify-content:space-between;padding:6px 16px;font-size:10.5px;color:var(--muted);font-weight:600}
   .lf-fsteps{margin-top:9px;font-size:11px;color:var(--ink2);text-align:center;line-height:1.6}
   @media(max-width:860px){.login-hero{display:none}}
@@ -270,9 +272,9 @@
       <div class="lerr" id="lerr"></div>
       <div class="lf-flow">
         <div class="lf-flow-h">2 luồng vận hành</div>
-        <div class="lf-fnode">✉ BU gửi yêu cầu</div>
+        <div class="lf-fnode bu"><span class="d">✉</span>BU gửi yêu cầu</div>
         <div class="lf-farrow"><span>↓ yêu cầu</span><span>↑ kết quả</span></div>
-        <div class="lf-fnode mkt">◆ MKT quản trị nội bộ</div>
+        <div class="lf-fnode mkt"><span class="d">◆</span>MKT quản trị nội bộ</div>
         <div class="lf-fsteps">Tiếp nhận › Giao việc › Thực thi › Báo cáo</div>
       </div>
       <div class="hint">Mỗi đơn vị (BU) được cấp tài khoản riêng để gửi và theo dõi yêu cầu. Liên hệ quản trị MKT nếu cần cấp tài khoản.</div>
