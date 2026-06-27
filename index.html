@@ -11,11 +11,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#17191f;--ink2:#3b3f4a;--muted:#8c909c;
-    --navy:#17191f;--navy2:#1d2027;--navy3:#2b2f38;
-    --gold:#17191f;
-    --bg:#f4f5f7;--card:#ffffff;--line:#e6e7ec;
-    --green:#3f8a63;--blue:#3b6ea5;--purple:#6b5e9c;--red:#b4524f;
+    --ink:#e9ecf5;--ink2:#aab3c7;--muted:#7c8499;
+    --navy:#0d1424;--navy2:#141b2e;--navy3:#1b2440;
+    --gold:#5b8cff;--accent:#3f6fff;--accent-2:#2f56d8;
+    --bg:#0a0f1e;--card:#131a2c;--line:#27314a;
+    --green:#46b07d;--blue:#5b8cff;--purple:#9a7bf0;--red:#e0564f;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   input,select,textarea,button,option{font-family:'Be Vietnam Pro',system-ui,-apple-system,sans-serif}
@@ -24,7 +24,7 @@
   body{font-family:'Be Vietnam Pro',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   /* LOGIN */
   #login{position:fixed;inset:0;background:#17191f;display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
-  .lbox{background:#fff;border-radius:14px;padding:40px 36px;width:380px;box-shadow:0 24px 70px rgba(0,0,0,.4)}
+  .lbox{background:var(--card);border-radius:14px;padding:40px 36px;width:380px;box-shadow:0 24px 70px rgba(0,0,0,.4)}
   .lbox .logo{width:52px;height:52px;border-radius:12px;background:#17191f;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:19px;margin:0 auto 18px;letter-spacing:.5px}
   .lbox h2{text-align:center;font-size:20px;font-weight:700;margin-bottom:5px;letter-spacing:-.3px}
   .lbox .s{text-align:center;color:var(--muted);font-size:13px;margin-bottom:26px}
@@ -34,13 +34,13 @@
   .lbox button{width:100%;margin-top:24px;padding:13px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
   .lbox button:hover{background:#000}
   .lerr{color:var(--red);font-size:12.5px;margin-top:13px;text-align:center;min-height:16px}
-  .hint{margin-top:20px;padding:13px;background:#f6f7f9;border:1px solid var(--line);border-radius:9px;font-size:12px;color:var(--muted);line-height:1.7}
+  .hint{margin-top:20px;padding:13px;background:#161f33;border:1px solid var(--line);border-radius:9px;font-size:12px;color:var(--muted);line-height:1.7}
   /* APP */
   #app{display:none;min-height:100vh}
   .wrap{display:flex;min-height:100vh}
   .sidebar{width:240px;background:#17191f;color:#c8cad2;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0}
   .brand{display:flex;align-items:center;gap:12px;padding:22px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
-  .brand .logo{width:38px;height:38px;border-radius:9px;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;color:#17191f;font-size:14px;letter-spacing:.5px}
+  .brand .logo{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,#5b8cff,#9a7bf0);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:14px;letter-spacing:.5px}
   .brand b{color:#fff;font-size:14px;display:block;line-height:1.2;letter-spacing:-.2px}
   .brand span{font-size:10px;color:#7f8493;letter-spacing:1.5px;font-weight:600}
   .menu{padding:16px 12px;flex:1;overflow-y:auto}
@@ -60,44 +60,44 @@
   .top h1{font-size:22px;font-weight:700;letter-spacing:-.4px}.top .sub{font-size:13px;color:var(--muted);margin-top:3px}
   .btn{background:var(--ink);color:#fff;border:none;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;transition:.15s}
   .btn:hover{background:#000}.btn.gold{background:var(--ink);color:#fff}.btn.gold:hover{background:#000}
-  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
-  .btn.ghost:hover{background:#f6f7f9;border-color:#d6d8df}
+  .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{background:#161f33;border-color:#d6d8df}
   .btn.sm{padding:7px 12px;font-size:12px}
-  .btn.danger{background:#fff;color:var(--red);border:1px solid #e6c5c4}
+  .btn.danger{background:var(--card);color:var(--red);border:1px solid #e6c5c4}
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-  .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:17px 19px;position:relative;overflow:hidden}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:17px 19px;position:relative;overflow:hidden}
   .kpi .bar{position:absolute;top:0;left:0;width:100%;height:3px}
   .kpi .lab{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
   .kpi .num{font-size:30px;font-weight:800;margin-top:6px;letter-spacing:-1.2px}
   .kpi .note{font-size:11.5px;color:var(--muted);margin-top:3px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-  .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:19px 21px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:19px 21px}
   .panel h3{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:9px;letter-spacing:-.2px}
   .panel h3 .dot{width:8px;height:8px;border-radius:50%}
   .row{display:flex;align-items:center;gap:11px;margin-bottom:11px}
   .row .name{font-size:12.5px;width:140px;color:var(--ink2);font-weight:500;flex-shrink:0}
-  .row .track{flex:1;height:8px;background:#eef0f3;border-radius:5px;overflow:hidden}
+  .row .track{flex:1;height:8px;background:#222c44;border-radius:5px;overflow:hidden}
   .row .fill{height:100%;border-radius:5px;transition:width .6s}
   .row .val{font-size:12px;font-weight:700;width:28px;text-align:right;color:var(--ink2)}
-  .tablewrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .tablewrap{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
   .tabtop{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-  .tabtop input,.tabtop select{padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;background:#fff;outline:none;font-family:inherit}
+  .tabtop input,.tabtop select{padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;background:var(--card);outline:none;font-family:inherit}
   .tabtop input{flex:1;min-width:160px}
   .tabtop input:focus,.tabtop select:focus{border-color:var(--ink)}
   .tabtop .count{font-size:12px;color:var(--muted);margin-left:auto;font-weight:600}
   .gfbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin:2px 0 20px;flex-wrap:wrap}
   .gfbar .gflab{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.4px;display:inline-flex;align-items:center;gap:5px}
-  .gfbar .gfwrap{display:flex;align-items:center;gap:10px;padding:8px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 1px 2px rgba(23,25,31,.03)}
+  .gfbar .gfwrap{display:flex;align-items:center;gap:10px;padding:8px 13px;border:1px solid var(--line);border-radius:10px;background:var(--card);box-shadow:0 1px 2px rgba(23,25,31,.03)}
   .gfbar select,.gfbar input{border:none;background:transparent;font-size:12.5px;color:var(--ink);outline:none;font-family:inherit;font-weight:600;cursor:pointer}
   .gfbar input[type=date]{border:1px solid var(--line);border-radius:6px;padding:4px 7px;font-weight:500;cursor:text}
   .gfbar .gfdiv{width:1px;height:17px;background:#e3e5ea;flex-shrink:0}
   .gfbar .gfcount{font-size:11.5px;color:var(--muted);font-weight:600;white-space:nowrap}
   table{width:100%;border-collapse:collapse;font-size:13px}
-  thead th{background:#fafbfc;text-align:left;padding:11px 14px;font-size:10.5px;color:#7b8090;font-weight:700;letter-spacing:.4px;text-transform:uppercase;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}
+  thead th{background:#161f33;text-align:left;padding:11px 14px;font-size:10.5px;color:#7b8090;font-weight:700;letter-spacing:.4px;text-transform:uppercase;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}
   thead th:hover{color:var(--ink)}
-  tbody td{padding:12px 14px;border-bottom:1px solid #f1f2f5;vertical-align:top}
+  tbody td{padding:12px 14px;border-bottom:1px solid #27314a;vertical-align:top}
   tbody tr:last-child td{border-bottom:none}
-  tbody tr:hover{background:#fafbfc}
+  tbody tr:hover{background:#161f33}
   .name-cell{font-weight:600;max-width:340px}
   .rid{font-size:11.5px;color:var(--muted);font-family:ui-monospace,'SFMono-Regular',monospace}
   .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;white-space:nowrap}
@@ -105,16 +105,16 @@
   .st-Done{background:#e6f0ea;color:#2f6d4d}.st-Waiting{background:#edeaf3;color:#574a82}.st-Cancelled{background:#f0f1f3;color:#787d8c}
   .pr{font-weight:700;font-size:11px;padding:2px 8px;border-radius:5px}
   .pr-P1{background:#f6e7e6;color:#9c4441}.pr-P2{background:#f7efe0;color:#956511}
-  .pr-P3{background:#e9eef5;color:#345e8a}.pr-P4{background:#eef0f3;color:#6b7080}
+  .pr-P3{background:#e9eef5;color:#345e8a}.pr-P4{background:#222c44;color:#6b7080}
   .bu-tag{font-size:12px;color:var(--ink2);font-weight:600}
   .empty{padding:50px;text-align:center;color:var(--muted)}.empty .big{font-size:38px;margin-bottom:12px;opacity:.5}
   .acts{display:flex;gap:6px}
   .ico{cursor:pointer;color:var(--muted);font-size:14px;padding:4px;border-radius:5px}
-  .ico:hover{color:var(--ink);background:#f1f2f5}
+  .ico:hover{color:var(--ink);background:#27314a}
   /* MODAL */
   .modal{position:fixed;inset:0;background:rgba(23,25,31,.55);display:none;align-items:flex-start;justify-content:center;z-index:90;padding:44px 16px;overflow-y:auto}
   .modal.show{display:flex}
-  .mbox{background:#fff;border-radius:14px;padding:26px 28px;width:560px;max-width:100%;box-shadow:0 24px 70px rgba(0,0,0,.25)}
+  .mbox{background:var(--card);border-radius:14px;padding:26px 28px;width:560px;max-width:100%;box-shadow:0 24px 70px rgba(0,0,0,.25)}
   .mbox h2{font-size:18px;font-weight:700;margin-bottom:20px;letter-spacing:-.3px}
   .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .fld{margin-bottom:0}
@@ -130,6 +130,34 @@
   input[type=file]{display:none}
   .hidden{display:none!important}
   @media(max-width:980px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.mgrid{grid-template-columns:1fr}.fld.full{grid-column:1}.sidebar{width:64px}.brand b,.brand span,.menu a span,.menu .lbl,.side-foot b,.side-foot span{display:none}.main{max-width:calc(100vw - 64px);padding:18px}}
+
+  /* ===== DARK PRO THEME OVERRIDES ===== */
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#2a3550;border-radius:6px}
+  ::-webkit-scrollbar-track{background:transparent}
+  #login{background:var(--navy)!important}
+  .sidebar{background:var(--navy)!important}
+  input,select,textarea{background:#0f1626!important;color:var(--ink)!important;border-color:var(--line)!important}
+  input::placeholder,textarea::placeholder{color:#69728a!important}
+  option{background:#131a2c;color:var(--ink)}
+  .lbox button{background:var(--accent)!important;color:#fff!important}
+  .lbox button:hover{background:var(--accent-2)!important}
+  .btn{background:var(--accent)!important;color:#fff!important;border:none!important}
+  .btn:hover{background:var(--accent-2)!important}
+  .btn.gold{background:var(--accent)!important;color:#fff!important}
+  .btn.gold:hover{background:var(--accent-2)!important}
+  .btn.ghost{background:rgba(255,255,255,.04)!important;color:var(--ink)!important;border:1px solid var(--line)!important}
+  .btn.ghost:hover{background:rgba(255,255,255,.09)!important}
+  .btn.danger{background:rgba(224,86,79,.10)!important;color:#ff8b85!important;border:1px solid rgba(224,86,79,.35)!important}
+  thead th{background:#161f33!important;color:#9aa3b8!important;border-bottom:1px solid var(--line)!important}
+  thead th:hover{color:var(--ink)!important}
+  tbody td{border-bottom:1px solid rgba(255,255,255,.05)!important}
+  tbody tr:hover{background:rgba(255,255,255,.035)!important}
+  .panel,.kpi,.tablewrap,.mbox{background:var(--card)!important;border-color:var(--line)!important}
+  .ico:hover{background:rgba(255,255,255,.07)!important;color:var(--ink)!important}
+  pre{background:#0a1120!important;border:1px solid var(--line)}
+  .gfbar .gfwrap{background:var(--card)!important;border-color:var(--line)!important}
+  .hint{background:#0f1626!important;border-color:var(--line)!important;color:var(--muted)!important}
 </style>
 </head>
 <body>
@@ -294,7 +322,7 @@ function lastUpdate(t){
 function daysSinceUpdate(t){const d=lastUpdate(t);if(!d)return null;return Math.floor((Date.now()-d.getTime())/86400000);}
 function isStale(t){if(isClosed(t)||isRecurring(t))return false;const n=daysSinceUpdate(t);return n!=null&&n>=STALE_DAYS;}
 function staleBadge(t){if(!isStale(t))return '';const n=daysSinceUpdate(t);return `<span title="Chưa cập nhật ${n} ngày" style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;background:#ece7f3;color:#6b5e9c">⏳ ${n}N CHƯA UPDATE</span>`;}
-function progBar(p){return `<div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:7px;background:#eef0f3;border-radius:5px;overflow:hidden;min-width:50px"><div style="height:100%;width:${p}%;background:${p>=100?'var(--green)':'var(--ink)'};border-radius:5px;transition:width .4s"></div></div><span style="font-size:11px;font-weight:700;color:var(--ink2);width:32px;text-align:right">${p}%</span></div>`;}
+function progBar(p){return `<div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:7px;background:#222c44;border-radius:5px;overflow:hidden;min-width:50px"><div style="height:100%;width:${p}%;background:${p>=100?'var(--green)':'var(--ink)'};border-radius:5px;transition:width .4s"></div></div><span style="font-size:11px;font-weight:700;color:var(--ink2);width:32px;text-align:right">${p}%</span></div>`;}
 
 /* ---- recurring / period helpers ---- */
 function fmtLocal(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
@@ -330,10 +358,10 @@ window.renderMsubs=()=>{
   const stC={Open:'#956511',WIP:'#345e8a',Done:'#2f6d4d'},stBG={Open:'#f7efe0',WIP:'#e9eef5',Done:'#e6f0ea'},stTxt={Open:'CHƯA',WIP:'ĐANG LÀM',Done:'✓ XONG'};
   const names=[...new Set([...DB.staff.map(s=>s.name),...DB.users.map(u=>u.name)])].filter(Boolean);
   if(!MSUBS.length){w.innerHTML=`<div style="font-size:12.5px;color:var(--muted)">Chưa có hạng mục — bấm mẫu ở trên hoặc thêm bên dưới.</div>`;return;}
-  w.innerHTML=MSUBS.map((s,i)=>`<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:#fff">
+  w.innerHTML=MSUBS.map((s,i)=>`<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--card)">
     <span onclick="mSubCycle(${i})" title="Bấm để đổi trạng thái" style="cursor:pointer;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:78px;padding:5px 0;border-radius:6px;font-size:10px;font-weight:700;background:${stBG[s.status]};color:${stC[s.status]}">${stTxt[s.status]}</span>
     <span style="flex:1;font-size:13px;font-weight:500">${esc(s.name)}</span>
-    <select onchange="mSubOwner(${i},this.value)" style="font-size:12px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;font-family:inherit;background:#fff;max-width:130px"><option value="">— giao cho —</option>${names.map(n=>`<option ${s.owner===n?'selected':''}>${esc(n)}</option>`).join('')}</select>
+    <select onchange="mSubOwner(${i},this.value)" style="font-size:12px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;font-family:inherit;background:var(--card);max-width:130px"><option value="">— giao cho —</option>${names.map(n=>`<option ${s.owner===n?'selected':''}>${esc(n)}</option>`).join('')}</select>
     <span onclick="mSubDel(${i})" class="ico" title="Xóa hạng mục">🗑</span>
   </div>`).join('');
 };
@@ -560,7 +588,7 @@ function byDueA(a,b){return (a['Due Date']||'9999').localeCompare(b['Due Date']|
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 const STCOLOR={Open:'#b58a3a',WIP:'#3b6ea5',Done:'#3f8a63',Waiting:'#6b5e9c',Cancelled:'#9aa0ac'};
 const PRCOLOR={P1:'#b4524f',P2:'#b58a3a',P3:'#3b6ea5',P4:'#9aa0ac'};
-const BUCOLOR=['#17191f','#383c45','#525760','#6c707b','#868a95','#a0a4af','#2b2f38','#474c57','#5e636e','#797e89'];
+const BUCOLOR=['#5b8cff','#9a7bf0','#46b07d','#e0a23c','#e0564f','#37b6c9','#7c8cff','#c77dff','#5ad1a8','#f0894f'];
 const HEALTH={'On track':'#3f8a63','Difficulty':'#b58a3a','Blocked':'#b4524f'};
 const HEALTHBG={'On track':'#e6f0ea','Difficulty':'#f7efe0','Blocked':'#f6e7e6'};
 function healthPill(h){if(!h)return '';const c=HEALTH[h]||'#9aa0ac',bg=HEALTHBG[h]||'#f0f1f3';return `<span style="display:inline-block;padding:2px 8px;border-radius:5px;font-size:10.5px;font-weight:700;background:${bg};color:${c}">${h==='On track'?'ON TRACK':h.toUpperCase()}</span>`;}
@@ -748,7 +776,7 @@ function rTasks(c,ta){
       <select id="fcx"><option value="">Mọi thời lượng</option>${CATS.Complexity.map(x=>`<option value="${esc(x)}" ${F.cx===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
       <span class="count" id="cnt"></span>
     </div>
-    ${canEdit?`<div id="bulkBar" style="display:none;align-items:center;gap:12px;padding:10px 16px;background:#fff8ec;border-bottom:1px solid var(--line)">
+    ${canEdit?`<div id="bulkBar" style="display:none;align-items:center;gap:12px;padding:10px 16px;background:var(--card)8ec;border-bottom:1px solid var(--line)">
       <span style="font-size:12.5px;font-weight:700;color:#8a6d1f"><span id="bulkN">0</span> task đã chọn</span>
       <button class="btn" id="bulkDel" style="background:#b4524f;color:#fff;border-color:#b4524f">🗑 Xóa đã chọn</button>
       <button class="btn ghost" id="bulkClear">Bỏ chọn</button>
@@ -806,7 +834,7 @@ function drawT(canEdit){
   const r=filterT();
   document.getElementById('cnt').textContent=r.length+' tasks';
   const meName=me().name;
-  document.getElementById('tb').innerHTML=r.map(t=>{const mine=t.Owner===meName||(t.subtasks||[]).some(s=>s.owner===meName);return `<tr${mine?' style="background:#fff8ec"':''}>
+  document.getElementById('tb').innerHTML=r.map(t=>{const mine=t.Owner===meName||(t.subtasks||[]).some(s=>s.owner===meName);return `<tr${mine?' style="background:var(--card)8ec"':''}>
     ${canEdit?`<td style="text-align:center${mine?';box-shadow:inset 3px 0 0 #caa83d':''}"><input type="checkbox" class="rowsel" data-sel="${t._id}" ${SEL.has(t._id)?'checked':''} style="cursor:pointer"></td>`:''}
     <td${(mine&&!canEdit)?' style="box-shadow:inset 3px 0 0 #caa83d"':''}><span class="rid">${esc(t['Request ID'])}</span></td>
     <td><span class="bu-tag">${esc(t.BU)}</span></td>
@@ -909,11 +937,11 @@ window.taskModal=(id,presetType)=>{
     ${evalSection}
     <div style="margin-top:18px;border-top:1px solid var(--line);padding-top:16px">
       <div style="font-size:13px;font-weight:700;margin-bottom:3px">Chia hạng mục con <span style="color:var(--muted);font-weight:500;font-size:12px">— giao từng phần cho từng bạn (tùy chọn)</span></div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin:11px 0"><span style="font-size:11px;color:var(--muted);font-weight:700;align-self:center">CHIA NHANH:</span>${Object.keys(SUBTASK_TEMPLATES).map(key=>`<button type="button" onclick="mSubTemplate('${key}')" style="font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:7px;border:1px dashed #cfd2d9;background:#fafbfc;color:var(--ink2);cursor:pointer;font-family:inherit">+ ${esc(key)}</button>`).join('')}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin:11px 0"><span style="font-size:11px;color:var(--muted);font-weight:700;align-self:center">CHIA NHANH:</span>${Object.keys(SUBTASK_TEMPLATES).map(key=>`<button type="button" onclick="mSubTemplate('${key}')" style="font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:7px;border:1px dashed #cfd2d9;background:#161f33;color:var(--ink2);cursor:pointer;font-family:inherit">+ ${esc(key)}</button>`).join('')}</div>
       <div id="msubWrap" style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px"></div>
       <div style="display:flex;gap:8px">
         <input id="msub_name" placeholder="Tên hạng mục (vd: Banner web)…" style="flex:1;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none;font-family:inherit">
-        <select id="msub_own" style="padding:9px 9px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;font-family:inherit;background:#fff"><option value="">— giao cho —</option>${staffNames.map(n=>`<option>${esc(n)}</option>`).join('')}</select>
+        <select id="msub_own" style="padding:9px 9px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;font-family:inherit;background:var(--card)"><option value="">— giao cho —</option>${staffNames.map(n=>`<option>${esc(n)}</option>`).join('')}</select>
         <button type="button" class="btn ghost" onclick="mSubAdd()">Thêm</button>
       </div>
     </div>
@@ -962,13 +990,13 @@ function buMatrixMini(){
   return `<table style="width:100%;border-collapse:collapse;font-size:12px">${head}${rows}</table>`;
 }
 function buStatusPill(s){
-  const m={Open:['Chờ duyệt','#8a6516','#f7efe0'],WIP:['Đang làm','#345e8a','#e9eef5'],Waiting:['Tạm chờ','#6b7080','#eef0f3'],Done:['Hoàn thành','#2f6d4d','#e6f0ea'],Cancelled:['Đã hủy','#9c4441','#f6e7e6']};
-  const x=m[s]||[s||'—','#6b7080','#eef0f3'];
+  const m={Open:['Chờ duyệt','#8a6516','#f7efe0'],WIP:['Đang làm','#345e8a','#e9eef5'],Waiting:['Tạm chờ','#6b7080','#222c44'],Done:['Hoàn thành','#2f6d4d','#e6f0ea'],Cancelled:['Đã hủy','#9c4441','#f6e7e6']};
+  const x=m[s]||[s||'—','#6b7080','#222c44'];
   return `<span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:6px;font-size:11.5px;font-weight:700;background:${x[2]};color:${x[1]}"><span style="width:6px;height:6px;border-radius:50%;background:${x[1]}"></span>${x[0]}</span>`;
 }
 function buWalletCard(w){
   const barCol=w.pct>=100?'#b4524f':(w.pct>=80?'#b58a3a':'#3f8a63');
-  return `<div style="background:#fff;border:1px solid #e3e5ea;border-radius:16px;padding:22px 26px;box-shadow:0 2px 10px rgba(23,25,31,.04)">
+  return `<div style="background:var(--card);border:1px solid #e3e5ea;border-radius:16px;padding:22px 26px;box-shadow:0 2px 10px rgba(23,25,31,.04)">
     <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:16px">
       <div><div style="font-size:11px;font-weight:700;color:#8c909c;letter-spacing:.6px;text-transform:uppercase">Ví credit · tháng này</div>
       <div style="font-size:30px;font-weight:800;letter-spacing:-1px;margin-top:3px">${w.remaining} <span style="font-size:15px;font-weight:600;color:#8c909c">/ ${w.budget} còn lại</span></div></div>
@@ -977,7 +1005,7 @@ function buWalletCard(w){
         <div><div style="font-size:20px;font-weight:800;color:#8a6516">${w.pending}</div><div style="font-size:10.5px;font-weight:700;color:#8c909c;text-transform:uppercase;letter-spacing:.3px">Chờ duyệt</div></div>
       </div>
     </div>
-    <div style="height:10px;background:#eef0f3;border-radius:6px;overflow:hidden"><div style="height:100%;border-radius:6px;background:${barCol};width:${w.pct}%"></div></div>
+    <div style="height:10px;background:#222c44;border-radius:6px;overflow:hidden"><div style="height:100%;border-radius:6px;background:${barCol};width:${w.pct}%"></div></div>
     <div style="font-size:11.5px;color:#9aa0ac;margin-top:9px;line-height:1.6">1 Credit = 15 phút. Credit chỉ bị trừ <b>khi task được duyệt / bắt đầu làm</b>. Yêu cầu đang chờ duyệt chưa trừ vào số dư.</div>
   </div>`;
 }
@@ -988,9 +1016,9 @@ function buSubmitForm(w){
   const capOpts=CAP_LEVELS.map(v=>`<option value="${v}" ${v==='Medium'?'selected':''}>${CAP_LABEL[v]} (${v})</option>`).join('');
   const prOpts=CATS.Priority.map(f=>`<option ${f==='P2'?'selected':''}>${esc(f)}</option>`).join('');
   const L='font-size:12px;font-weight:600;color:#3b3f4a;display:block;margin-bottom:6px';
-  const I='width:100%;padding:11px 13px;border:1px solid #dfe1e6;border-radius:9px;font-size:13.5px;outline:none;font-family:inherit;background:#fff;box-sizing:border-box';
+  const I='width:100%;padding:11px 13px;border:1px solid #dfe1e6;border-radius:9px;font-size:13.5px;outline:none;font-family:inherit;background:var(--card);box-sizing:border-box';
   return `<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
-    <div style="flex:1 1 460px;background:#fff;border:1px solid #e3e5ea;border-radius:14px;padding:24px 26px">
+    <div style="flex:1 1 460px;background:var(--card);border:1px solid #e3e5ea;border-radius:14px;padding:24px 26px">
       <div style="font-size:10.5px;font-weight:700;letter-spacing:.8px;color:#8c909c;text-transform:uppercase;margin-bottom:14px">Thông tin yêu cầu</div>
       <div style="margin-bottom:13px"><label style="${L}">Tên task / yêu cầu *</label><input id="bu_name" style="${I}" placeholder="VD: Chạy Google Ads ra mắt sản phẩm tháng 7"></div>
       <div style="margin-bottom:13px"><label style="${L}">Dự án / Campaign</label><input id="bu_proj" style="${I}" placeholder="Tùy chọn"></div>
@@ -1011,15 +1039,15 @@ function buSubmitForm(w){
       <button onclick="buSubmit()" style="width:100%;padding:14px;background:#17191f;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Gửi yêu cầu →</button>
     </div>
     <div style="flex:1 1 280px;position:sticky;top:84px">
-      <div style="background:#fafbfc;border:1px solid #e3e5ea;border-radius:14px;padding:20px 22px">
+      <div style="background:#161f33;border:1px solid #e3e5ea;border-radius:14px;padding:20px 22px">
         <div style="font-size:10.5px;font-weight:700;letter-spacing:1px;color:#8c909c;text-transform:uppercase;margin-bottom:12px">Chi phí credit dự kiến</div>
         <div id="bu_cost" style="font-size:34px;font-weight:800;letter-spacing:-1.4px">—</div>
         <div id="bu_cost_sub" style="font-size:12.5px;color:#6b7080;margin-top:4px;line-height:1.5">Chọn độ phức tạp & mức năng lực để tính credit.</div>
-        <div style="height:1px;background:#eef0f3;margin:16px 0"></div>
+        <div style="height:1px;background:#222c44;margin:16px 0"></div>
         <div style="font-size:12.5px;color:#3b3f4a;line-height:1.7">Còn lại sau yêu cầu này: <b id="bu_after">${w.remaining}</b> credit</div>
         <div id="bu_warn" style="display:none;font-size:12px;color:#b4524f;font-weight:600;margin-top:8px"></div>
       </div>
-      <div style="background:#fff;border:1px solid #e3e5ea;border-radius:14px;padding:16px 18px;margin-top:13px">
+      <div style="background:var(--card);border:1px solid #e3e5ea;border-radius:14px;padding:16px 18px;margin-top:13px">
         <div style="font-size:10.5px;font-weight:700;letter-spacing:.6px;color:#8c909c;text-transform:uppercase;margin-bottom:10px">Ma trận credit (file)</div>
         ${buMatrixMini()}
       </div>
@@ -1027,20 +1055,20 @@ function buSubmitForm(w){
   </div>`;
 }
 function buMyList(mine){
-  if(!mine.length)return `<div style="background:#fff;border:1px solid #e3e5ea;border-radius:14px;padding:50px;text-align:center;color:#9aa0ac;font-size:13.5px">Chưa có yêu cầu nào. Bấm <b>Gửi yêu cầu</b> để tạo.</div>`;
+  if(!mine.length)return `<div style="background:var(--card);border:1px solid #e3e5ea;border-radius:14px;padding:50px;text-align:center;color:#9aa0ac;font-size:13.5px">Chưa có yêu cầu nào. Bấm <b>Gửi yêu cầu</b> để tạo.</div>`;
   const rows=mine.slice().sort((a,b)=>(b['Request Date']||'').localeCompare(a['Request Date']||'')).map(t=>{
     const ag=t.agent?` <span title="Agent" style="font-size:10px;font-weight:700;color:#574a82;background:#edeaf3;padding:1px 6px;border-radius:4px">⚡ ${esc(t.agent.status)}${t.agent.outputUrl?' ✓':''}</span>`:'';
     return `<tr>
-      <td style="padding:11px 14px;border-bottom:1px solid #f1f2f5;font-weight:600">${esc(t['Request Name'])}${ag}<div style="font-size:11px;color:#9aa0ac;font-weight:500;margin-top:2px">${esc(t['Request ID'])} · ${esc(t.Function||'—')}</div></td>
-      <td style="padding:11px 14px;border-bottom:1px solid #f1f2f5;color:#6b7080;white-space:nowrap">${cxKey(t)} · ${CAP_LABEL[capKey(t)]}</td>
-      <td style="padding:11px 14px;border-bottom:1px solid #f1f2f5;font-weight:700;color:#46506b">${creditOf(t)}</td>
-      <td style="padding:11px 14px;border-bottom:1px solid #f1f2f5">${buStatusPill(t.Status)}</td>
-      <td style="padding:11px 14px;border-bottom:1px solid #f1f2f5;color:#6b7080">${esc(t.Owner||'—')}</td>
-      <td style="padding:11px 14px;border-bottom:1px solid #f1f2f5;color:#6b7080;white-space:nowrap">${esc(t['Due Date']||'—')}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #27314a;font-weight:600">${esc(t['Request Name'])}${ag}<div style="font-size:11px;color:#9aa0ac;font-weight:500;margin-top:2px">${esc(t['Request ID'])} · ${esc(t.Function||'—')}</div></td>
+      <td style="padding:11px 14px;border-bottom:1px solid #27314a;color:#6b7080;white-space:nowrap">${cxKey(t)} · ${CAP_LABEL[capKey(t)]}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #27314a;font-weight:700;color:#46506b">${creditOf(t)}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #27314a">${buStatusPill(t.Status)}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #27314a;color:#6b7080">${esc(t.Owner||'—')}</td>
+      <td style="padding:11px 14px;border-bottom:1px solid #27314a;color:#6b7080;white-space:nowrap">${esc(t['Due Date']||'—')}</td>
     </tr>`;
   }).join('');
-  return `<div style="background:#fff;border:1px solid #e3e5ea;border-radius:14px;overflow:hidden"><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
-    <thead><tr>${['Task','Loại','Credit','Trạng thái','Phụ trách','Hạn'].map(h=>`<th style="text-align:left;padding:10px 14px;font-size:10px;color:#8b8f9a;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:#fafbfc;border-bottom:1px solid #eef0f3">${h}</th>`).join('')}</tr></thead>
+  return `<div style="background:var(--card);border:1px solid #e3e5ea;border-radius:14px;overflow:hidden"><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr>${['Task','Loại','Credit','Trạng thái','Phụ trách','Hạn'].map(h=>`<th style="text-align:left;padding:10px 14px;font-size:10px;color:#8b8f9a;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:#161f33;border-bottom:1px solid #222c44">${h}</th>`).join('')}</tr></thead>
     <tbody>${rows}</tbody></table></div></div>`;
 }
 window.buUpdCost=()=>{
@@ -1073,7 +1101,7 @@ function renderBuPortal(){
   host.innerHTML=`
   <div style="min-height:100vh;background:#f1f2f4">
     <div style="background:#17191f;color:#fff;padding:15px 30px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:5">
-      <div style="width:38px;height:38px;border-radius:9px;background:#fff;color:#17191f;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px">FM</div>
+      <div style="width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,#5b8cff,#9a7bf0);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px">FM</div>
       <div style="line-height:1.25"><b style="font-size:14px;display:block">Cổng yêu cầu Marketing</b><span style="font-size:11px;color:#9398a3;letter-spacing:.5px">BU · ${esc(bu||'(chưa gán BU)')}</span></div>
       <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
         <span style="font-size:12.5px;color:#c8cad2">${esc(u?u.name:'')}</span>
@@ -1124,11 +1152,11 @@ window.fadoMKT={
 function rAgents(c,ta){
   const a=DB.agents||{webhook:'',content:'',image:'',video:''};
   const buRows=CATS.BU.map(bu=>{const w=buWallet(bu);return `<tr>
-    <td style="padding:9px 12px;border-bottom:1px solid #f1f2f5;font-weight:600">${esc(bu)}</td>
-    <td style="padding:9px 12px;border-bottom:1px solid #f1f2f5"><input data-bubudget="${esc(bu)}" type="number" min="0" value="${buBudget(bu)}" style="width:84px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit"></td>
-    <td style="padding:9px 12px;border-bottom:1px solid #f1f2f5;color:#345e8a;font-weight:700">${w.used}</td>
-    <td style="padding:9px 12px;border-bottom:1px solid #f1f2f5;color:#8a6516;font-weight:700">${w.pending}</td>
-    <td style="padding:9px 12px;border-bottom:1px solid #f1f2f5;font-weight:700;color:${w.remaining<0?'#b4524f':'#2f6d4d'}">${w.remaining}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid #27314a;font-weight:600">${esc(bu)}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid #27314a"><input data-bubudget="${esc(bu)}" type="number" min="0" value="${buBudget(bu)}" style="width:84px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit"></td>
+    <td style="padding:9px 12px;border-bottom:1px solid #27314a;color:#345e8a;font-weight:700">${w.used}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid #27314a;color:#8a6516;font-weight:700">${w.pending}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid #27314a;font-weight:700;color:${w.remaining<0?'#b4524f':'#2f6d4d'}">${w.remaining}</td>
   </tr>`;}).join('');
   const F=(id,label,val,ph)=>`<div style="margin-bottom:12px"><label style="font-size:12px;font-weight:600;color:var(--ink2);display:block;margin-bottom:5px">${label}</label><input id="${id}" value="${esc(val||'')}" placeholder="${ph}" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-family:inherit;box-sizing:border-box"></div>`;
   const sample=JSON.stringify({jobId:'JOB-xxx',source:'fado-mkt',taskId:'…',requestId:'MKT-2026-001',bu:'Proship',title:'Banner sale 7.7',function:'Content & Creative',subFunction:'Design',complexity:'S',capacity:'Medium',credit:4,priority:'P2',dueDate:'',notes:''},null,2);
@@ -1158,7 +1186,7 @@ function rAgents(c,ta){
       <div style="font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:${g.c};margin:16px 0 9px">${g.grp}</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">
         ${g.items.map(([k,ic,nm,role,pw])=>{const on=!!(a[k]&&String(a[k]).trim());if(on)_nConf++;return `
-        <div style="border:1px solid var(--line);border-radius:11px;padding:12px 13px;background:#fff">
+        <div style="border:1px solid var(--line);border-radius:11px;padding:12px 13px;background:var(--card)">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
             <span style="font-size:16px">${ic}</span><b style="font-size:13px">${nm}</b>
             <span style="margin-left:auto;width:9px;height:9px;border-radius:50%;background:${on?'#3f8a63':'#cfd2da'}" title="${on?'Đã cấu hình':'Chưa cắm endpoint'}"></span>
@@ -1191,7 +1219,7 @@ function rAgents(c,ta){
   </div>
   <div class="panel" style="margin-bottom:16px">
     <h3><span class="dot" style="background:var(--navy)"></span>Ngân sách credit theo BU <span style="font-size:11.5px;color:var(--muted);font-weight:500">· mặc định ${DEFAULT_BU_CREDIT}/tháng</span></h3>
-    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr>${['BU','Ngân sách','Đã dùng','Chờ duyệt','Còn lại'].map(h=>`<th style="text-align:left;padding:8px 12px;font-size:10px;color:#8b8f9a;font-weight:700;text-transform:uppercase;background:#fafbfc;border-bottom:1px solid #eef0f3">${h}</th>`).join('')}</tr></thead><tbody>${buRows}</tbody></table></div>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr>${['BU','Ngân sách','Đã dùng','Chờ duyệt','Còn lại'].map(h=>`<th style="text-align:left;padding:8px 12px;font-size:10px;color:#8b8f9a;font-weight:700;text-transform:uppercase;background:#161f33;border-bottom:1px solid #222c44">${h}</th>`).join('')}</tr></thead><tbody>${buRows}</tbody></table></div>
     <div style="margin-top:14px"><button class="btn gold" id="buSaveBudgets">Lưu ngân sách</button></div>
   </div>
   <div class="panel" style="margin-top:16px">
@@ -1323,7 +1351,7 @@ window.taskDetail=id=>{
   const qcColor=t.QC==='Pass'?'#2f6d4d':(t.QC==='Fail'?'#9c4441':'#787d8c');
   const sn=Number(t.Satisfaction);const sat=sn>=1?('★'.repeat(sn)+'☆'.repeat(5-sn)):'—';
   const comments=t.comments||[],hist=t.history||[];
-  const row=(l,v)=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #f1f2f5"><span style="font-size:12px;color:var(--muted);font-weight:600">${l}</span><span style="font-size:13px;font-weight:500;text-align:right">${v}</span></div>`;
+  const row=(l,v)=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #27314a"><span style="font-size:12px;color:var(--muted);font-weight:600">${l}</span><span style="font-size:13px;font-weight:500;text-align:right">${v}</span></div>`;
   const subs=t.subtasks||[],sp=subProgress(t);
   const stC={Open:'#956511',WIP:'#345e8a',Done:'#2f6d4d'},stBG={Open:'#f7efe0',WIP:'#e9eef5',Done:'#e6f0ea'},stTxt={Open:'CHƯA',WIP:'ĐANG LÀM',Done:'✓ XONG'};
   const subSection=`<div style="margin-top:18px">
@@ -1331,16 +1359,16 @@ window.taskDetail=id=>{
       <div style="font-size:13px;font-weight:700">Hạng mục con ${sp?`<span style="color:var(--muted);font-weight:500">· ${sp.done}/${sp.total} xong</span>`:''}</div>
       ${sp?`<div style="flex:1;max-width:160px">${progBar(Math.round(sp.done/sp.total*100))}</div>`:''}
     </div>
-    ${subs.length?`<div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px">${subs.map(s=>{const can=canEdit||s.owner===u.name;return `<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:#fff">
+    ${subs.length?`<div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px">${subs.map(s=>{const can=canEdit||s.owner===u.name;return `<div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--card)">
         <span ${can?`onclick="subCycle('${t._id}','${s.id}')" style="cursor:pointer;`:'style="'}flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:78px;padding:5px 0;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.3px;background:${stBG[s.status]};color:${stC[s.status]}" title="${can?'Bấm để đổi trạng thái':''}">${stTxt[s.status]}</span>
         <span style="flex:1;font-size:13px;font-weight:500;${s.status==='Done'?'text-decoration:line-through;color:var(--muted)':''}">${esc(s.name)}</span>
-        ${canEdit?`<select onchange="subOwner('${t._id}','${s.id}',this.value)" style="font-size:12px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;font-family:inherit;background:#fff;max-width:130px"><option value="">— giao cho —</option>${staffNames.map(n=>`<option ${s.owner===n?'selected':''}>${esc(n)}</option>`).join('')}</select>
+        ${canEdit?`<select onchange="subOwner('${t._id}','${s.id}',this.value)" style="font-size:12px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;font-family:inherit;background:var(--card);max-width:130px"><option value="">— giao cho —</option>${staffNames.map(n=>`<option ${s.owner===n?'selected':''}>${esc(n)}</option>`).join('')}</select>
         <span onclick="subDel('${t._id}','${s.id}')" class="ico" title="Xóa hạng mục">🗑</span>`:`<span class="bu-tag">${esc(s.owner||'—')}</span>`}
       </div>`;}).join('')}</div>`:`<div style="font-size:12.5px;color:var(--muted);margin-bottom:12px">Chưa chia hạng mục.${canEdit?' Chia nhanh theo mẫu, hoặc thêm thủ công bên dưới.':''}</div>`}
-    ${canEdit?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"><span style="font-size:11px;color:var(--muted);font-weight:700;align-self:center;margin-right:2px">CHIA NHANH:</span>${Object.keys(SUBTASK_TEMPLATES).map(key=>`<button onclick="subTemplate('${t._id}','${key}')" style="font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:7px;border:1px dashed #cfd2d9;background:#fafbfc;color:var(--ink2);cursor:pointer;font-family:inherit">+ ${esc(key)}</button>`).join('')}</div>
+    ${canEdit?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"><span style="font-size:11px;color:var(--muted);font-weight:700;align-self:center;margin-right:2px">CHIA NHANH:</span>${Object.keys(SUBTASK_TEMPLATES).map(key=>`<button onclick="subTemplate('${t._id}','${key}')" style="font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:7px;border:1px dashed #cfd2d9;background:#161f33;color:var(--ink2);cursor:pointer;font-family:inherit">+ ${esc(key)}</button>`).join('')}</div>
     <div style="display:flex;gap:8px">
       <input id="sub_name" placeholder="Tên hạng mục (vd: Banner web)…" style="flex:1;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none;font-family:inherit">
-      <select id="sub_own" style="padding:9px 9px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;font-family:inherit;background:#fff"><option value="">— giao cho —</option>${staffNames.map(n=>`<option>${esc(n)}</option>`).join('')}</select>
+      <select id="sub_own" style="padding:9px 9px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;font-family:inherit;background:var(--card)"><option value="">— giao cho —</option>${staffNames.map(n=>`<option>${esc(n)}</option>`).join('')}</select>
       <button class="btn" onclick="subAdd('${t._id}')">Thêm</button>
     </div>`:''}
   </div>`;
@@ -1373,7 +1401,7 @@ window.taskDetail=id=>{
       <div style="display:flex;gap:8px"><input id="dc_in" placeholder="Write a comment..." style="flex:1;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none;font-family:inherit"><button class="btn" id="dc_add">Send</button></div>
     </div>
     <div style="margin-top:18px"><div style="font-size:13px;font-weight:700;margin-bottom:9px">Activity</div>
-      <div>${hist.length?hist.slice().reverse().map(h=>`<div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #f1f2f5"><span style="font-size:11.5px;color:var(--muted);width:140px;flex-shrink:0">${esc(h.at)}</span><span style="font-size:12.5px"><b>${esc(h.by)}</b> · ${esc(h.text)}</span></div>`).join(''):'<div style="font-size:12.5px;color:var(--muted)">No activity recorded.</div>'}</div>
+      <div>${hist.length?hist.slice().reverse().map(h=>`<div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #27314a"><span style="font-size:11.5px;color:var(--muted);width:140px;flex-shrink:0">${esc(h.at)}</span><span style="font-size:12.5px"><b>${esc(h.by)}</b> · ${esc(h.text)}</span></div>`).join(''):'<div style="font-size:12.5px;color:var(--muted)">No activity recorded.</div>'}</div>
     </div>
     <div class="mfoot"><button class="btn ghost" onclick="mClose()">Close</button></div>`);
   if(canCheck){
@@ -1403,13 +1431,13 @@ function rRecurring(c,ta){
     const bg=s.ok?'#3f8a63':(s.done>0?'#b58a3a':'#b4524f');
     const ctrl=!cc?`<span style="font-size:13px;font-weight:700;color:${bg}">${s.q?s.done+'/'+s.q:(s.ok?'✓ đã làm':'chưa làm')}</span>`:(s.q?
       `<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">
-        <button onclick="recSet('${t._id}','${s.key}',${s.done-1})" ${s.done<=0?'disabled':''} style="width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:15px;font-weight:700;opacity:${s.done<=0?.4:1}">−</button>
+        <button onclick="recSet('${t._id}','${s.key}',${s.done-1})" ${s.done<=0?'disabled':''} style="width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:15px;font-weight:700;opacity:${s.done<=0?.4:1}">−</button>
         <span style="font-size:15px;font-weight:800;min-width:48px;text-align:center;color:${bg}">${s.done}/${s.q}</span>
-        <button onclick="recSet('${t._id}','${s.key}',${s.done+1})" style="width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:15px;font-weight:700">+</button>
+        <button onclick="recSet('${t._id}','${s.key}',${s.done+1})" style="width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:15px;font-weight:700">+</button>
       </div>`:
       `<button onclick="recSet('${t._id}','${s.key}',${s.ok?0:1})" style="padding:7px 13px;border-radius:8px;border:1px solid ${s.ok?'#3f8a63':'var(--line)'};background:${s.ok?'#3f8a63':'#fff'};color:${s.ok?'#fff':'var(--ink2)'};font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">${s.ok?'✓ Đã làm kỳ này':'Đánh dấu đã làm'}</button>`);
     const hist=recentPeriods(s.cad,10).map(k=>{const cnt=periodCount(t,k),met=s.q?cnt>=s.q:cnt>=1,par=cnt>0&&!met,cur=k===s.key;return `<span title="${periodLabel(s.cad,k)}: ${cnt}${s.q?'/'+s.q:''}" style="width:14px;height:14px;border-radius:3px;background:${met?'#3f8a63':(par?'#d8b772':'#e9ebef')};display:inline-block;${cur?'outline:2px solid #17191f;outline-offset:1px':''}"></span>`;}).join('');
-    return `<div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--line);${miss?'border-left:3px solid #b4524f;':''}border-radius:10px;background:#fff">
+    return `<div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--line);${miss?'border-left:3px solid #b4524f;':''}border-radius:10px;background:var(--card)">
       <div style="flex:1;min-width:0">
         <div data-open="${t._id}" style="font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:${bg};flex-shrink:0"></span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t['Request Name'])}</span>${miss?`<span style="font-size:10px;font-weight:700;color:#9c4441;background:#f6e7e6;padding:2px 7px;border-radius:5px;white-space:nowrap">⚠ Trễ kỳ trước</span>`:''}</div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:7px;flex-wrap:wrap"><span class="bu-tag">${esc(t.BU)}</span><span>·</span><span>${esc(t.Cadence||'')}</span><span>·</span><span>${s.q?'chỉ tiêu '+s.q+'/kỳ':'việc duy trì'}</span></div>
@@ -1496,7 +1524,7 @@ function rLeadHome(c,ta){
   const [mf,mt]=dRange('month');
   const doneMonth=all.filter(t=>t.Status==='Done'&&(t['Close Date']||'')>=mf&&(t['Close Date']||'')<=mt).length;
   const k=(lab,num,note,col)=>`<div class="kpi"><div class="bar" style="background:${col}"></div><div class="lab">${lab}</div><div class="num">${num}</div><div class="note">${note}</div></div>`;
-  const row=t=>`<div data-open="${t._id}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff">
+  const row=t=>`<div data-open="${t._id}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--card)">
       ${healthDot(t)}<span class="pr pr-${t.Priority}">${esc(t.Priority)}</span>
       <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t['Request Name'])}</div><div style="font-size:11px;color:var(--muted)">${esc(t.BU||'—')}${t['Project/Campaign']?' · '+esc(t['Project/Campaign']):''}</div></div>
       ${staleBadge(t)}${dueBadge(t)}<span class="pill st-${t.Status}">${esc(t.Status)}</span>
@@ -1552,7 +1580,7 @@ function projectsHtml(ts){
   const projKeys=Object.keys(groups).filter(k=>k!==NOPROJ).sort((a,b)=>groups[b].length-groups[a].length);
   const loose=groups[NOPROJ]||[];
   const meName=me().name;
-  const stRow=t=>{const mine=t.Owner===meName||(t.subtasks||[]).some(s=>s.owner===meName);return `<div data-open="${t._id}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:7px 9px;border-radius:7px;background:${mine?'#fff8ec':'#fafbfc'};${mine?'box-shadow:inset 3px 0 0 #caa83d':''}"><span class="pr pr-${t.Priority}">${esc(t.Priority)}</span><span style="flex:1;font-size:12.5px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t['Request Name'])}</span>${staleBadge(t)}${dueBadge(t)}<span class="pill st-${t.Status}">${esc(t.Status)}</span><span style="font-size:11px;color:${mine?'#8a6d1f':'var(--muted)'};font-weight:${mine?'700':'400'};width:110px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${mine?'★ '+esc(t.Owner):esc(t.Owner||'chưa giao')}</span><span style="font-size:11px;font-weight:700;width:40px;text-align:right">${progressOf(t)}%</span></div>`;};
+  const stRow=t=>{const mine=t.Owner===meName||(t.subtasks||[]).some(s=>s.owner===meName);return `<div data-open="${t._id}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:7px 9px;border-radius:7px;background:${mine?'#fff8ec':'#161f33'};${mine?'box-shadow:inset 3px 0 0 #caa83d':''}"><span class="pr pr-${t.Priority}">${esc(t.Priority)}</span><span style="flex:1;font-size:12.5px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t['Request Name'])}</span>${staleBadge(t)}${dueBadge(t)}<span class="pill st-${t.Status}">${esc(t.Status)}</span><span style="font-size:11px;color:${mine?'#8a6d1f':'var(--muted)'};font-weight:${mine?'700':'400'};width:110px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${mine?'★ '+esc(t.Owner):esc(t.Owner||'chưa giao')}</span><span style="font-size:11px;font-weight:700;width:40px;text-align:right">${progressOf(t)}%</span></div>`;};
   // ---- Real projects ----
   const projHtml=projKeys.map(k=>{
     const arr=groups[k];const done=arr.filter(t=>t.Status==='Done').length;
@@ -1626,14 +1654,14 @@ function rScorecard(c,ta){
     <div style="display:flex;align-items:center;justify-content:space-between"><div class="lab">${lab}</div><span style="width:9px;height:9px;border-radius:50%;background:${ragColor(state)};flex-shrink:0"></span></div>
     <div class="num" style="color:${ragColor(state)}">${val}</div>
     <div class="note">${sub}</div>
-    <div style="font-size:10.5px;color:var(--muted);margin-top:5px;padding-top:6px;border-top:1px solid #f1f2f5">🎯 Mục tiêu: ${target}</div>
+    <div style="font-size:10.5px;color:var(--muted);margin-top:5px;padding-top:6px;border-top:1px solid #27314a">🎯 Mục tiêu: ${target}</div>
   </div>`;
   const allGreen=[otState,ovState,stState,waitState].every(s=>s==='g');
   const banner=`<div style="display:flex;align-items:center;gap:12px;background:${allGreen?'#e9f3ee':'#fbf6ec'};border:1px solid ${allGreen?'#cfe6da':'#f0e2c4'};border-radius:12px;padding:14px 17px;margin-bottom:16px">
     <span style="font-size:22px">${allGreen?'✅':'⚠️'}</span>
     <div style="font-size:13px;line-height:1.55;color:var(--ink2)">${allGreen?'<b>Mọi chỉ số điều phối đang đạt mục tiêu.</b> Giữ nhịp như hiện tại.':'<b>Có chỉ số cần chú ý.</b> Tập trung vào các ô màu vàng/đỏ bên dưới — chúng phản ánh trực tiếp chất lượng điều phối của bạn.'}</div>
   </div>`;
-  const lineT=t=>`<div data-open="${t._id}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 0;border-bottom:1px solid #f1f2f5">
+  const lineT=t=>`<div data-open="${t._id}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 0;border-bottom:1px solid #27314a">
     <span class="pr pr-${t.Priority}">${esc(t.Priority||'')}</span>
     <span style="flex:1;font-size:12.5px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t['Request Name'])}</span>
     <span style="font-size:11.5px;color:var(--muted)">${esc(t.Owner||'chưa giao')}</span>
@@ -1649,10 +1677,10 @@ function rScorecard(c,ta){
   </div>
   <div class="grid2">
     <div class="panel"><h3><span class="dot" style="background:var(--purple)"></span>Task lâu chưa cập nhật <span style="font-size:11.5px;color:var(--muted);font-weight:500">· cần nhắc người làm / Lead</span></h3>
-      ${stale.length?`<div>${stale.slice(0,8).map(t=>`<div data-open="${t._id}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 0;border-bottom:1px solid #f1f2f5"><span style="width:8px;height:8px;border-radius:50%;background:${STCOLOR[t.Status]||'#9aa3b8'};flex-shrink:0"></span><span style="flex:1;font-size:12.5px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t['Request Name'])}</span><span style="font-size:11.5px;color:var(--muted)">${esc(t.Owner||'chưa giao')}</span><span style="font-size:11px;font-weight:700;color:#6b5e9c;width:54px;text-align:right">${daysSinceUpdate(t)} ngày</span></div>`).join('')}${stale.length>8?`<div style="font-size:11.5px;color:var(--muted);padding-top:9px">+ ${stale.length-8} task khác…</div>`:''}</div>`:'<div style="color:var(--muted);font-size:12.5px">Mọi task đều được cập nhật gần đây. 🎉</div>'}
+      ${stale.length?`<div>${stale.slice(0,8).map(t=>`<div data-open="${t._id}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 0;border-bottom:1px solid #27314a"><span style="width:8px;height:8px;border-radius:50%;background:${STCOLOR[t.Status]||'#9aa3b8'};flex-shrink:0"></span><span style="flex:1;font-size:12.5px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t['Request Name'])}</span><span style="font-size:11.5px;color:var(--muted)">${esc(t.Owner||'chưa giao')}</span><span style="font-size:11px;font-weight:700;color:#6b5e9c;width:54px;text-align:right">${daysSinceUpdate(t)} ngày</span></div>`).join('')}${stale.length>8?`<div style="font-size:11.5px;color:var(--muted);padding-top:9px">+ ${stale.length-8} task khác…</div>`:''}</div>`:'<div style="color:var(--muted);font-size:12.5px">Mọi task đều được cập nhật gần đây. 🎉</div>'}
     </div>
     <div class="panel"><h3><span class="dot" style="background:var(--gold)"></span>Yêu cầu chờ giao lâu nhất <span style="font-size:11.5px;color:var(--muted);font-weight:500">· giao Lead sớm</span></h3>
-      ${oldestUn.length?`<div>${oldestUn.slice(0,8).map(t=>{const a=ageOf(t);return `<div data-open="${t._id}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 0;border-bottom:1px solid #f1f2f5"><span class="pr pr-${t.Priority}">${esc(t.Priority||'P3')}</span><span style="flex:1;font-size:12.5px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t['Request Name'])}</span><span class="bu-tag">${esc(t.BU||'—')}</span><span style="font-size:11px;font-weight:700;color:${a>MGR_TARGET.waitDays?'#b4524f':'var(--muted)'};width:54px;text-align:right">${a==null?'—':a+' ngày'}</span></div>`;}).join('')}${oldestUn.length>8?`<div style="font-size:11.5px;color:var(--muted);padding-top:9px">+ ${oldestUn.length-8} yêu cầu khác…</div>`:''}</div>`:'<div style="color:var(--muted);font-size:12.5px">Không có yêu cầu nào đang chờ giao. 🎉</div>'}
+      ${oldestUn.length?`<div>${oldestUn.slice(0,8).map(t=>{const a=ageOf(t);return `<div data-open="${t._id}" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 0;border-bottom:1px solid #27314a"><span class="pr pr-${t.Priority}">${esc(t.Priority||'P3')}</span><span style="flex:1;font-size:12.5px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t['Request Name'])}</span><span class="bu-tag">${esc(t.BU||'—')}</span><span style="font-size:11px;font-weight:700;color:${a>MGR_TARGET.waitDays?'#b4524f':'var(--muted)'};width:54px;text-align:right">${a==null?'—':a+' ngày'}</span></div>`;}).join('')}${oldestUn.length>8?`<div style="font-size:11.5px;color:var(--muted);padding-top:9px">+ ${oldestUn.length-8} yêu cầu khác…</div>`:''}</div>`:'<div style="color:var(--muted);font-size:12.5px">Không có yêu cầu nào đang chờ giao. 🎉</div>'}
     </div>
   </div>`;
   c.querySelectorAll('[data-open]').forEach(e=>e.addEventListener('click',()=>taskDetail(e.dataset.open)));
@@ -1754,7 +1782,7 @@ function rPerf(c,ta){
       <div style="width:30px;height:30px;border-radius:50%;background:${medal(i)};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0">${i+1}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.o)}${i===0?' <span style="font-size:11px;color:#caa83d;font-weight:700">★ dẫn đầu</span>':''}</div>
-        <div style="margin-top:7px;height:7px;background:#eef0f3;border-radius:5px;overflow:hidden;max-width:280px"><div style="height:100%;width:${r.score/maxScore*100}%;background:${i===0?'#caa83d':'#17191f'};border-radius:5px"></div></div>
+        <div style="margin-top:7px;height:7px;background:#222c44;border-radius:5px;overflow:hidden;max-width:280px"><div style="height:100%;width:${r.score/maxScore*100}%;background:${i===0?'#caa83d':'#17191f'};border-radius:5px"></div></div>
       </div>
       <div style="display:flex;align-items:center;gap:18px;flex-shrink:0">
         ${chip('việc xong',r.done)}
@@ -1783,7 +1811,7 @@ function rWorkload(c,ta){
   const rows=owners.map(o=>{const my=ts.filter(t=>t.Owner===o);const load=sumCredit(my);const cap=capOf(o);return {o,load,cap,n:my.length,pv:Math.round(load/cap*100)};}).sort((a,b)=>b.pv-a.pv);
   c.innerHTML=`<div class="panel"><h3><span class="dot" style="background:var(--navy)"></span>Capacity vs assigned workload <span style="font-size:11.5px;color:var(--muted);font-weight:500">· active tasks only · set capacity per person in “People”</span></h3>
     <div style="overflow-x:auto"><table><thead><tr><th>Person</th><th>Active tasks</th><th>Assigned credit</th><th>Capacity</th><th style="width:36%">Utilisation</th></tr></thead><tbody>
-    ${rows.map(r=>{const over=r.pv>100;const col=over?'#b4524f':(r.pv>85?'#b58a3a':'#3f8a63');return `<tr><td><b>${esc(r.o)}</b></td><td>${r.n}</td><td>${r.load}</td><td>${r.cap}</td><td><div style="display:flex;align-items:center;gap:9px"><div style="flex:1;height:9px;background:#eef0f3;border-radius:5px;overflow:hidden"><div style="height:100%;width:${Math.min(100,r.pv)}%;background:${col};border-radius:5px"></div></div><span style="font-size:12px;font-weight:700;color:${col};width:62px;text-align:right">${r.pv}%${over?' ⚠':''}</span></div></td></tr>`;}).join('')}
+    ${rows.map(r=>{const over=r.pv>100;const col=over?'#b4524f':(r.pv>85?'#b58a3a':'#3f8a63');return `<tr><td><b>${esc(r.o)}</b></td><td>${r.n}</td><td>${r.load}</td><td>${r.cap}</td><td><div style="display:flex;align-items:center;gap:9px"><div style="flex:1;height:9px;background:#222c44;border-radius:5px;overflow:hidden"><div style="height:100%;width:${Math.min(100,r.pv)}%;background:${col};border-radius:5px"></div></div><span style="font-size:12px;font-weight:700;color:${col};width:62px;text-align:right">${r.pv}%${over?' ⚠':''}</span></div></td></tr>`;}).join('')}
     </tbody></table></div></div>`;
 }
 
@@ -1821,7 +1849,7 @@ function rRequests(c,ta){
 }
 function reqCard(t){
   const note=t.Notes||t['Sub Function']||'';
-  return `<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 15px;display:flex;flex-direction:column;gap:9px">
+  return `<div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 15px;display:flex;flex-direction:column;gap:9px">
     <div style="display:flex;align-items:center;gap:7px"><span class="pr pr-${t.Priority}">${esc(t.Priority||'P3')}</span><span class="bu-tag">${esc(t.BU||'—')}</span><span style="margin-left:auto;font-size:11px;color:var(--muted)">${esc(t['Request Date']||'')}</span></div>
     <div style="font-size:14px;font-weight:600;line-height:1.4">${esc(t['Request Name']||'(không tên)')}</div>
     <div>${t.Confirmed?'<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#2f6d4d;background:#e6f0ea;padding:3px 9px;border-radius:6px">✓ Đã xác nhận hợp lệ</span>':'<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#8a6516;background:#f7efe0;padding:3px 9px;border-radius:6px">⏳ Chờ xác nhận hợp lệ</span>'}</div>
@@ -1917,7 +1945,7 @@ function rProgress(c,ta){
     const statusTxt=open.length===0?'Không có task đang mở':(r.freshest==null?'Chưa từng cập nhật':(r.freshest<=7?('✓ Cập nhật '+(r.freshest===0?'hôm nay':r.freshest+' ngày trước')):('⚠ '+r.freshest+' ngày chưa cập nhật')));
     const statusCol=fresh==='g'?'#3f8a63':'#b4524f';
     const stat=(l,v,col)=>`<div style="text-align:center"><div style="font-size:22px;font-weight:800;color:${col||'var(--ink)'};letter-spacing:-.5px">${v}</div><div style="font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:2px">${l}</div></div>`;
-    const line=t=>`<div onclick="taskDetail('${t._id}')" style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #f1f2f5;cursor:pointer">
+    const line=t=>`<div onclick="taskDetail('${t._id}')" style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #27314a;cursor:pointer">
         <span style="width:8px;height:8px;border-radius:50%;background:${STCOLOR[t.Status]||'#9aa3b8'};flex-shrink:0"></span>
         <span style="flex:1;font-size:12.5px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t['Request Name'])}</span>
         ${t.Health&&t.Health!=='On track'?healthPill(t.Health):''}
@@ -1925,7 +1953,7 @@ function rProgress(c,ta){
         <span style="font-size:11.5px;color:var(--muted);flex-shrink:0">${esc(t.Owner||'chưa giao')}</span>
         <span style="font-size:11px;font-weight:700;color:var(--ink2);width:34px;text-align:right;flex-shrink:0">${progressOf(t)}%</span>
       </div>`;
-    const lineU=t=>`<div onclick="taskDetail('${t._id}')" style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #f1f2f5;cursor:pointer">
+    const lineU=t=>`<div onclick="taskDetail('${t._id}')" style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #27314a;cursor:pointer">
         <span style="width:8px;height:8px;border-radius:50%;background:${STCOLOR[t.Status]||'#9aa3b8'};flex-shrink:0"></span>
         <span style="flex:1;font-size:12.5px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t['Request Name'])}</span>
         <span style="font-size:11.5px;color:var(--muted);flex-shrink:0">${esc(t.Owner||'chưa giao')}</span>
@@ -1954,7 +1982,7 @@ function rProgress(c,ta){
 
 /* ---- BACKLOG (task tồn đọng) ---- */
 function tkRow(t){
-  return `<div onclick="taskDetail('${t._id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;margin-bottom:7px">
+  return `<div onclick="taskDetail('${t._id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--card);cursor:pointer;margin-bottom:7px">
     <span style="width:9px;height:9px;border-radius:50%;background:${STCOLOR[t.Status]||'#9aa3b8'};flex-shrink:0"></span>
     <div style="flex:1;min-width:0">
       <div style="font-size:13px;font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t['Request Name'])}</div>
@@ -1988,7 +2016,7 @@ function rBacklog(c,ta){
       ${kpi('soon','Sắp tới hạn',soon.length,soon.length?'#b58a3a':'#3f8a63')}
       ${kpi('noOwner','Chưa giao',noOwner.length,noOwner.length?'#3b6ea5':'#3f8a63')}
     </div>
-    ${BKFILTER!=='all'?`<div style="display:flex;align-items:center;gap:10px;margin-bottom:13px"><span style="font-size:12px;color:var(--muted)">Đang lọc theo nhóm đã chọn.</span><button data-bk="all" style="font-size:12px;font-weight:600;border:1px solid var(--line);background:#fff;border-radius:7px;padding:5px 11px;cursor:pointer;font-family:inherit">✕ Xem tất cả</button></div>`:''}
+    ${BKFILTER!=='all'?`<div style="display:flex;align-items:center;gap:10px;margin-bottom:13px"><span style="font-size:12px;color:var(--muted)">Đang lọc theo nhóm đã chọn.</span><button data-bk="all" style="font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--card);border-radius:7px;padding:5px 11px;cursor:pointer;font-family:inherit">✕ Xem tất cả</button></div>`:''}
     ${sec('overdue','🔴 Quá hạn — xử lý ngay','#b4524f',overdue,'Không có việc quá hạn. 🎉')}
     ${sec('stale','⏳ Lâu chưa cập nhật (≥'+STALE_DAYS+' ngày)','#6b5e9c',staleArr,'Mọi việc đều được cập nhật gần đây.')}
     ${sec('soon','🟡 Sắp tới hạn (≤3 ngày)','#b58a3a',soon,'Không có việc sắp tới hạn.')}
@@ -2008,7 +2036,7 @@ function rSla(c,ta){
   const openOverdue=ts.filter(t=>!isClosed(t)&&dueState(t)==='overdue').sort((a,b)=>(a['Due Date']||'').localeCompare(b['Due Date']||''));
   const rate=doneDue.length?Math.round(onTime.length/doneDue.length*100):null;
   const rateCol=rate==null?'var(--muted)':(rate>=90?'#3f8a63':rate>=75?'#b58a3a':'#b4524f');
-  const kpi=(l,v,col,sub)=>`<div style="flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px"><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px">${l}</div><div style="font-size:32px;font-weight:800;letter-spacing:-1px;margin-top:5px;color:${col||'var(--ink)'}">${v}</div>${sub?`<div style="font-size:11.5px;color:var(--muted);margin-top:3px">${sub}</div>`:''}</div>`;
+  const kpi=(l,v,col,sub)=>`<div style="flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px"><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px">${l}</div><div style="font-size:32px;font-weight:800;letter-spacing:-1px;margin-top:5px;color:${col||'var(--ink)'}">${v}</div>${sub?`<div style="font-size:11.5px;color:var(--muted);margin-top:3px">${sub}</div>`:''}</div>`;
   // SLA theo Function
   const funcs=[...new Set(ts.map(t=>t.Function).filter(Boolean))];
   const fnRows=funcs.map(f=>{
@@ -2017,7 +2045,7 @@ function rSla(c,ta){
     const r=dd.length?Math.round(ot/dd.length*100):null;
     const col=r==null?'#9aa0ac':(r>=90?'#3f8a63':r>=75?'#b58a3a':'#b4524f');
     const ov=ts.filter(t=>t.Function===f&&!isClosed(t)&&dueState(t)==='overdue').length;
-    return `<tr><td><b>${esc(f)}</b></td><td>${dd.length}</td><td style="color:#b4524f;font-weight:600">${ov||''}</td><td><div style="display:flex;align-items:center;gap:9px"><div style="flex:1;height:8px;background:#eef0f3;border-radius:5px;overflow:hidden;min-width:80px"><div style="height:100%;width:${r==null?0:r}%;background:${col};border-radius:5px"></div></div><span style="font-size:12px;font-weight:700;color:${col};width:42px;text-align:right">${r==null?'—':r+'%'}</span></div></td></tr>`;
+    return `<tr><td><b>${esc(f)}</b></td><td>${dd.length}</td><td style="color:#b4524f;font-weight:600">${ov||''}</td><td><div style="display:flex;align-items:center;gap:9px"><div style="flex:1;height:8px;background:#222c44;border-radius:5px;overflow:hidden;min-width:80px"><div style="height:100%;width:${r==null?0:r}%;background:${col};border-radius:5px"></div></div><span style="font-size:12px;font-weight:700;color:${col};width:42px;text-align:right">${r==null?'—':r+'%'}</span></div></td></tr>`;
   }).join('');
   c.innerHTML=`<div style="display:flex;gap:13px;margin-bottom:16px">
       ${kpi('SLA đúng hạn',rate==null?'—':rate+'%',rateCol,onTime.length+'/'+doneDue.length+' task done đúng hạn')}
@@ -2181,7 +2209,7 @@ function rKanban(c,ta){
       return `<div class="kcol" data-st="${st}" style="width:265px;flex-shrink:0;background:#eef1f7;border-radius:13px;padding:10px">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 6px 10px">
           <span style="font-weight:700;font-size:13px;display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:${STCOLOR[st]||'#9aa3b8'}"></span>${st}</span>
-          <span style="background:#fff;border-radius:20px;font-size:11px;font-weight:700;padding:2px 9px;color:var(--muted)">${items.length}</span>
+          <span style="background:var(--card);border-radius:20px;font-size:11px;font-weight:700;padding:2px 9px;color:var(--muted)">${items.length}</span>
         </div>
         <div class="kdrop" data-st="${st}" style="min-height:60px">
           ${items.map(t=>{const dg=canDragTask(t);const mine=t.Owner===u.name||(t.subtasks||[]).some(s=>s.owner===u.name);return `<div class="kcard" draggable="${dg}" data-id="${t._id}" data-drag="${dg?1:0}" onclick="taskDetail('${t._id}')" style="background:${mine?'#fff8ec':'#fff'};border-radius:10px;padding:11px 12px;margin-bottom:9px;border:1px solid ${mine?'#e9cf94':'var(--line)'};${mine?'border-left:3px solid #caa83d;':''}cursor:${dg?'grab':'pointer'};${dg?'':'opacity:.82'}">
@@ -2222,17 +2250,17 @@ function wireDrag(canDragTask){
 
 /* ---- GUIDE & TRAINING (visual map) ---- */
 function rGuide(c){
-  const node=(n,ic,t,sub)=>`<div style="flex:1;min-width:130px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:14px 12px;text-align:center"><div style="width:30px;height:30px;border-radius:8px;background:var(--ink);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 9px">${n}</div><div style="font-size:19px;margin-bottom:5px">${ic}</div><div style="font-size:13px;font-weight:700">${t}</div><div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4">${sub}</div></div>`;
+  const node=(n,ic,t,sub)=>`<div style="flex:1;min-width:130px;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:14px 12px;text-align:center"><div style="width:30px;height:30px;border-radius:8px;background:var(--ink);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin:0 auto 9px">${n}</div><div style="font-size:19px;margin-bottom:5px">${ic}</div><div style="font-size:13px;font-weight:700">${t}</div><div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4">${sub}</div></div>`;
   const arrow=`<div style="display:flex;align-items:center;color:#c2c5cd;font-size:20px;flex:0 0 auto">→</div>`;
   const steps=[['1','📥','Tiếp nhận','Sheet · Excel · nhập tay'],['2','➤','Giao Lead','Function · Ưu tiên · Hạn'],['3','▤','Đang làm','Kanban · chia hạng mục'],['4','◉','Check-in','🟢 🟡 🔴 + cập nhật %'],['5','✓','QC','Đạt / Không · số lần sửa'],['6','★','Hoàn thành','đo đúng hạn'],['7','◉','Theo dõi','Scorecard · Tiến độ · Hiệu suất']];
   const flow=steps.map((s,i)=>node(s[0],s[1],s[2],s[3])+(i<steps.length-1?arrow:'')).join('');
-  const lane=(role,color,chips)=>`<div style="display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid #f1f2f5"><div style="width:210px;flex-shrink:0;display:flex;align-items:center;gap:9px"><span style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0"></span><b style="font-size:13px">${role}</b></div><div style="display:flex;flex-wrap:wrap;gap:7px">${chips.map(x=>`<span style="font-size:12px;font-weight:600;background:#f4f5f7;border:1px solid var(--line);border-radius:7px;padding:5px 10px">${x}</span>`).join('')}</div></div>`;
+  const lane=(role,color,chips)=>`<div style="display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid #27314a"><div style="width:210px;flex-shrink:0;display:flex;align-items:center;gap:9px"><span style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0"></span><b style="font-size:13px">${role}</b></div><div style="display:flex;flex-wrap:wrap;gap:7px">${chips.map(x=>`<span style="font-size:12px;font-weight:600;background:#0a0f1e;border:1px solid var(--line);border-radius:7px;padding:5px 10px">${x}</span>`).join('')}</div></div>`;
   const roles=lane('BOD / Head BU','#b4524f',['Gửi yêu cầu qua Google Form','(không cần tài khoản app)'])
     +lane('Marketing Work Mgmt','#6b5e9c',['Yêu cầu mới (Intake) → giao Lead','Manager Scorecard (KPI)','Tiến độ theo Lead','Backlog · SLA · Workload'])
     +lane('Function Lead','#3b6ea5',['Nhận task theo Function','Chia hạng mục & giao nhân viên','Check-in / cập nhật tiến độ đều'])
     +lane('Nhân viên','#3f8a63',['My Focus','Cập nhật % · Check-in','Bình luận'])
     +lane('Admin / IT','#17191f',['Tài khoản · Phân quyền','Nhân sự · Phòng ban','Đồng bộ Sheet']);
-  const vis=(role,color,scope)=>`<div style="display:flex;align-items:center;gap:13px;padding:12px 0;border-bottom:1px solid #f1f2f5"><div style="width:230px;flex-shrink:0;display:flex;align-items:center;gap:9px"><span style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0"></span><b style="font-size:13px">${role}</b></div><div style="color:#c2c5cd;font-size:18px;flex-shrink:0">→</div><span style="font-size:12.5px;font-weight:700;background:#f4f5f7;border:1px solid var(--line);border-radius:7px;padding:6px 12px">${scope}</span></div>`;
+  const vis=(role,color,scope)=>`<div style="display:flex;align-items:center;gap:13px;padding:12px 0;border-bottom:1px solid #27314a"><div style="width:230px;flex-shrink:0;display:flex;align-items:center;gap:9px"><span style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0"></span><b style="font-size:13px">${role}</b></div><div style="color:#c2c5cd;font-size:18px;flex-shrink:0">→</div><span style="font-size:12.5px;font-weight:700;background:#0a0f1e;border:1px solid var(--line);border-radius:7px;padding:6px 12px">${scope}</span></div>`;
   const visibility=vis('Marketing Work Mgmt','#6b5e9c','Toàn bộ task (mọi Function)')
     +vis('Function Lead','#3b6ea5','Chỉ task thuộc Function của mình')
     +vis('Nhân viên','#3f8a63','Chỉ task được giao cho mình');
@@ -2241,7 +2269,7 @@ function rGuide(c){
   const prLeg=CATS.Priority.map(p=>`<span class="pr pr-${p}">${p}</span>`).join('');
   const hLab={'On track':'Đúng tiến độ','Difficulty':'Gặp khó','Blocked':'Bị chặn'};
   const healthLeg=['On track','Difficulty','Blocked'].map(h=>`<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600"><span style="width:9px;height:9px;border-radius:50%;background:${HEALTH[h]}"></span>${hLab[h]}</span>`).join('');
-  const creditLeg=['X = 0.5','S = 1','M = 3','L = 8'].map(x=>`<span style="font-size:12px;font-weight:600;background:#f4f5f7;border:1px solid var(--line);border-radius:7px;padding:4px 9px">${x}</span>`).join('');
+  const creditLeg=['X = 0.5','S = 1','M = 3','L = 8'].map(x=>`<span style="font-size:12px;font-weight:600;background:#0a0f1e;border:1px solid var(--line);border-radius:7px;padding:4px 9px">${x}</span>`).join('');
   c.innerHTML=`
   <div class="panel" style="margin-bottom:16px"><h3><span class="dot" style="background:var(--ink)"></span>Vòng đời công việc</h3>
     <div style="display:flex;align-items:stretch;gap:8px;flex-wrap:wrap">${flow}</div></div>
@@ -2256,7 +2284,7 @@ function rGuide(c){
       ['Ai làm nhiều / hiệu quả','Hiệu suất & Báo cáo','Xếp hạng theo kỳ + bảng theo người / BU / ưu tiên · xuất Excel'],
       ['Toàn cảnh & bàn giao BOD','Executive Summary','Đã hoàn thành, on-time, QC, satisfaction, top contributors'],
       ['Ai đang quá tải','Workload','Capacity vs khối lượng được giao mỗi người'],
-    ].map(r=>`<div style="display:flex;align-items:flex-start;gap:13px;padding:11px 0;border-bottom:1px solid #f1f2f5"><span style="width:230px;flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--ink2)">${r[0]}</span><span style="font-size:12.5px;font-weight:700;background:#f4f5f7;border:1px solid var(--line);border-radius:7px;padding:5px 11px;white-space:nowrap;flex-shrink:0;align-self:flex-start">${r[1]}</span><span style="font-size:12px;color:var(--muted);line-height:1.5">${r[2]}</span></div>`).join('')}
+    ].map(r=>`<div style="display:flex;align-items:flex-start;gap:13px;padding:11px 0;border-bottom:1px solid #27314a"><span style="width:230px;flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--ink2)">${r[0]}</span><span style="font-size:12.5px;font-weight:700;background:#0a0f1e;border:1px solid var(--line);border-radius:7px;padding:5px 11px;white-space:nowrap;flex-shrink:0;align-self:flex-start">${r[1]}</span><span style="font-size:12px;color:var(--muted);line-height:1.5">${r[2]}</span></div>`).join('')}
   </div>
   <div class="panel" style="margin-bottom:16px"><h3><span class="dot" style="background:var(--blue)"></span>Cờ ⏳ "Chưa cập nhật"</h3><div style="font-size:12.5px;color:#56617e;line-height:1.7">Mỗi task đang mở mà <b>${STALE_DAYS} ngày</b> không có động thái (check-in, đổi %, bình luận, đổi trạng thái) sẽ tự gắn cờ <span style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;background:#ece7f3;color:#6b5e9c">⏳ CHƯA UPDATE</span>. Cờ hiện ở <b>Backlog</b>, <b>Tiến độ theo Lead</b>, <b>Marketing Tasks (theo dự án)</b> và <b>Manager Scorecard</b> — để bạn biết nhắc ai cập nhật.</div></div>
   <div class="panel"><h3><span class="dot" style="background:var(--gold)"></span>Chú thích</h3>${leg('Trạng thái',statusLeg)}${leg('Ưu tiên',prLeg)}${leg('Tình trạng',healthLeg)}${leg('Credit',creditLeg)}</div>`;
