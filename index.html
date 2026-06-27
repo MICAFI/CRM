@@ -242,6 +242,27 @@
   .lf-farrow{display:flex;justify-content:space-between;padding:6px 16px;font-size:10.5px;color:var(--muted);font-weight:600}
   .lf-fsteps{margin-top:9px;font-size:11px;color:var(--ink2);text-align:center;line-height:1.6}
   @media(max-width:860px){.login-hero{display:none}}
+  .topbar{display:flex;align-items:center;gap:16px;margin:-28px -32px 22px;padding:11px 32px;border-bottom:1px solid var(--line);background:var(--card)}
+  .tb-search{flex:1;max-width:520px;display:flex;align-items:center;gap:9px;background:var(--input-bg);border:1px solid var(--line);border-radius:10px;padding:9px 13px}
+  .tb-search input{flex:1;border:none;background:transparent;color:var(--ink);font-size:13px;outline:none;font-family:inherit}
+  .tb-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .tb-ic{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;font-weight:700}
+  .tb-ic:hover{color:var(--ink);background:var(--hover)}
+  .tb-user{position:relative;display:flex;align-items:center;gap:10px;padding:5px 8px;border-radius:10px;cursor:pointer}
+  .tb-user:hover{background:var(--hover)}
+  .tb-av{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+  .tb-uinfo b{font-size:13px;display:block;line-height:1.15;color:var(--ink)}
+  .tb-uinfo span{font-size:11px;color:var(--muted)}
+  .tb-chev{color:var(--muted);font-size:11px}
+  .tb-menu{display:none;position:absolute;top:50px;right:0;width:236px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 46px rgba(0,0,0,.42);padding:7px;z-index:60}
+  .tb-menu.show{display:block}
+  .tb-mhead{padding:10px 11px 12px;border-bottom:1px solid var(--line);margin-bottom:6px}
+  .tb-mhead b{font-size:13px;display:block;color:var(--ink)}.tb-mhead span{font-size:11.5px;color:var(--muted)}
+  .tb-menu a{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;font-size:13px;color:var(--ink);cursor:pointer;text-decoration:none}
+  .tb-menu a:hover{background:var(--hover)}
+  .tb-menu a.danger{color:var(--red)}
+  @media(max-width:980px){.topbar{margin:-18px -18px 16px;padding:10px 18px}}
+  @media(max-width:760px){.tb-uinfo,.tb-chev{display:none}}
 </style>
 </head>
 <body>
@@ -300,6 +321,22 @@
       </div>
     </aside>
     <main class="main">
+      <div class="topbar">
+        <div class="tb-search"><span style="color:var(--muted)">🔍</span><input id="tbSearch" placeholder="Tìm task, BU, người dùng…"></div>
+        <div class="tb-right">
+          <div class="tb-ic" id="tbHelp" title="Hướng dẫn">?</div>
+          <div class="tb-user" id="tbUser">
+            <div class="tb-av" id="tbAv">A</div>
+            <div class="tb-uinfo"><b id="tbName">Admin</b><span id="tbRole">Administrator</span></div>
+            <span class="tb-chev">▾</span>
+            <div class="tb-menu" id="tbMenu">
+              <div class="tb-mhead"><b id="tbName2">Admin</b><span id="tbEmail"></span></div>
+              <a id="tbAccount">⚙ Tài khoản</a>
+              <a id="tbLogout" class="danger">⎋ Đăng xuất</a>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="top">
         <div><h1 id="vtitle">Overview</h1><div class="sub" id="vsub"></div></div>
         <div style="display:flex;align-items:center;gap:9px">
@@ -644,6 +681,7 @@ function openApp(){
   document.getElementById('meName').textContent=u.name;
   document.getElementById('meRole').textContent=roleLabel(u.role)+(u.func?(' · '+u.func):'');
   document.getElementById('meAv').textContent=u.name[0].toUpperCase();
+  (function(){var av=document.getElementById('tbAv'),nm=document.getElementById('tbName'),rl=document.getElementById('tbRole'),n2=document.getElementById('tbName2'),em=document.getElementById('tbEmail');if(nm){nm.textContent=u.name;n2.textContent=u.name;rl.textContent=roleLabel(u.role);av.textContent=u.name[0].toUpperCase();em.textContent=u.username||'';}var tu=document.getElementById('tbUser'),tm=document.getElementById('tbMenu');if(tu&&!tu._w){tu._w=1;tu.addEventListener('click',function(e){e.stopPropagation();tm.classList.toggle('show');});document.addEventListener('click',function(){tm.classList.remove('show');});var ac=document.getElementById('tbAccount');if(ac)ac.addEventListener('click',function(){VIEW='account';buildMenu();render();tm.classList.remove('show');});var lo=document.getElementById('tbLogout');if(lo)lo.addEventListener('click',function(){DB.session=null;try{localStorage.setItem(SESS_KEY,'');}catch(e){}location.reload();});var hp=document.getElementById('tbHelp');if(hp)hp.addEventListener('click',function(){VIEW='guide';buildMenu();render();});var s=document.getElementById('tbSearch');if(s)s.addEventListener('keydown',function(e){if(e.key==='Enter'){F.q=s.value.trim();VIEW='tasks';TASKVIEW='list';buildMenu();render();}});}})();
   if(!NAV.find(n=>n.v===VIEW&&n.roles.includes(u.role)))VIEW='dash';
   buildMenu();render();
   startAutoSync();
