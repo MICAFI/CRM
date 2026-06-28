@@ -332,6 +332,7 @@
       <div class="topbar">
         <div class="tb-search"><span style="color:var(--muted)">🔍</span><input id="tbSearch" placeholder="Tìm task, BU, người dùng…"></div>
         <div class="tb-right">
+          <div class="tb-ic" id="tbBell" title="Yêu cầu mới" style="position:relative">🔔<span id="tbBellBadge" style="position:absolute;top:-5px;right:-5px;background:var(--red);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 3px">0</span></div>
           <div class="tb-ic" id="tbHelp" title="Hướng dẫn">?</div>
           <div class="tb-user" id="tbUser">
             <div class="tb-av" id="tbAv">A</div>
@@ -674,6 +675,8 @@ function buildMenu(){
 
 /* ============ APP OPEN ============ */
 let VIEW='dash';
+function updateReqBell(){var b=document.getElementById('tbBellBadge');if(!b)return;var u=me();var n=(u&&['admin','manager'].indexOf(u.role)>=0)?DB.tasks.filter(function(t){return !isClosed(t)&&!t.Owner;}).length:0;if(n>0){b.textContent=n;b.style.display='flex';}else{b.style.display='none';}}
+function appToast(msg){var el=document.getElementById('appToast');if(el)el.remove();el=document.createElement('div');el.id='appToast';el.style.cssText='position:fixed;top:18px;right:18px;z-index:200;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:11px;padding:13px 16px;font-size:13px;color:var(--ink);box-shadow:0 12px 36px rgba(0,0,0,.28);max-width:340px;cursor:pointer;line-height:1.5';el.textContent=msg;el.onclick=function(){VIEW='requests';buildMenu();render();el.remove();};document.body.appendChild(el);setTimeout(function(){if(el&&el.parentNode)el.remove();},9000);}
 function openApp(){
   document.getElementById('login').style.display='none';
   const _me=me();
@@ -689,7 +692,7 @@ function openApp(){
   document.getElementById('meName').textContent=u.name;
   document.getElementById('meRole').textContent=roleLabel(u.role)+(u.func?(' · '+u.func):'');
   document.getElementById('meAv').textContent=u.name[0].toUpperCase();
-  (function(){var av=document.getElementById('tbAv'),nm=document.getElementById('tbName'),rl=document.getElementById('tbRole'),n2=document.getElementById('tbName2'),em=document.getElementById('tbEmail');if(nm){nm.textContent=u.name;n2.textContent=u.name;rl.textContent=roleLabel(u.role);av.textContent=u.name[0].toUpperCase();em.textContent=u.username||'';}var tu=document.getElementById('tbUser'),tm=document.getElementById('tbMenu');if(tu&&!tu._w){tu._w=1;tu.addEventListener('click',function(e){e.stopPropagation();tm.classList.toggle('show');});document.addEventListener('click',function(){tm.classList.remove('show');});var ac=document.getElementById('tbAccount');if(ac)ac.addEventListener('click',function(){VIEW='account';buildMenu();render();tm.classList.remove('show');});var lo=document.getElementById('tbLogout');if(lo)lo.addEventListener('click',function(){DB.session=null;try{localStorage.setItem(SESS_KEY,'');}catch(e){}location.reload();});var hp=document.getElementById('tbHelp');if(hp)hp.addEventListener('click',function(){VIEW='guide';buildMenu();render();});var s=document.getElementById('tbSearch');if(s)s.addEventListener('keydown',function(e){if(e.key==='Enter'){F.q=s.value.trim();VIEW='tasks';TASKVIEW='list';buildMenu();render();}});}})();
+  (function(){var av=document.getElementById('tbAv'),nm=document.getElementById('tbName'),rl=document.getElementById('tbRole'),n2=document.getElementById('tbName2'),em=document.getElementById('tbEmail');if(nm){nm.textContent=u.name;n2.textContent=u.name;rl.textContent=roleLabel(u.role);av.textContent=u.name[0].toUpperCase();em.textContent=u.username||'';}var tu=document.getElementById('tbUser'),tm=document.getElementById('tbMenu');if(tu&&!tu._w){tu._w=1;tu.addEventListener('click',function(e){e.stopPropagation();tm.classList.toggle('show');});document.addEventListener('click',function(){tm.classList.remove('show');});var ac=document.getElementById('tbAccount');if(ac)ac.addEventListener('click',function(){VIEW='account';buildMenu();render();tm.classList.remove('show');});var lo=document.getElementById('tbLogout');if(lo)lo.addEventListener('click',function(){DB.session=null;try{localStorage.setItem(SESS_KEY,'');}catch(e){}location.reload();});var hp=document.getElementById('tbHelp');if(hp)hp.addEventListener('click',function(){VIEW='guide';buildMenu();render();});var s=document.getElementById('tbSearch');if(s)s.addEventListener('keydown',function(e){if(e.key==='Enter'){F.q=s.value.trim();VIEW='tasks';TASKVIEW='list';buildMenu();render();}});}var _bl=document.getElementById('tbBell');if(_bl&&!_bl._w){_bl._w=1;_bl.addEventListener('click',function(){VIEW='requests';buildMenu();render();});}updateReqBell();var _u=me();if(_u&&['admin','manager'].indexOf(_u.role)>=0){var _nr=DB.tasks.filter(function(t){return !isClosed(t)&&!t.Owner;});if(_nr.length){var _bus=Array.from(new Set(_nr.map(function(t){return t.BU;}).filter(Boolean))).slice(0,3).join(', ');appToast('🔔 Có '+_nr.length+' yêu cầu mới'+(_bus?(' từ: '+_bus):'')+'. Bấm chuông 🔔 để xem.');}}})();
   if(!NAV.find(n=>n.v===VIEW&&n.roles.includes(u.role)))VIEW='dash';
   buildMenu();render();
   startAutoSync();
@@ -786,7 +789,7 @@ function render(){
   else if(VIEW==='agents')rAgents(c,ta);
   else if(VIEW==='account')rAccount(c,ta);
   else if(VIEW==='guide')rGuide(c);
-  buTips();
+  buTips();updateReqBell();
 }
 
 /* ---- GLOBAL DATE FILTER BAR ---- */
@@ -1076,7 +1079,7 @@ window.taskModal=(id,presetType)=>{
       <div class="fld"><label>Mã (Request ID)</label><input id="t_id" value="${esc(t['Request ID']||autoId())}"></div>
       <div class="fld"><label>BU *</label><select id="t_bu">${opt(CATS.BU,t.BU)}</select></div>
       <div class="fld full"><label>Dự án / Campaign</label><input id="t_proj" value="${esc(t['Project/Campaign']||'')}"></div>
-      <div class="fld full"><label>Mô tả / Ghi chú</label><textarea id="t_note" rows="2">${esc(t.Notes||'')}</textarea></div><div class="fld full"><label>📤 Nội dung giao cho BU <span style="color:var(--muted);font-weight:400">(BU sẽ xem được)</span></label><textarea id="t_deliv" rows="4" placeholder="Dán/nhập content thành phẩm để giao cho BU…">${esc(t.Deliverable||'')}</textarea></div><div class="fld full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600"><input type="checkbox" id="t_delivered" ${t.Delivered?'checked':''} style="width:18px;height:18px;flex:none"> ✓ Hiển thị nội dung này cho BU (ở Cổng BU)</label></div>${t.Attachment?`<div class="fld full"><label>Ảnh / Tài liệu đính kèm</label><a href="${esc(t.Attachment)}" target="_blank" rel="noopener" title="Bấm để mở/tải">${(t.Attachment.slice(0,10)==='data:image'||/\.(png|jpe?g|webp|gif)(\?|$)/i.test(t.Attachment))?`<img src="${esc(t.Attachment)}" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid var(--line);display:block">`:'📎 Mở tài liệu đính kèm →'}</a></div>`:''}`)}
+      <div class="fld full"><label>Mô tả / Ghi chú</label><textarea id="t_note" rows="2">${esc(t.Notes||'')}</textarea></div><div class="fld full"><label>📤 Nội dung giao cho BU <span style="color:var(--muted);font-weight:400">(BU sẽ xem được)</span></label><textarea id="t_deliv" rows="4" placeholder="Dán/nhập content thành phẩm để giao cho BU…">${esc(t.Deliverable||'')}</textarea></div><div class="fld full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600"><input type="checkbox" id="t_delivered" ${t.Delivered?'checked':''} style="width:18px;height:18px;flex:none"> ✓ Hiển thị nội dung này cho BU (ở Cổng BU)</label></div><div class="fld full"><label>💬 Phản hồi cho BU <span style="color:var(--muted);font-weight:400">(BU xem ở "tiến trình" — vd lý do điều chỉnh credit)</span></label><textarea id="t_mktnote" rows="2">${esc(t.MktNote||'')}</textarea></div>${t.Attachment?`<div class="fld full"><label>Ảnh / Tài liệu đính kèm</label><a href="${esc(t.Attachment)}" target="_blank" rel="noopener" title="Bấm để mở/tải">${(t.Attachment.slice(0,10)==='data:image'||/\.(png|jpe?g|webp|gif)(\?|$)/i.test(t.Attachment))?`<img src="${esc(t.Attachment)}" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid var(--line);display:block">`:'📎 Mở tài liệu đính kèm →'}</a></div>`:''}`)}
     ${sec('Giao việc & kế hoạch','',`
       <div class="fld"><label>Function</label><select id="t_fn">${opt(CATS.Function,t.Function)}</select></div>
       <div class="fld"><label>Sub Function</label><select id="t_sub">${opt(CATS.SubFunction,t['Sub Function'])}</select></div>
@@ -1118,7 +1121,7 @@ window.saveTask=id=>{
   if(!g('t_own')){alert('Hãy chọn người nhận việc (Lead hoặc nhân viên)');return;}
   const prev=id?DB.tasks.find(t=>t._id===id):null;
   const o=Object.assign({},prev||{},{_id:id||uid(),'Request ID':g('t_id'),'Request Date':(prev&&prev['Request Date'])||today(),BU:g('t_bu'),'Project/Campaign':g('t_proj'),'Request Name':g('t_name'),Function:g('t_fn'),'Sub Function':g('t_sub'),Requestor:(prev&&prev.Requestor)||me().name,Source:g('t_src'),Priority:g('t_pr'),Owner:g('t_own'),Status:g('t_st'),'Due Date':g('t_due'),Complexity:g('t_cx'),'Capacity Level':g('t_cap'),CreditOverride:g('t_credit'),Progress:g('t_prog'),QC:g('t_qc'),Revisions:g('t_rev'),Satisfaction:g('t_sat'),Notes:g('t_note'),Type:g('t_type'),Cadence:g('t_cad'),Quota:g('t_quota')});
-  o.comments=o.comments||[];o.history=o.history||[];var _dv=document.getElementById('t_deliv');if(_dv)o.Deliverable=_dv.value.trim();var _dd=document.getElementById('t_delivered');o.Delivered=_dd?_dd.checked:(prev&&prev.Delivered||false);
+  o.comments=o.comments||[];o.history=o.history||[];var _dv=document.getElementById('t_deliv');if(_dv)o.Deliverable=_dv.value.trim();var _dd=document.getElementById('t_delivered');o.Delivered=_dd?_dd.checked:(prev&&prev.Delivered||false);var _mn=document.getElementById('t_mktnote');if(_mn)o.MktNote=_mn.value.trim();
   o.subtasks=MSUBS.map(s=>({...s}));
   if(o.Status==='Done'&&!o['Close Date'])o['Close Date']=today();
   if(o.Status!=='Done')o['Close Date']='';
@@ -1212,6 +1215,16 @@ function buSubmitForm(w){
     </div>
   </div>`;
 }
+window.buShowTimeline=function(id){
+  var t=DB.tasks.find(function(x){return x._id===id;}); if(!t)return;
+  var o=document.getElementById('buTLov'); if(o)o.remove();
+  var hist=(t.history||[]).slice().reverse();
+  var rows=hist.map(function(h){return '<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)"><span style="color:var(--muted);font-size:11px;white-space:nowrap;min-width:128px">'+esc(h.at||'')+'</span><span style="font-size:12.5px">'+esc(h.text||'')+'</span></div>';}).join('')||'<div style="color:var(--muted);font-size:12.5px">Chưa có cập nhật.</div>';
+  var cancel=(t.Status==='Cancelled'&&t['Cancel Reason'])?'<div style="background:#fbeeed;border:1px solid #f0d4d2;border-radius:9px;padding:10px 13px;margin-bottom:12px"><b style="color:#b4524f;font-size:12px">⊘ MKT đã bỏ qua — lý do:</b><div style="font-size:13px;color:#8a4340;margin-top:3px;white-space:pre-wrap">'+esc(t['Cancel Reason'])+'</div></div>':'';
+  var mkt=t.MktNote?'<div style="background:#eef3f9;border:1px solid #d6e2ef;border-radius:9px;padding:10px 13px;margin-bottom:12px"><b style="color:#345e8a;font-size:12px">💬 MKT phản hồi:</b><div style="font-size:13px;color:#2c4a6b;margin-top:3px;white-space:pre-wrap">'+esc(t.MktNote)+'</div></div>':'';
+  var html='<div id="buTLov" style="position:fixed;inset:0;background:rgba(20,10,30,.5);z-index:90;display:flex;align-items:flex-start;justify-content:center;padding:50px 16px;overflow:auto" onclick="if(event.target===this)this.remove()"><div style="background:var(--card);border:1px solid var(--line);border-radius:14px;max-width:560px;width:100%;padding:22px 24px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><b style="font-size:16px">Tiến trình yêu cầu</b><span onclick="this.closest(\'#buTLov\').remove()" style="cursor:pointer;font-size:20px;color:var(--muted)">✕</span></div><div style="font-weight:700;font-size:14px;margin-bottom:8px">'+esc(t['Request Name']||'')+'</div><div style="margin-bottom:13px"><span style="font-size:12px;color:var(--muted)">Trạng thái: </span>'+buStatusPill(t.Status)+'</div>'+mkt+cancel+'<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px">Lịch sử cập nhật</div>'+rows+'</div></div>';
+  document.body.insertAdjacentHTML('beforeend',html);
+};
 function buDeliveredSection(mine){
   var dv=(mine||[]).filter(function(t){return t.Delivered&&t.Deliverable;});
   if(!dv.length)return '';
@@ -1230,7 +1243,7 @@ function buMyList(mine){
   const rows=mine.slice().sort((a,b)=>(b['Request Date']||'').localeCompare(a['Request Date']||'')).map(t=>{
     const ag=t.agent?` <span title="Agent" style="font-size:10px;font-weight:700;color:#574a82;background:#edeaf3;padding:1px 6px;border-radius:4px">⚡ ${esc(t.agent.status)}${t.agent.outputUrl?' ✓':''}</span>`:'';
     return `<tr>
-      <td style="padding:11px 14px;border-bottom:1px solid var(--line);font-weight:600">${esc(t['Request Name'])}${ag}<div style="font-size:11px;color:#9aa0ac;font-weight:500;margin-top:2px">${esc(t['Request ID'])} · ${esc(t.Function||'—')}</div></td>
+      <td style="padding:11px 14px;border-bottom:1px solid var(--line);font-weight:600">${esc(t['Request Name'])}${ag} <span onclick="buShowTimeline('${t._id}')" title="Xem tiến trình & phản hồi MKT" style="cursor:pointer;font-size:11px;color:var(--accent);font-weight:600">📋 tiến trình</span><div style="font-size:11px;color:#9aa0ac;font-weight:500;margin-top:2px">${esc(t['Request ID'])} · ${esc(t.Function||'—')}</div></td>
       <td style="padding:11px 14px;border-bottom:1px solid var(--line);color:#6b7080;white-space:nowrap">${cxKey(t)} · ${CAP_LABEL[capKey(t)]}</td>
       <td style="padding:11px 14px;border-bottom:1px solid var(--line);font-weight:700;color:#46506b">${creditOf(t)}</td>
       <td style="padding:11px 14px;border-bottom:1px solid var(--line)">${buStatusPill(t.Status)}</td>
