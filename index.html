@@ -1335,7 +1335,7 @@ function showContentModal(t,text,loading){
 }
 window.aiWriteContent=async function(id){
   var t=DB.tasks.find(function(x){return x._id===id;}); if(!t)return;
-  var a=DB.agents||{}; var url=((a.content||a.webhook||'')+'').trim();
+  var a=DB.agents||{}; var url=((a.content||a.webhook||'https://hook.us2.make.com/sivw06ded7skk1n4ugv3ymmteo27cdmm')+'').trim();
   if(!url){ alert('Chưa cấu hình endpoint Copy Agent.\nVào AI Agent Control Center → dán webhook Make vào ô Copy Agent → Lưu, rồi thử lại.'); return; }
   showContentModal(t,'⏳ Đang gọi AI viết content… (chờ vài giây)',true);
   try{
