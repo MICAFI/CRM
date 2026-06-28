@@ -27,12 +27,12 @@
     --green:#2f8a5b;--blue:#3b6ea5;--purple:#6b5e9c;--red:#d24a44;
   }
   :root[data-theme="violet"]{
-    --bg:#0e0b1a;--card:#17132b;--card2:#1d1838;--line:#2c2548;--track:#241d40;
-    --ink:#ece9f7;--ink2:#b3aacb;--muted:#857ba8;
-    --accent:#8b5cf6;--accent-2:#7344e0;--accent-soft:#c4b5fd;
-    --side-bg:#140f28;--input-bg:#140f28;--hover:rgba(255,255,255,.045);
-    --navy:#140f28;--navy2:#1d1838;--navy3:#241d40;--gold:#8b5cf6;
-    --green:#4ad6a8;--blue:#7c8cff;--purple:#c4b5fd;--red:#f0716a;
+    --bg:#120821;--card:#1c1033;--card2:#241640;--line:#382559;--track:#2a1a48;
+    --ink:#f1eafb;--ink2:#bcabd9;--muted:#897aa8;
+    --accent:#a855f7;--accent-2:#8b2fe0;--accent-soft:#d8b4fe;
+    --side-bg:#0c0518;--input-bg:#190f2d;--hover:rgba(255,255,255,.05);
+    --navy:#0c0518;--navy2:#1c1033;--navy3:#241640;--gold:#a855f7;
+    --green:#4ad6a8;--blue:#7c8cff;--purple:#d8b4fe;--red:#f0716a;
   }
   :root[data-theme="coral"]{
     --bg:#0f141c;--card:#19212e;--card2:#1e2735;--line:#2a3340;--track:#232d3b;
@@ -193,7 +193,7 @@
   .theme-row span[data-th]:hover{transform:scale(1.12)}
   .theme-row span[data-th].on{border-color:#fff}
   /* ===== LOGIN 2-PANEL ===== */
-  #login{position:fixed;inset:0;display:flex;background:var(--bg);z-index:100}
+  #login{position:fixed;inset:0;display:flex;flex-direction:row-reverse;background:var(--bg);z-index:100}
   .login-hero{flex:1.2;background:var(--side-bg);color:#e9ecf5;padding:56px 60px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow-y:auto}
   .login-hero .lh-brand{display:flex;align-items:center;gap:13px;margin-bottom:50px}
   .lh-logo{width:46px;height:46px;border-radius:11px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:16px}
@@ -320,7 +320,7 @@
     <aside class="sidebar">
       <div class="brand"><div class="logo">FM</div><div><b>FADO MKT</b><span>WORK MANAGEMENT</span></div></div>
       <nav class="menu" id="menu"></nav>
-      <div class="theme-row" id="themePick"><span class="tl">THEME</span><span data-th="navy" title="Indigo" style="background:#6366f1"></span><span data-th="white" title="Trắng" style="background:var(--track)"></span><span data-th="violet" title="Tím" style="background:#8b5cf6"></span><span data-th="coral" title="Coral" style="background:#e0564f"></span><span data-th="ember" title="Ember (n8n)" style="background:#ff6d5a"></span></div>
+      <div class="theme-row" id="themePick"><span class="tl">THEME</span><span data-th="navy" title="Indigo" style="background:#6366f1"></span><span data-th="white" title="Trắng" style="background:var(--track)"></span><span data-th="violet" title="Make (tím đậm)" style="background:#a855f7"></span><span data-th="coral" title="Coral" style="background:#e0564f"></span><span data-th="ember" title="Ember (n8n)" style="background:#ff6d5a"></span></div>
       <div class="side-foot">
         <div class="av" id="meAv">A</div>
         <div><b id="meName">Admin</b><span id="meRole">Administrator</span></div>
@@ -2771,7 +2771,7 @@ window.mClose=()=>document.getElementById('modal').classList.remove('show');
 document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')mClose();};
 
 /* ============ INIT ============ */
-function applyTheme(t){try{if(!localStorage.getItem('fado_theme_v3')){localStorage.setItem('fado_theme','coral');localStorage.setItem('fado_theme_v3','1');}}catch(e){}t=t||localStorage.getItem('fado_theme')||'coral';document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('fado_theme',t);}catch(e){}var p=document.getElementById('themePick');if(p)p.querySelectorAll('span[data-th]').forEach(function(s){s.classList.toggle('on',s.dataset.th===t);});}
+function applyTheme(t){try{if(!localStorage.getItem('fado_theme_v4')){localStorage.setItem('fado_theme','violet');localStorage.setItem('fado_theme_v4','1');}}catch(e){}t=t||localStorage.getItem('fado_theme')||'violet';document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('fado_theme',t);}catch(e){}var p=document.getElementById('themePick');if(p)p.querySelectorAll('span[data-th]').forEach(function(s){s.classList.toggle('on',s.dataset.th===t);});}
 window.setTheme=applyTheme;
 document.addEventListener('click',function(e){var s=e.target&&e.target.closest?e.target.closest('#themePick span[data-th]'):null;if(s)applyTheme(s.dataset.th);});
 function renderLoginStats(){try{var ts=DB.tasks||[];var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};set('st_total',ts.length);set('st_wip',ts.filter(function(t){return t.Status==='WIP';}).length);set('st_queue',ts.filter(function(t){return t.Status==='Open';}).length);var bus=new Set(ts.map(function(t){return t.BU;}).filter(Boolean)).size;set('st_bu',bus||(CATS.BU?CATS.BU.length:0));renderLoginChart();}catch(e){}}
