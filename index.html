@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
 <style>
 :root,:root[data-theme="navy"]{
     --bg:#0a0c1a;--card:#13162b;--card2:#1a1e38;--line:#262a4d;--track:#20264a;
@@ -78,10 +79,10 @@
   .brand span{font-size:10px;color:#7f8493;letter-spacing:1.5px;font-weight:600}
   .menu{padding:16px 12px;flex:1;overflow-y:auto}
   .menu .lbl{font-size:10px;color:#6b7080;letter-spacing:1.8px;padding:14px 12px 8px;font-weight:700}
-  .menu a{display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:8px;color:#b7bac4;text-decoration:none;font-size:13.5px;font-weight:500;margin-bottom:2px;cursor:pointer;transition:.12s;border-left:2px solid transparent}
+  .menu a{display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:8px;color:#cdcbd7;text-decoration:none;font-size:13.5px;font-weight:500;margin-bottom:2px;cursor:pointer;transition:.12s;border-left:2px solid transparent}
   .menu a:hover{background:rgba(255,255,255,.06);color:#fff}
   .menu a.active{background:rgba(255,255,255,.09);color:#fff;border-left-color:var(--accent);font-weight:600}
-  .menu a .ic{width:18px;text-align:center;font-size:14px}
+  .menu a .ic{width:20px;text-align:center;font-size:17px;display:inline-flex;align-items:center;justify-content:center}
   .side-foot{padding:15px 16px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:11px}
   .side-foot .av{width:34px;height:34px;border-radius:8px;background:#2b2f38;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
   .side-foot b{color:#fff;font-size:12.5px;display:block}
@@ -654,26 +655,26 @@ function me(){return DB.users.find(u=>u.id===DB.session);}
 
 /* ============ ROLE-BASED MENU ============ */
 const NAV=[
-  {v:'dash',ic:'▦',t:'Overview',sec:'WORK',roles:['admin','manager','lead','staff']},
-  {v:'focus',ic:'◉',t:'My Focus',sec:'WORK',roles:['staff']},
-  {v:'kanban',ic:'▤',t:'Kanban Board',sec:'WORK',roles:['admin','manager','lead','staff']},
-  {v:'tasks',ic:'☷',t:'Marketing Tasks',sec:'WORK',roles:['admin','manager','lead','staff']},
-  {v:'recur',ic:'↻',t:'Công việc định kỳ',sec:'WORK',roles:['admin','manager','lead','staff']},
-  {v:'backlog',ic:'⊟',t:'Backlog',sec:'WORK',roles:['admin','manager']},
-  {v:'requests',ic:'✉',t:'Yêu cầu mới',sec:'WORK',roles:['admin','manager']},
-  {v:'exec',ic:'★',t:'Executive Summary',sec:'INSIGHTS',roles:['admin','manager']},
-  {v:'scorecard',ic:'◉',t:'Manager Scorecard',sec:'INSIGHTS',roles:['admin','manager']},
-  {v:'progress',ic:'◕',t:'Tiến độ theo Lead',sec:'INSIGHTS',roles:['admin','manager']},
-  {v:'sla',ic:'◷',t:'SLA',sec:'INSIGHTS',roles:['admin','manager']},
-  {v:'perf',ic:'◆',t:'Hiệu suất & Báo cáo',sec:'INSIGHTS',roles:['admin','manager']},
-  {v:'workload',ic:'⚖',t:'Workload',sec:'INSIGHTS',roles:['admin','manager']},
-  {v:'staff',ic:'☺',t:'People',sec:'ADMIN',roles:['admin']},
-  {v:'dept',ic:'⬡',t:'Departments',sec:'ADMIN',roles:['admin']},
-  {v:'users',ic:'⚷',t:'Accounts & Roles',sec:'ADMIN',roles:['admin']},
-  {v:'backup',ic:'⛃',t:'Sao lưu & Khôi phục',sec:'ADMIN',roles:['admin']},
-  {v:'agents',ic:'⚡',t:'Automation & API',sec:'ADMIN',roles:['admin','manager']},
-  {v:'account',ic:'⚙',t:'Tài khoản',sec:'HELP',roles:['admin','manager','lead','staff']},
-  {v:'guide',ic:'◈',t:'Guide & Training',sec:'HELP',roles:['admin','manager','lead','staff']},
+  {v:'dash',ic:'<i class=\"ti ti-layout-dashboard\"></i>',t:'Overview',sec:'WORK',roles:['admin','manager','lead','staff']},
+  {v:'focus',ic:'<i class=\"ti ti-target\"></i>',t:'My Focus',sec:'WORK',roles:['staff']},
+  {v:'kanban',ic:'<i class=\"ti ti-layout-kanban\"></i>',t:'Kanban Board',sec:'WORK',roles:['admin','manager','lead','staff']},
+  {v:'tasks',ic:'<i class=\"ti ti-checklist\"></i>',t:'Marketing Tasks',sec:'WORK',roles:['admin','manager','lead','staff']},
+  {v:'recur',ic:'<i class=\"ti ti-repeat\"></i>',t:'Công việc định kỳ',sec:'WORK',roles:['admin','manager','lead','staff']},
+  {v:'backlog',ic:'<i class=\"ti ti-stack-2\"></i>',t:'Backlog',sec:'WORK',roles:['admin','manager']},
+  {v:'requests',ic:'<i class=\"ti ti-mail\"></i>',t:'Yêu cầu mới',sec:'WORK',roles:['admin','manager']},
+  {v:'exec',ic:'<i class=\"ti ti-star\"></i>',t:'Executive Summary',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'scorecard',ic:'<i class=\"ti ti-target-arrow\"></i>',t:'Manager Scorecard',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'progress',ic:'<i class=\"ti ti-progress\"></i>',t:'Tiến độ theo Lead',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'sla',ic:'<i class=\"ti ti-clock\"></i>',t:'SLA',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'perf',ic:'<i class=\"ti ti-chart-bar\"></i>',t:'Hiệu suất & Báo cáo',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'workload',ic:'<i class=\"ti ti-scale\"></i>',t:'Workload',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'staff',ic:'<i class=\"ti ti-users\"></i>',t:'People',sec:'ADMIN',roles:['admin']},
+  {v:'dept',ic:'<i class=\"ti ti-building\"></i>',t:'Departments',sec:'ADMIN',roles:['admin']},
+  {v:'users',ic:'<i class=\"ti ti-key\"></i>',t:'Accounts & Roles',sec:'ADMIN',roles:['admin']},
+  {v:'backup',ic:'<i class=\"ti ti-database\"></i>',t:'Sao lưu & Khôi phục',sec:'ADMIN',roles:['admin']},
+  {v:'agents',ic:'<i class=\"ti ti-bolt\"></i>',t:'Automation & API',sec:'ADMIN',roles:['admin','manager']},
+  {v:'account',ic:'<i class=\"ti ti-settings\"></i>',t:'Tài khoản',sec:'HELP',roles:['admin','manager','lead','staff']},
+  {v:'guide',ic:'<i class=\"ti ti-book\"></i>',t:'Guide & Training',sec:'HELP',roles:['admin','manager','lead','staff']},
 ];
 function buildMenu(){
   const r=me().role;
