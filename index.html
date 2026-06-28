@@ -1103,7 +1103,7 @@ window.taskModal=(id,presetType)=>{
         <button type="button" class="btn ghost" onclick="mSubAdd()">Thêm</button>
       </div>
     </div>
-    <div class="mfoot">${id?`<button class="btn ghost" onclick="sendToAgent('${id}')" title="POST task sang endpoint agent (content/ảnh/video)">⚡ Gửi tới Agent</button>`:''}<button class="btn ghost" id="tCancel">Cancel</button><button class="btn gold" id="tSave">${id?'Save':'Assign'}</button></div>`);
+    <div class="mfoot">${id?`<button class="btn ghost" onclick="sendToAgent('${id}')" title="POST task sang endpoint agent (content/ảnh/video)">⚡ Gửi tới Agent</button><button class="btn ghost" onclick="aiWriteContent('${id}')" title="Gọi AI (Make) viết content cho task này">✍️ AI viết content</button>`:''}<button class="btn ghost" id="tCancel">Cancel</button><button class="btn gold" id="tSave">${id?'Save':'Assign'}</button></div>`);
   document.getElementById('tCancel').addEventListener('click',mClose);
   document.getElementById('tSave').addEventListener('click',()=>saveTask(id||''));
   MSUBS=(t.subtasks||[]).map(s=>({...s}));
@@ -1287,6 +1287,35 @@ function agentEndpointFor(t){
   return null;
 }
 function agentPayload(t){return {jobId:'JOB-'+Date.now().toString(36),source:'fado-mkt',taskId:t._id,requestId:t['Request ID'],bu:t.BU,title:t['Request Name'],function:t.Function,subFunction:t['Sub Function'],complexity:cxKey(t),capacity:capKey(t),credit:creditOf(t),priority:t.Priority,dueDate:t['Due Date']||'',notes:t.Notes||'',brief:t.Brief||''};}
+function showContentModal(t,text,loading){
+  var box=document.getElementById('mbox');
+  box.innerHTML='<h2>✍️ AI viết content'+(t['Request Name']?(' · '+esc(t['Request Name'])):'')+'</h2>'
+    +'<textarea id="aiOut" rows="14" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13px;line-height:1.6;background:var(--input-bg);color:var(--ink);box-sizing:border-box">'+esc(text)+'</textarea>'
+    +'<div class="mfoot">'
+    +(loading?'':'<button class="btn ghost" id="aiCopy">Copy</button><button class="btn ghost" id="aiSaveNote">Lưu vào ghi chú task</button>')
+    +'<button class="btn" id="aiClose">Đóng</button></div>';
+  document.getElementById('modal').classList.add('show');
+  var cl=document.getElementById('aiClose'); if(cl)cl.onclick=function(){document.getElementById('modal').classList.remove('show');};
+  var cp=document.getElementById('aiCopy'); if(cp)cp.onclick=function(){try{navigator.clipboard.writeText(document.getElementById('aiOut').value);cp.textContent='✓ Đã copy';}catch(e){}};
+  var sv=document.getElementById('aiSaveNote'); if(sv)sv.onclick=function(){var v=document.getElementById('aiOut').value;t.Notes=(t.Notes?t.Notes+'\n\n':'')+'[AI content]\n'+v;logHist(t,'Lưu AI content vào ghi chú');save();document.getElementById('modal').classList.remove('show');alert('✓ Đã lưu vào ghi chú task.');};
+}
+window.aiWriteContent=async function(id){
+  var t=DB.tasks.find(function(x){return x._id===id;}); if(!t)return;
+  var a=DB.agents||{}; var url=((a.content||a.webhook||'')+'').trim();
+  if(!url){ alert('Chưa cấu hình endpoint Copy Agent.\nVào AI Agent Control Center → dán webhook Make vào ô Copy Agent → Lưu, rồi thử lại.'); return; }
+  showContentModal(t,'⏳ Đang gọi AI viết content… (chờ vài giây)',true);
+  try{
+    var r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(agentPayload(t))});
+    var text=''; var ct=(r.headers.get('content-type')||'');
+    if(ct.indexOf('application/json')>=0){ var j=await r.json(); text=(j&&(j.content||j.text||j.result))||JSON.stringify(j); }
+    else { text=await r.text(); }
+    if(!text) text='(Không nhận được nội dung. Kiểm tra Make scenario.)';
+    showContentModal(t,text,false);
+    try{ t.agent=Object.assign({},t.agent,{status:'done',type:'content',resultAt:new Date().toISOString()}); logHist(t,'✍️ AI viết content (draft)'); save(); }catch(e){}
+  }catch(e){
+    showContentModal(t,'❌ Lỗi gọi AI: '+((e&&e.message)||e)+'\n\nKiểm tra:\n• Make scenario đã BẬT chưa?\n• Webhook Response có header Access-Control-Allow-Origin: * chưa?\n• URL dán đúng (Production URL) chưa?',false);
+  }
+};
 window.sendToAgent=async id=>{
   const t=DB.tasks.find(x=>x._id===id);if(!t)return;
   const ep=agentEndpointFor(t);const payload=agentPayload(t);
