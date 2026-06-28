@@ -1076,7 +1076,7 @@ window.taskModal=(id,presetType)=>{
       <div class="fld"><label>Mã (Request ID)</label><input id="t_id" value="${esc(t['Request ID']||autoId())}"></div>
       <div class="fld"><label>BU *</label><select id="t_bu">${opt(CATS.BU,t.BU)}</select></div>
       <div class="fld full"><label>Dự án / Campaign</label><input id="t_proj" value="${esc(t['Project/Campaign']||'')}"></div>
-      <div class="fld full"><label>Mô tả / Ghi chú</label><textarea id="t_note" rows="2">${esc(t.Notes||'')}</textarea></div>${t.Attachment?`<div class="fld full"><label>Ảnh / Tài liệu đính kèm</label><a href="${esc(t.Attachment)}" target="_blank" rel="noopener" title="Bấm để mở/tải">${(t.Attachment.slice(0,10)==='data:image'||/\.(png|jpe?g|webp|gif)(\?|$)/i.test(t.Attachment))?`<img src="${esc(t.Attachment)}" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid var(--line);display:block">`:'📎 Mở tài liệu đính kèm →'}</a></div>`:''}`)}
+      <div class="fld full"><label>Mô tả / Ghi chú</label><textarea id="t_note" rows="2">${esc(t.Notes||'')}</textarea></div><div class="fld full"><label>📤 Nội dung giao cho BU <span style="color:var(--muted);font-weight:400">(BU sẽ xem được)</span></label><textarea id="t_deliv" rows="4" placeholder="Dán/nhập content thành phẩm để giao cho BU…">${esc(t.Deliverable||'')}</textarea></div><div class="fld full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600"><input type="checkbox" id="t_delivered" ${t.Delivered?'checked':''} style="width:18px;height:18px;flex:none"> ✓ Hiển thị nội dung này cho BU (ở Cổng BU)</label></div>${t.Attachment?`<div class="fld full"><label>Ảnh / Tài liệu đính kèm</label><a href="${esc(t.Attachment)}" target="_blank" rel="noopener" title="Bấm để mở/tải">${(t.Attachment.slice(0,10)==='data:image'||/\.(png|jpe?g|webp|gif)(\?|$)/i.test(t.Attachment))?`<img src="${esc(t.Attachment)}" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid var(--line);display:block">`:'📎 Mở tài liệu đính kèm →'}</a></div>`:''}`)}
     ${sec('Giao việc & kế hoạch','',`
       <div class="fld"><label>Function</label><select id="t_fn">${opt(CATS.Function,t.Function)}</select></div>
       <div class="fld"><label>Sub Function</label><select id="t_sub">${opt(CATS.SubFunction,t['Sub Function'])}</select></div>
@@ -1118,7 +1118,7 @@ window.saveTask=id=>{
   if(!g('t_own')){alert('Hãy chọn người nhận việc (Lead hoặc nhân viên)');return;}
   const prev=id?DB.tasks.find(t=>t._id===id):null;
   const o=Object.assign({},prev||{},{_id:id||uid(),'Request ID':g('t_id'),'Request Date':(prev&&prev['Request Date'])||today(),BU:g('t_bu'),'Project/Campaign':g('t_proj'),'Request Name':g('t_name'),Function:g('t_fn'),'Sub Function':g('t_sub'),Requestor:(prev&&prev.Requestor)||me().name,Source:g('t_src'),Priority:g('t_pr'),Owner:g('t_own'),Status:g('t_st'),'Due Date':g('t_due'),Complexity:g('t_cx'),'Capacity Level':g('t_cap'),CreditOverride:g('t_credit'),Progress:g('t_prog'),QC:g('t_qc'),Revisions:g('t_rev'),Satisfaction:g('t_sat'),Notes:g('t_note'),Type:g('t_type'),Cadence:g('t_cad'),Quota:g('t_quota')});
-  o.comments=o.comments||[];o.history=o.history||[];
+  o.comments=o.comments||[];o.history=o.history||[];var _dv=document.getElementById('t_deliv');if(_dv)o.Deliverable=_dv.value.trim();var _dd=document.getElementById('t_delivered');o.Delivered=_dd?_dd.checked:(prev&&prev.Delivered||false);
   o.subtasks=MSUBS.map(s=>({...s}));
   if(o.Status==='Done'&&!o['Close Date'])o['Close Date']=today();
   if(o.Status!=='Done')o['Close Date']='';
@@ -1212,6 +1212,19 @@ function buSubmitForm(w){
     </div>
   </div>`;
 }
+function buDeliveredSection(mine){
+  var dv=(mine||[]).filter(function(t){return t.Delivered&&t.Deliverable;});
+  if(!dv.length)return '';
+  return '<div style="margin-top:18px"><div style="font-size:13px;font-weight:700;margin-bottom:10px">📄 Nội dung đã giao ('+dv.length+')</div>'
+    +dv.map(function(t){
+      return '<div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:11px">'
+        +'<div style="font-weight:700;font-size:13.5px;margin-bottom:8px">'+esc(t['Request Name']||'')+'</div>'
+        +'<div style="white-space:pre-wrap;font-size:13px;line-height:1.6;background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:12px 14px;max-height:340px;overflow:auto">'+esc(t.Deliverable||'')+'</div>'
+        +'<button class="btn ghost sm" style="margin-top:9px" onclick="buCopyDeliv(\''+t._id+'\')">Copy nội dung</button>'
+        +'</div>';
+    }).join('')+'</div>';
+}
+window.buCopyDeliv=function(id){var t=DB.tasks.find(function(x){return x._id===id;});if(t&&navigator.clipboard){navigator.clipboard.writeText(t.Deliverable||'');try{buToast('✓ Đã copy nội dung');}catch(e){}}};
 function buMyList(mine){
   if(!mine.length)return `<div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:50px;text-align:center;color:#9aa0ac;font-size:13.5px">Chưa có yêu cầu nào. Bấm <b>Gửi yêu cầu</b> để tạo.</div>`;
   const rows=mine.slice().sort((a,b)=>(b['Request Date']||'').localeCompare(a['Request Date']||'')).map(t=>{
@@ -1227,7 +1240,7 @@ function buMyList(mine){
   }).join('');
   return `<div style="background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden"><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead><tr>${['Task','Loại','Credit','Trạng thái','Phụ trách','Hạn'].map(h=>`<th style="text-align:left;padding:10px 14px;font-size:10px;color:#8b8f9a;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:var(--card2);border-bottom:1px solid var(--track)">${h}</th>`).join('')}</tr></thead>
-    <tbody>${rows}</tbody></table></div></div>`;
+    <tbody>${rows}</tbody></table></div></div>${buDeliveredSection(mine)}`;
 }
 window.buUpdCost=()=>{
   const cx=document.getElementById('bu_cx'),cap=document.getElementById('bu_cap');
@@ -1292,12 +1305,13 @@ function showContentModal(t,text,loading){
   box.innerHTML='<h2>✍️ AI viết content'+(t['Request Name']?(' · '+esc(t['Request Name'])):'')+'</h2>'
     +'<textarea id="aiOut" rows="14" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:13px;line-height:1.6;background:var(--input-bg);color:var(--ink);box-sizing:border-box">'+esc(text)+'</textarea>'
     +'<div class="mfoot">'
-    +(loading?'':'<button class="btn ghost" id="aiCopy">Copy</button><button class="btn ghost" id="aiSaveNote">Lưu vào ghi chú task</button>')
+    +(loading?'':'<button class="btn ghost" id="aiCopy">Copy</button><button class="btn ghost" id="aiSaveNote">Lưu vào ghi chú</button><button class="btn" id="aiSendBU">📤 Gửi cho BU</button>')
     +'<button class="btn" id="aiClose">Đóng</button></div>';
   document.getElementById('modal').classList.add('show');
   var cl=document.getElementById('aiClose'); if(cl)cl.onclick=function(){document.getElementById('modal').classList.remove('show');};
   var cp=document.getElementById('aiCopy'); if(cp)cp.onclick=function(){try{navigator.clipboard.writeText(document.getElementById('aiOut').value);cp.textContent='✓ Đã copy';}catch(e){}};
   var sv=document.getElementById('aiSaveNote'); if(sv)sv.onclick=function(){var v=document.getElementById('aiOut').value;t.Notes=(t.Notes?t.Notes+'\n\n':'')+'[AI content]\n'+v;logHist(t,'Lưu AI content vào ghi chú');save();document.getElementById('modal').classList.remove('show');alert('✓ Đã lưu vào ghi chú task.');};
+  var sb=document.getElementById('aiSendBU'); if(sb)sb.onclick=function(){t.Deliverable=document.getElementById('aiOut').value;t.Delivered=true;logHist(t,'📤 Gửi content cho BU');save();document.getElementById('modal').classList.remove('show');try{alert('✓ Đã gửi cho BU. BU sẽ thấy ở Cổng BU.');}catch(e){}};
 }
 window.aiWriteContent=async function(id){
   var t=DB.tasks.find(function(x){return x._id===id;}); if(!t)return;
