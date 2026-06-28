@@ -1170,8 +1170,8 @@ function buWalletCard(w){
 function buSubmitForm(w){
   const fnOpts=CATS.Function.map(f=>`<option>${esc(f)}</option>`).join('');
   const subOpts=CATS.SubFunction.map(f=>`<option>${esc(f)}</option>`).join('');
-  const cxOpts=CATS.Complexity.map(f=>`<option ${f==='M - 1 day'?'selected':''}>${esc(f)}</option>`).join('');
-  const capOpts=CAP_LEVELS.map(v=>`<option value="${v}" ${v==='Medium'?'selected':''}>${CAP_LABEL[v]} (${v})</option>`).join('');
+  const cxOpts='<option value="__ASK_MKT__" selected>🤝 Không rõ — để MKT đánh giá</option>'+CATS.Complexity.map(f=>`<option>${esc(f)}</option>`).join('');
+  const capOpts='<option value="__ASK_MKT__" selected>🤝 Không rõ — để MKT đánh giá</option>'+CAP_LEVELS.map(v=>`<option value="${v}">${CAP_LABEL[v]} (${v})</option>`).join('');
   const prOpts=CATS.Priority.map(f=>`<option ${f==='P2'?'selected':''}>${esc(f)}</option>`).join('');
   const L='font-size:12px;font-weight:600;color:#3b3f4a;display:block;margin-bottom:6px';
   const I='width:100%;padding:11px 13px;border:1px solid #dfe1e6;border-radius:9px;font-size:13.5px;outline:none;font-family:inherit;background:var(--card);box-sizing:border-box';
@@ -1181,7 +1181,7 @@ function buSubmitForm(w){
       <div style="margin-bottom:13px"><label style="${L}">Tên task / yêu cầu *</label><input id="bu_name" style="${I}" placeholder="VD: Chạy Google Ads ra mắt sản phẩm tháng 7"></div>
       <div style="margin-bottom:13px"><label style="${L}">Dự án / Campaign</label><input id="bu_proj" style="${I}" placeholder="Tùy chọn"></div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:13px">
-        <div style="flex:1 1 200px"><label style="${L}">Function *</label><select id="bu_fn" style="${I}" onchange="buUpdCost()"><option value="">— Chọn —</option>${fnOpts}</select></div>
+        <div style="flex:1 1 200px"><label style="${L}">Function *</label><select id="bu_fn" style="${I}" onchange="buUpdCost()"><option value="">— Chọn —</option><option value="__ASK_MKT__">🤝 Không rõ — để MKT chọn giúp</option>${fnOpts}</select></div>
         <div style="flex:1 1 200px"><label style="${L}">Sub Function</label><select id="bu_sub" style="${I}"><option value="">—</option>${subOpts}</select></div>
       </div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:13px">
@@ -1202,7 +1202,7 @@ function buSubmitForm(w){
         <div id="bu_cost" style="font-size:34px;font-weight:800;letter-spacing:-1.4px">—</div>
         <div id="bu_cost_sub" style="font-size:12.5px;color:#6b7080;margin-top:4px;line-height:1.5">Chọn độ phức tạp & mức năng lực để tính credit.</div>
         <div style="height:1px;background:var(--track);margin:16px 0"></div>
-        <div style="font-size:12.5px;color:#3b3f4a;line-height:1.7">Còn lại sau yêu cầu này: <b id="bu_after">${w.remaining}</b> credit</div>
+        <div style="font-size:12.5px;color:#3b3f4a;line-height:1.7">Còn lại sau yêu cầu này: <b id="bu_after">${w.remaining}</b> credit</div><div style="font-size:11.5px;color:#8c909c;line-height:1.6;margin-top:9px;padding-top:9px;border-top:1px solid var(--track)">ℹ️ Đây là <b>credit dự kiến</b>. MKT sẽ xem, có thể điều chỉnh & phản hồi lại trước khi thực hiện.</div>
         <div id="bu_warn" style="display:none;font-size:12px;color:#b4524f;font-weight:600;margin-top:8px"></div>
       </div>
       <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:13px">
@@ -1246,6 +1246,9 @@ window.buUpdCost=()=>{
   const cx=document.getElementById('bu_cx'),cap=document.getElementById('bu_cap');
   const cost=document.getElementById('bu_cost'),sub=document.getElementById('bu_cost_sub'),after=document.getElementById('bu_after'),warn=document.getElementById('bu_warn');
   if(!cx||!cost)return;
+  const _wA=buWallet(buName());
+  if(cx.value==='__ASK_MKT__'||cap.value==='__ASK_MKT__'){cost.textContent='MKT đánh giá';cost.style.fontSize='24px';sub.innerHTML='Bạn để MKT đánh giá độ phức tạp & credit. MKT sẽ xem và xác nhận lại.';if(after)after.textContent=_wA.remaining;if(warn)warn.style.display='none';return;}
+  cost.style.fontSize='34px';
   const c=creditFor(cx.value,cap.value);
   cost.textContent=c+' credit';
   sub.innerHTML='≈ '+(c*15)+' phút · '+cxKey(cx.value)+' × '+capKey(cap.value);
@@ -1259,10 +1262,14 @@ window.buSubmit=()=>{
   const err=document.getElementById('bu_err');
   if(!name||!fn){if(err){err.style.display='block';err.textContent='Vui lòng nhập Tên task và chọn Function.';}return;}
   const t={_id:uid(),'Request ID':autoId(),'Request Date':today(),BU:buName(),'Project/Campaign':g('bu_proj'),'Request Name':name,Function:fn,'Sub Function':g('bu_sub'),Requestor:me().name,Source:'New Request',Priority:g('bu_pr')||'P2',Owner:'',Status:'Open','Due Date':g('bu_due'),Complexity:g('bu_cx'),'Capacity Level':g('bu_cap'),Notes:g('bu_note'),Progress:'',comments:[],history:[]};
-  logHist(t,'BU gửi yêu cầu — chờ MKT duyệt');
+  if(t.Function==='__ASK_MKT__')t.Function='';
+  if(t['Sub Function']==='__ASK_MKT__')t['Sub Function']='';
+  if(t.Complexity==='__ASK_MKT__'){t.Complexity='';t.NeedEstimate=true;}
+  if(t['Capacity Level']==='__ASK_MKT__'){t['Capacity Level']='';t.NeedEstimate=true;}
+  logHist(t,'BU gửi yêu cầu — chờ MKT duyệt'+(t.NeedEstimate?' (nhờ MKT đánh giá credit)':''));
   DB.tasks.push(t);save();
   BUVIEW='mine';renderBuPortal();
-  buToast('✓ Đã gửi '+t['Request ID']+' · '+creditOf(t)+' credit (chờ duyệt)');
+  buToast('✓ Đã gửi '+t['Request ID']+' · '+(t.NeedEstimate?'MKT sẽ đánh giá credit':creditOf(t)+' credit')+' (chờ duyệt)');
 };
 function renderBuPortal(){
   const host=document.getElementById('buPortal');if(!host)return;
