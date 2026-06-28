@@ -19,12 +19,12 @@
     --green:#46b07d;--blue:#7c8cff;--purple:#9a7bf0;--red:#e0564f;
   }
   :root[data-theme="white"]{
-    --bg:#f4f6fb;--card:#ffffff;--card2:#f7f9fc;--line:#e4e8f0;--track:#eef1f6;
-    --ink:#1a2233;--ink2:#46506a;--muted:#8b93a7;
-    --accent:#3f6fff;--accent-2:#2f56d8;--accent-soft:#3f6fff;
-    --side-bg:#0d1424;--input-bg:#ffffff;--hover:rgba(20,30,60,.04);
-    --navy:#0d1424;--navy2:#141b2e;--navy3:#eef1f6;--gold:#3f6fff;
-    --green:#2f8a5b;--blue:#3b6ea5;--purple:#6b5e9c;--red:#d24a44;
+    --bg:#f6f4fb;--card:#ffffff;--card2:#f3effa;--line:#e7e0f2;--track:#efe9f8;
+    --ink:#221833;--ink2:#4a4063;--muted:#8b84a0;
+    --accent:#7c3aed;--accent-2:#6d28d9;--accent-soft:#7c3aed;
+    --side-bg:linear-gradient(180deg,#7e22ce,#c026d3);--input-bg:#ffffff;--hover:rgba(124,58,237,.06);
+    --navy:#7e22ce;--navy2:#f3effa;--navy3:#efe9f8;--gold:#7c3aed;
+    --green:#2f8a5b;--blue:#6d28d9;--purple:#7c3aed;--red:#d24a44;
   }
   :root[data-theme="violet"]{
     --bg:#120821;--card:#1c1033;--card2:#241640;--line:#382559;--track:#2a1a48;
@@ -320,7 +320,7 @@
     <aside class="sidebar">
       <div class="brand"><div class="logo">FM</div><div><b>FADO MKT</b><span>WORK MANAGEMENT</span></div></div>
       <nav class="menu" id="menu"></nav>
-      <div class="theme-row" id="themePick"><span class="tl">THEME</span><span data-th="navy" title="Indigo" style="background:#6366f1"></span><span data-th="white" title="Trắng" style="background:var(--track)"></span><span data-th="violet" title="Make (tím đậm)" style="background:#a855f7"></span><span data-th="coral" title="Coral" style="background:#e0564f"></span><span data-th="ember" title="Ember (n8n)" style="background:#ff6d5a"></span></div>
+      <div class="theme-row" id="themePick"><span class="tl">THEME</span><span data-th="navy" title="Indigo" style="background:#6366f1"></span><span data-th="white" title="Make (sáng)" style="background:linear-gradient(135deg,#ffffff 48%,#7c3aed 52%)"></span><span data-th="violet" title="Make (tím đậm)" style="background:#a855f7"></span><span data-th="coral" title="Coral" style="background:#e0564f"></span><span data-th="ember" title="Ember (n8n)" style="background:#ff6d5a"></span></div>
       <div class="side-foot">
         <div class="av" id="meAv">A</div>
         <div><b id="meName">Admin</b><span id="meRole">Administrator</span></div>
@@ -2771,7 +2771,7 @@ window.mClose=()=>document.getElementById('modal').classList.remove('show');
 document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')mClose();};
 
 /* ============ INIT ============ */
-function applyTheme(t){try{if(!localStorage.getItem('fado_theme_v4')){localStorage.setItem('fado_theme','violet');localStorage.setItem('fado_theme_v4','1');}}catch(e){}t=t||localStorage.getItem('fado_theme')||'violet';document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('fado_theme',t);}catch(e){}var p=document.getElementById('themePick');if(p)p.querySelectorAll('span[data-th]').forEach(function(s){s.classList.toggle('on',s.dataset.th===t);});}
+function applyTheme(t){try{if(!localStorage.getItem('fado_theme_v5')){localStorage.setItem('fado_theme','white');localStorage.setItem('fado_theme_v5','1');}}catch(e){}t=t||localStorage.getItem('fado_theme')||'white';document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('fado_theme',t);}catch(e){}var p=document.getElementById('themePick');if(p)p.querySelectorAll('span[data-th]').forEach(function(s){s.classList.toggle('on',s.dataset.th===t);});}
 window.setTheme=applyTheme;
 document.addEventListener('click',function(e){var s=e.target&&e.target.closest?e.target.closest('#themePick span[data-th]'):null;if(s)applyTheme(s.dataset.th);});
 function renderLoginStats(){try{var ts=DB.tasks||[];var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};set('st_total',ts.length);set('st_wip',ts.filter(function(t){return t.Status==='WIP';}).length);set('st_queue',ts.filter(function(t){return t.Status==='Open';}).length);var bus=new Set(ts.map(function(t){return t.BU;}).filter(Boolean)).size;set('st_bu',bus||(CATS.BU?CATS.BU.length:0));renderLoginChart();}catch(e){}}
