@@ -677,6 +677,7 @@ const NAV=[
   {v:'backlog',ic:'<i class="ti ti-stack-2"></i>',t:'Backlog',vi:'Việc tồn đọng · quá hạn · đang chờ',sec:'WORK',roles:['admin','manager']},
   {v:'requests',ic:'<i class="ti ti-mail"></i>',t:'New Requests',vi:'Yêu cầu mới — duyệt & giao cho Lead',sec:'WORK',roles:['admin','manager']},
   {v:'credit',ic:'<i class="ti ti-coins"></i>',t:'Credit Overview',vi:'Tổng quan ví credit BU & KPI nhân sự',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'akpi',ic:'<i class="ti ti-clipboard-check"></i>',t:'Admin KPI',vi:'KPI quản lý CRM · Service Management (JD & SOW)',sec:'INSIGHTS',roles:['admin','manager']},
   {v:'exec',ic:'<i class="ti ti-star"></i>',t:'Executive Summary',vi:'Tóm tắt cho ban lãnh đạo',sec:'INSIGHTS',roles:['admin','manager']},
   {v:'scorecard',ic:'<i class="ti ti-target-arrow"></i>',t:'Manager Scorecard',vi:'KPI điều phối so với mục tiêu',sec:'INSIGHTS',roles:['admin','manager']},
   {v:'progress',ic:'<i class="ti ti-progress"></i>',t:'Lead Progress',vi:'Tiến độ & cập nhật theo từng Lead',sec:'INSIGHTS',roles:['admin','manager']},
@@ -807,7 +808,7 @@ function render(){
   const c=document.getElementById('content');
   const ta=document.getElementById('topActions');ta.innerHTML='';
   const u=me();
-  const T={flow:['Sơ đồ hệ thống','Quy trình vận hành & lộ trình đấu nối AI'],dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Tasks Pool','Kho task chung của toàn đội · danh sách & theo dõi'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],credit:['Credit Overview','Ví credit BU & KPI nhân sự theo tháng'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],backup:['Sao lưu & Khôi phục','Tải bản sao lưu toàn bộ dữ liệu hoặc khôi phục từ file'],agents:['Automation & API','Ngân sách credit theo BU · endpoint agent (content/ảnh/video) · API đấu nối'],account:['Tài khoản','Cập nhật thông tin cá nhân & đổi mật khẩu'],guide:['Guide & Training','How to use this CRM — at a glance']};
+  const T={flow:['Sơ đồ hệ thống','Quy trình vận hành & lộ trình đấu nối AI'],dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Tasks Pool','Kho task chung của toàn đội · danh sách & theo dõi'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],credit:['Credit Overview','Ví credit BU & KPI nhân sự theo tháng'],akpi:['Admin KPI','KPI quản lý CRM · Service Management theo JD & SOW'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],backup:['Sao lưu & Khôi phục','Tải bản sao lưu toàn bộ dữ liệu hoặc khôi phục từ file'],agents:['Automation & API','Ngân sách credit theo BU · endpoint agent (content/ảnh/video) · API đấu nối'],account:['Tài khoản','Cập nhật thông tin cá nhân & đổi mật khẩu'],guide:['Guide & Training','How to use this CRM — at a glance']};
   document.getElementById('vtitle').textContent=T[VIEW][0];
   document.getElementById('vsub').textContent=T[VIEW][1];
   renderGFBar();
@@ -824,6 +825,7 @@ function render(){
   else if(VIEW==='backlog')rBacklog(c,ta);
   else if(VIEW==='sla')rSla(c,ta);
   else if(VIEW==='credit')rCredit(c,ta);
+  else if(VIEW==='akpi')rAdminKpi(c,ta);
   else if(VIEW==='exec')rExec(c);
   else if(VIEW==='scorecard')rScorecard(c,ta);
   else if(VIEW==='leadupd'){VIEW='progress';rProgress(c,ta);}
@@ -2513,6 +2515,62 @@ function rCredit(c,ta){
     <div class="tablewrap"><table><thead><tr><th>BU</th><th style="text-align:right">Budget</th><th style="text-align:right">Đã dùng</th><th style="text-align:right">Chờ duyệt</th><th style="text-align:right">Còn lại</th><th>Mức dùng</th><th style="text-align:right">%</th></tr></thead><tbody>${buRows}</tbody></table></div></div>
   <div class="panel"><h3><span class="dot" style="background:#3f8a63"></span>KPI nhân sự sản xuất · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· mặc định ${DEFAULT_STAFF_CREDIT}/tháng (1 FTE) · chỉ tính người trực tiếp làm</span></h3>
     <div class="tablewrap"><table><thead><tr><th>Nhân sự</th><th style="text-align:right">KPI tháng</th><th style="text-align:right">Đã nhận</th><th style="text-align:right">Còn lại</th><th>Tiến độ</th><th style="text-align:right">%</th></tr></thead><tbody>${stRows}</tbody></table></div></div>${supW.length?`<div class="panel" style="margin-top:16px"><h3><span class="dot" style="background:#6b5e9c"></span>Điều phối / Giám sát · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· phụ trách & review — KHÔNG tính KPI sản xuất</span></h3><div class="tablewrap"><table><thead><tr><th>Người</th><th>Vai trò</th><th style="text-align:right">Khối lượng phụ trách (credit)</th><th style="text-align:right">Số task</th></tr></thead><tbody>${supW.map(x=>`<tr><td class="name-cell">${esc(x[0])}</td><td><span class="role-badge role-${roleOfName(x[0])}">${roleLabel(roleOfName(x[0]))}</span></td><td style="text-align:right;font-weight:700;color:#6b5e9c">${x[1].used}</td><td style="text-align:right;color:#6b7080">${DB.tasks.filter(t=>t.Owner===x[0]&&taskMonthKey(t)===mk&&t.Status!=='Cancelled').length}</td></tr>`).join('')}</tbody></table></div></div>`:''}`;
+}
+const ADMIN_KPI=[
+ ['Request Intake',5,'Ghi nhận & nhập task/credit chính xác, phân loại','intake'],
+ ['Demand Management',10,'Quản lý đủ task, không sót, đánh giá xếp loại','assigned'],
+ ['Backlog Management',5,'Kiểm soát & cảnh báo tồn đọng','backlog'],
+ ['Priority Management',5,'Task đúng Priority / impact','priority'],
+ ['Capacity Planning',10,'Quản lý tải & slot nhận task của team','capacity'],
+ ['Tasks Allocation & Alignment',10,'Phân bổ task đúng bộ phận · SLA · output','alloc'],
+ ['Project Tracking',10,'Theo dõi tiến độ task (65%) & campaign (35%)','tracking'],
+ ['SLA Management',5,'SLA Compliance ≥ 80% · cảnh báo vi phạm','sla'],
+ ['BU Reporting',2,'Report đúng hạn 40% · chính xác 60%','manual'],
+ ['Business Requirement Gathering',10,'Hiểu đúng nhu cầu BU · accuracy/completeness','manual'],
+ ['Campaign Brief Development',10,'Brief rõ ràng, đầy đủ, được duyệt','manual'],
+ ['Campaign Planning',15,'Plan đúng hạn, hoàn chỉnh, được duyệt','manual'],
+ ['Campaign Review',3,'Đánh giá campaign & hành động cải tiến','manual'],
+];
+function adminKpiVal(name){var o=DB.adminKpi||{};var v=o[name];return (v===''||v==null)?null:Number(v);}
+window.setAdminKpi=(name,v)=>{DB.adminKpi=DB.adminKpi||{};DB.adminKpi[name]=(v===''?'':Number(v));save();render();};
+function rAdminKpi(c,ta){
+  ta.innerHTML='';
+  const ts=DB.tasks||[];const total=ts.length||1;
+  const open=ts.filter(t=>!isClosed(t));const openC=open.length||1;
+  const assigned=Math.round(ts.filter(t=>t.Owner).length/total*100);
+  const priority=Math.round(ts.filter(t=>t.Priority).length/total*100);
+  const intake=Math.round(ts.filter(t=>t.Function&&t['Sub Function']).length/total*100);
+  const overdue=open.filter(t=>dueState(t)==='overdue').length;
+  const backlog=Math.round(100*(1-overdue/openC));
+  const closed=ts.filter(isClosed);
+  const onTime=closed.filter(t=>!t['Due Date']||!t['Close Date']||t['Close Date']<=t['Due Date']).length;
+  const sla=closed.length?Math.round(onTime/closed.length*100):100;
+  const wip=ts.filter(t=>t.Status==='WIP');
+  const tracking=wip.length?Math.round(wip.filter(t=>progressOf(t)>0||!isStale(t)).length/wip.length*100):100;
+  const ppl=staffPeople().filter(n=>!isSupervisor(n));
+  const overload=ppl.filter(n=>staffWallet(n).remaining<0).length;
+  const capacity=ppl.length?Math.round(100*(ppl.length-overload)/ppl.length):100;
+  const AUTO={intake:intake,assigned:assigned,backlog:backlog,priority:priority,capacity:capacity,alloc:assigned,tracking:tracking,sla:sla};
+  let num=0,den=0,autoNum=0,autoDen=0;
+  ADMIN_KPI.forEach(k=>{const auto=k[3]!=='manual';const sc=auto?AUTO[k[3]]:adminKpiVal(k[0]);if(sc!=null){num+=k[1]*sc;den+=k[1];}if(auto){autoNum+=k[1]*sc;autoDen+=k[1];}});
+  const overall=den?Math.round(num/den):0, autoScore=autoDen?Math.round(autoNum/autoDen):0;
+  const colOf=p=>p==null?'#9aa0ac':(p>=80?'#3f8a63':(p>=50?'#b58a3a':'#b4524f'));
+  const bar=(p,col)=>`<div style="height:8px;background:var(--track);border-radius:5px;overflow:hidden"><div style="height:100%;border-radius:5px;background:${col};width:${Math.min(100,p)}%"></div></div>`;
+  const kpi=(lab,num2,note,col)=>`<div class="kpi"><div class="bar" style="background:${col}"></div><div class="lab">${lab}</div><div class="num">${num2}</div><div class="note">${note}</div></div>`;
+  const rows=ADMIN_KPI.map(k=>{const name=k[0],w=k[1],desc=k[2],key=k[3];const auto=key!=='manual';const sc=auto?AUTO[key]:adminKpiVal(name);const col=colOf(sc);
+    const cell=auto?`<b style="color:${col};font-size:14px">${sc}%</b><div style="font-size:10px;color:#9aa0ac">tự đo</div>`:`<input type="number" min="0" max="100" value="${sc==null?'':sc}" onchange="setAdminKpi('${name}',this.value)" style="width:64px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13px;text-align:right"><div style="font-size:10px;color:#9aa0ac">nhập tay</div>`;
+    return `<tr><td class="name-cell">${name}<div style="font-size:11px;color:var(--muted);font-weight:400">${desc}</div></td><td style="text-align:center;font-weight:800;color:#46506b">${w}%</td><td style="text-align:right">${cell}</td><td style="min-width:130px">${sc==null?'<span style="color:#9aa0ac">— chưa nhập</span>':bar(sc,col)}</td></tr>`;}).join('');
+  c.innerHTML=`
+  <div class="kpis">
+    ${kpi('KPI ADMIN TỔNG',overall+'%','trọng số có dữ liệu '+den+'% / 100%',colOf(overall))}
+    ${kpi('TỰ ĐO HỆ THỐNG',autoScore+'%','từ '+autoDen+'% trọng số đo được',colOf(autoScore))}
+    ${kpi('SLA COMPLIANCE',sla+'%','mục tiêu ≥ 80%',sla>=80?'#3f8a63':'#b4524f')}
+    ${kpi('KHÔNG SÓT TASK',assigned+'%','task đã phân người làm',colOf(assigned))}
+  </div>
+  <div class="panel"><h3><span class="dot" style="background:#3f6ea5"></span>KPI Quản lý CRM — Admin · Service Management <span style="font-size:11.5px;color:var(--muted);font-weight:500">· theo JD & SOW · phần định lượng tự đo từ dữ liệu, phần định tính nhập tay</span></h3>
+    <div class="tablewrap"><table><thead><tr><th>Nhóm chức năng (Sub Function)</th><th style="text-align:center">Trọng số</th><th style="text-align:right">Điểm</th><th>Mức đạt</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div style="font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:12px">Điểm "tự đo" tính realtime từ CRM (đã phân task, đúng hạn SLA, backlog, tiến độ, tải team…). Ô "nhập tay" là KPI định tính (chất lượng brief, plan, report…) — Admin tự chấm 0–100 mỗi kỳ. <b>KPI Admin tổng</b> = bình quân theo trọng số của các mục đã có điểm.</div>
+  </div>`;
 }
 function rStaff(c,ta){
   ta.innerHTML=`<button class="btn gold" id="addStaff">+ Add Person</button>`;
