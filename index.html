@@ -678,6 +678,7 @@ const NAV=[
   {v:'requests',ic:'<i class="ti ti-mail"></i>',t:'New Requests',vi:'Yêu cầu mới — duyệt & giao cho Lead',sec:'WORK',roles:['admin','manager']},
   {v:'credit',ic:'<i class="ti ti-coins"></i>',t:'Credit Overview',vi:'Tổng quan ví credit BU & KPI nhân sự',sec:'INSIGHTS',roles:['admin','manager']},
   {v:'akpi',ic:'<i class="ti ti-clipboard-check"></i>',t:'Admin KPI',vi:'KPI quản lý CRM · Service Management (JD & SOW)',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'okpi',ic:'<i class="ti ti-chart-dots"></i>',t:'KPI Sản lượng',vi:'KPI content/logistics theo sản lượng — quy đổi ra credit',sec:'INSIGHTS',roles:['admin','manager']},
   {v:'exec',ic:'<i class="ti ti-star"></i>',t:'Executive Summary',vi:'Tóm tắt cho ban lãnh đạo',sec:'INSIGHTS',roles:['admin','manager']},
   {v:'scorecard',ic:'<i class="ti ti-target-arrow"></i>',t:'Manager Scorecard',vi:'KPI điều phối so với mục tiêu',sec:'INSIGHTS',roles:['admin','manager']},
   {v:'progress',ic:'<i class="ti ti-progress"></i>',t:'Lead Progress',vi:'Tiến độ & cập nhật theo từng Lead',sec:'INSIGHTS',roles:['admin','manager']},
@@ -808,7 +809,7 @@ function render(){
   const c=document.getElementById('content');
   const ta=document.getElementById('topActions');ta.innerHTML='';
   const u=me();
-  const T={flow:['Sơ đồ hệ thống','Quy trình vận hành & lộ trình đấu nối AI'],dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Tasks Pool','Kho task chung của toàn đội · danh sách & theo dõi'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],credit:['Credit Overview','Ví credit BU & KPI nhân sự theo tháng'],akpi:['Admin KPI','KPI quản lý CRM · Service Management theo JD & SOW'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],backup:['Sao lưu & Khôi phục','Tải bản sao lưu toàn bộ dữ liệu hoặc khôi phục từ file'],agents:['Automation & API','Ngân sách credit theo BU · endpoint agent (content/ảnh/video) · API đấu nối'],account:['Tài khoản','Cập nhật thông tin cá nhân & đổi mật khẩu'],guide:['Guide & Training','How to use this CRM — at a glance']};
+  const T={flow:['Sơ đồ hệ thống','Quy trình vận hành & lộ trình đấu nối AI'],dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Tasks Pool','Kho task chung của toàn đội · danh sách & theo dõi'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],credit:['Credit Overview','Ví credit BU & KPI nhân sự theo tháng'],akpi:['Admin KPI','KPI quản lý CRM · Service Management theo JD & SOW'],okpi:['KPI Sản lượng','KPI theo sản lượng content/logistics · quy đổi ra credit'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],backup:['Sao lưu & Khôi phục','Tải bản sao lưu toàn bộ dữ liệu hoặc khôi phục từ file'],agents:['Automation & API','Ngân sách credit theo BU · endpoint agent (content/ảnh/video) · API đấu nối'],account:['Tài khoản','Cập nhật thông tin cá nhân & đổi mật khẩu'],guide:['Guide & Training','How to use this CRM — at a glance']};
   document.getElementById('vtitle').textContent=T[VIEW][0];
   document.getElementById('vsub').textContent=T[VIEW][1];
   renderGFBar();
@@ -826,6 +827,7 @@ function render(){
   else if(VIEW==='sla')rSla(c,ta);
   else if(VIEW==='credit')rCredit(c,ta);
   else if(VIEW==='akpi')rAdminKpi(c,ta);
+  else if(VIEW==='okpi')rOutputKpi(c,ta);
   else if(VIEW==='exec')rExec(c);
   else if(VIEW==='scorecard')rScorecard(c,ta);
   else if(VIEW==='leadupd'){VIEW='progress';rProgress(c,ta);}
@@ -2552,6 +2554,57 @@ function rCredit(c,ta){
     <div class="tablewrap"><table><thead><tr><th>BU</th><th style="text-align:right">Budget</th><th style="text-align:right">Đã dùng</th><th style="text-align:right">Phí tháng (₫)</th><th style="text-align:right">Còn lại</th><th>Mức dùng</th><th style="text-align:right">Thu thêm (vượt)</th><th style="text-align:right">Giá trị dư</th></tr></thead><tbody>${buRows}</tbody></table></div></div>
   <div class="panel"><h3><span class="dot" style="background:#3f8a63"></span>KPI nhân sự sản xuất · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· vượt KPI = thưởng thêm (${fmtVnd(bonus)}/credit vượt) · Admin chốt cuối theo KPI quản lý</span></h3>
     <div class="tablewrap"><table><thead><tr><th>Nhân sự</th><th style="text-align:right">KPI tháng</th><th style="text-align:right">Đã nhận</th><th style="text-align:right">Còn lại</th><th>Tiến độ</th><th style="text-align:right">%</th><th style="text-align:right">Thưởng vượt (₫)</th></tr></thead><tbody>${stRows}${adminRow}</tbody></table></div></div>${supW.length?`<div class="panel" style="margin-top:16px"><h3><span class="dot" style="background:#6b5e9c"></span>Điều phối / Giám sát · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· phụ trách & review — KHÔNG tính KPI sản xuất</span></h3><div class="tablewrap"><table><thead><tr><th>Người</th><th>Vai trò</th><th style="text-align:right">Khối lượng phụ trách (credit)</th><th style="text-align:right">Số task</th></tr></thead><tbody>${supW.map(x=>`<tr><td class="name-cell">${esc(x[0])}</td><td><span class="role-badge role-${roleOfName(x[0])}">${roleLabel(roleOfName(x[0]))}</span></td><td style="text-align:right;font-weight:700;color:#6b5e9c">${x[1].used}</td><td style="text-align:right;color:#6b7080">${DB.tasks.filter(t=>t.Owner===x[0]&&taskMonthKey(t)===mk&&t.Status!=='Cancelled').length}</td></tr>`).join('')}</tbody></table></div></div>`:''}`;
+}
+const OUTPUT_KPI={
+ 'Nghi':{role:'Content · Social & Web',note:'Theo sheet "Công việc Phương Nghi" — FADO168 20% · FDS 40% · MICAFI 40%',items:[
+   ['Facebook','bài',{FADO168:15,FDS:15,MICAFI:8}],
+   ['Telegram','bài',{FADO168:12}],
+   ['Zalo','bài',{FDS:2}],
+   ['Tiktok','video',{FADO168:1,FDS:2}],
+   ['Youtube','video',{FDS:1,MICAFI:4}],
+   ['Event','bài',{FDS:2,MICAFI:2}],
+   ['Website','từ',{FADO168:500,FDS:4000,MICAFI:5000}],
+ ]},
+ 'Yến':{role:'Logistics · SEO/Website (2 dự án)',note:'Sơ lược 2 dự án logistics Proship & Ratraco',items:[
+   ['SEO bài viết','bài',{Proship:8,Ratraco:8}],
+   ['Website nội dung','từ',{Proship:4000,Ratraco:4000}],
+   ['Social','bài',{Proship:8,Ratraco:8}],
+   ['Backlink/Off-page','bài',{Proship:4,Ratraco:4}],
+ ]},
+};
+function convBai(){var v=(DB.convRates||{}).bai;return v?Number(v):30;}
+function convVideo(){var v=(DB.convRates||{}).video;return v?Number(v):60;}
+function convTu(){var v=(DB.convRates||{}).tu;return (v&&Number(v)>0)?Number(v):250;}
+window.setConv=(k,v)=>{DB.convRates=DB.convRates||{};DB.convRates[k]=Number(v)||0;save();render();};
+function itemCredit(unit,n){if(unit==='bài')return n*convBai()/15;if(unit==='video')return n*convVideo()/15;if(unit==='từ')return n/convTu();return 0;}
+function rOutputKpi(c,ta){
+  ta.innerHTML=`<label style="font-size:12px;color:var(--muted);white-space:nowrap">Phút/bài <input id="cvBai" type="number" min="1" value="${convBai()}" style="width:64px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13px;margin:0 10px 0 4px"></label><label style="font-size:12px;color:var(--muted);white-space:nowrap">Phút/video <input id="cvVid" type="number" min="1" value="${convVideo()}" style="width:64px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13px;margin:0 10px 0 4px"></label><label style="font-size:12px;color:var(--muted);white-space:nowrap">Từ/credit <input id="cvTu" type="number" min="1" value="${convTu()}" style="width:70px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13px;margin:0 0 0 4px"></label>`;
+  setTimeout(()=>{var a=document.getElementById('cvBai');if(a)a.onchange=e=>setConv('bai',e.target.value);var b=document.getElementById('cvVid');if(b)b.onchange=e=>setConv('video',e.target.value);var d=document.getElementById('cvTu');if(d)d.onchange=e=>setConv('tu',e.target.value);},0);
+  const mk=curMonthKey();
+  let html='<div style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px">KPI theo <b>sản lượng</b> (bài/video/từ) như file Nghi/Yến đang chấm, kèm cột <b>credit quy đổi</b> (theo định mức trên) để đối chiếu với KPI credit 768/tháng và số liệu CRM thực tế. Chỉnh định mức để xem có khớp không.</div>';
+  Object.keys(OUTPUT_KPI).forEach(name=>{
+    const cfg=OUTPUT_KPI[name];
+    const bus=[...new Set([].concat.apply([],cfg.items.map(it=>Object.keys(it[2]))))];
+    let totCr=0,totUnit=0;
+    const rows=cfg.items.map(it=>{const ch=it[0],unit=it[1],m=it[2];const tot=bus.reduce((s,b)=>s+(m[b]||0),0);const cr=itemCredit(unit,tot);totCr+=cr;
+      return `<tr><td class="name-cell">${ch}</td><td style="color:#8c909c">${unit}</td>${bus.map(b=>`<td style="text-align:right">${m[b]||'—'}</td>`).join('')}<td style="text-align:right;font-weight:700">${tot} ${unit}</td><td style="text-align:right;font-weight:800;color:#3f6ea5">${Math.round(cr)} cr</td></tr>`;}).join('');
+    const kpiTarget=staffTarget(name);const actual=staffUsed(name,mk);
+    const pctVsKpi=kpiTarget?Math.round(totCr/kpiTarget*100):0;
+    const diff=Math.round(totCr-kpiTarget);
+    const nx = totCr<kpiTarget*0.7 ? ('Sản lượng quy đổi ('+Math.round(totCr)+'cr) THẤP hơn KPI credit '+kpiTarget+' → hoặc còn việc khác ngoài content, hoặc định mức/phút mỗi đơn vị đang để thấp.') : (totCr>kpiTarget*1.3 ? ('Sản lượng quy đổi cao hơn KPI credit → định mức đang để cao, hoặc tải thật sự vượt.') : ('Khá khớp với KPI credit '+kpiTarget+' (lệch '+(diff>0?'+':'')+diff+' cr).'));
+    html+=`<div class="panel" style="margin-bottom:16px"><h3><span class="dot" style="background:#3f8a63"></span>${name} · ${cfg.role}</h3>
+      <div style="font-size:11.5px;color:var(--muted);margin:-6px 0 12px">${cfg.note}</div>
+      <div class="tablewrap"><table><thead><tr><th>Kênh</th><th>ĐVT</th>${bus.map(b=>`<th style="text-align:right">${esc(b)}</th>`).join('')}<th style="text-align:right">Tổng</th><th style="text-align:right">Credit quy đổi</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:14px">
+        <div><div style="font-size:22px;font-weight:800;color:#3f6ea5">${Math.round(totCr)} cr</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Sản lượng → credit/tháng</div></div>
+        <div><div style="font-size:22px;font-weight:800">${kpiTarget}</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">KPI credit (FTE)</div></div>
+        <div><div style="font-size:22px;font-weight:800;color:${pctVsKpi>=70&&pctVsKpi<=130?'#3f8a63':'#b58a3a'}">${pctVsKpi}%</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Quy đổi / KPI</div></div>
+        <div><div style="font-size:22px;font-weight:800;color:#8a6516">${actual} cr</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">CRM thực tế ${monthLabel(mk).replace('Tháng ','T')}</div></div>
+      </div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.6;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)">💡 ${nx}</div>
+    </div>`;
+  });
+  c.innerHTML=html;
 }
 const ADMIN_KPI=[
  ['Request Intake',5,[['Ghi nhận chính xác yêu cầu BU',30,null],['Nhập task & credit vào hệ thống',30,'hasCredit'],['Phân loại yêu cầu',15,'classified'],['Tạo Brief cho MKT',15,null]]],
