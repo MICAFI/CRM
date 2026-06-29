@@ -1466,6 +1466,16 @@ function showContentModal(t,text,loading){
   var sv=document.getElementById('aiSaveNote'); if(sv)sv.onclick=function(){var v=document.getElementById('aiOut').value;t.Notes=(t.Notes?t.Notes+'\n\n':'')+'[AI content]\n'+v;logHist(t,'Lưu AI content vào ghi chú');save();document.getElementById('modal').classList.remove('show');alert('✓ Đã lưu vào ghi chú task.');};
   var sb=document.getElementById('aiSendBU'); if(sb)sb.onclick=function(){t.Deliverable=document.getElementById('aiOut').value;t.Delivered=true;logHist(t,'📤 Gửi content cho BU');save();document.getElementById('modal').classList.remove('show');try{alert('✓ Đã gửi cho BU. BU sẽ thấy ở Cổng BU.');}catch(e){}};
 }
+function mediaSize(ratio){ratio=(ratio||'').slice(0,4);if(ratio.indexOf('9:16')===0)return '1024x1792';if(ratio.indexOf('16:9')===0||ratio.indexOf('1.91')===0)return '1792x1024';return '1024x1024';}
+window.showImgResult=function(t,url,promptText){
+  var box=document.getElementById('mbox');
+  box.innerHTML='<h2>🖼️ Ảnh AI'+(t['Request Name']?(' · '+esc(t['Request Name'])):'')+'</h2>'
+    +'<div style="text-align:center;margin-bottom:12px"><img src="'+esc(url)+'" style="max-width:100%;max-height:60vh;border-radius:12px;border:1px solid var(--line)"></div>'
+    +(promptText?'<details style="margin-bottom:10px"><summary style="cursor:pointer;font-size:12.5px;color:var(--muted)">Xem prompt đã dùng</summary><div style="font-size:12px;color:var(--ink2);white-space:pre-wrap;margin-top:6px">'+esc(promptText)+'</div></details>':'')
+    +'<div class="mfoot"><a class="btn ghost" href="'+esc(url)+'" target="_blank" rel="noopener">Mở/Tải ảnh ↗</a><button class="btn" id="imgClose">Đóng</button></div>';
+  document.getElementById('modal').classList.add('show');
+  var c=document.getElementById('imgClose'); if(c)c.onclick=function(){document.getElementById('modal').classList.remove('show');};
+};
 window.aiMedia=function(id){
   var t=DB.tasks.find(function(x){return x._id===id;}); if(!t)return;
   var box=document.getElementById('mbox');
@@ -1496,14 +1506,16 @@ window.aiMediaRun=async function(id){
     instr='Bạn là chuyên gia tạo prompt ẢNH AI. Viết '+nv+' PROMPT TIẾNG ANH chi tiết, sẵn sàng dán vào ChatGPT/DALL·E/Grok, để tạo ẢNH cho bài đăng của brand "'+(t.BU||'')+'" — chủ đề: "'+(t['Request Name']||'')+'". Nền tảng: '+plat+'. Tỷ lệ/kích thước: '+ratio+'. Mỗi prompt mô tả: chủ thể chính, bối cảnh, bố cục, phong cách hình ảnh, bảng màu theo brand '+(t.BU||'')+', ánh sáng & mood, có/không text overlay, và phần "avoid" (tránh gì). Đánh số PA1/PA2/... Sau mỗi prompt tiếng Anh thêm 1 dòng tiếng Việt tóm tắt cho người duyệt.';
   }
   instr+=' Thông tin tham khảo: '+refInfo+'.';
-  var payload=agentPayload(t); payload.mode='media'; payload.mediaType=type; payload.ratio=ratio; payload.platform=plat; payload.notes=instr; payload.title='['+type.toUpperCase()+' PROMPT] '+(t['Request Name']||'');
+  var payload=agentPayload(t); payload.mode='media'; payload.mediaType=type; payload.ratio=ratio; payload.size=mediaSize(ratio); payload.platform=plat; payload.notes=instr; payload.title='['+type.toUpperCase()+' PROMPT] '+(t['Request Name']||'');
   showContentModal(t,'⏳ Đang tạo '+nv+' prompt '+type+' ('+ratio+')… chờ vài giây',true);
   try{
     var r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     var text=''; var ct=(r.headers.get('content-type')||'');
     if(ct.indexOf('application/json')>=0){var j=await r.json();text=(j&&(j.content||j.text||j.result))||JSON.stringify(j);}else{text=await r.text();}
     if(!text)text='(Không nhận được nội dung. Kiểm tra Make scenario.)';
-    showContentModal(t,text+'\n\n— Copy prompt → dán vào ChatGPT hoặc Grok để tạo '+type.toLowerCase()+' theo kích thước '+ratio+'.',false);
+    var imgUrl=''; try{ var tx=(''+text).trim(); var m=tx.match(/https?:\/\/[^\s"'<>]+\.(?:png|jpg|jpeg|webp)(?:\?[^\s"'<>]*)?/i); if(m)imgUrl=m[0]; else { try{var jj=JSON.parse(tx); imgUrl=(jj&&(jj.url||jj.image_url||(jj.data&&jj.data[0]&&jj.data[0].url)))||''; }catch(e2){} } }catch(e1){}
+    if(imgUrl){ showImgResult(t,imgUrl,instr); try{t.MediaUrl=imgUrl;logHist(t,'🖼️ Ảnh AI đã tạo');save();}catch(e){} }
+    else showContentModal(t,text+'\n\n— Nếu đây là PROMPT: copy dán vào ChatGPT/Grok. Nếu đã nối API ảnh mà ra chữ này → kiểm tra webhook image trả về URL ảnh.',false);
     try{t.agent=Object.assign({},t.agent,{status:'done',type:type==='Video'?'video':'image',resultAt:new Date().toISOString()});logHist(t,'🎨 AI prompt '+type+' ('+ratio+')');save();}catch(e){}
   }catch(e){
     showContentModal(t,'❌ Lỗi gọi AI: '+((e&&e.message)||e)+'\n\nKiểm tra Make scenario đã BẬT & webhook đúng chưa.',false);
