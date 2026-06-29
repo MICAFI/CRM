@@ -2488,11 +2488,18 @@ function exportReport(){
 /* ---- STAFF ---- */
 let CREDITMONTH='';
 window.setCreditMonth=mk=>{CREDITMONTH=mk;render();};
+function creditPrice(){var p=DB.creditPrice;return (p!=null&&p!=='')?Number(p):50000;}
+window.setCreditPrice=v=>{DB.creditPrice=Number(v)||0;save();render();};
+function fmtVnd(n){return (Math.round(n)||0).toLocaleString('vi-VN')+' ₫';}
+function buFee(bu){var o=DB.buFee||{};var v=o[bu];if(v==null||v===''){return bu==='MICAFI'?36000000:0;}return Number(v);}
+window.setBuFee=(bu,v)=>{DB.buFee=DB.buFee||{};DB.buFee[bu]=(v===''?'':Number(v));save();render();};
+function buPrice(bu){var f=buFee(bu),b=buBudget(bu);return (f>0&&b>0)?Math.round(f/b):creditPrice();}
 function rCredit(c,ta){
   const mk=CREDITMONTH||curMonthKey();
-  const months=[...new Set([curMonthKey(),...DB.tasks.map(taskMonthKey)])].sort().reverse();
-  ta.innerHTML=`<select id="cmSel" style="padding:8px 12px;border:1px solid var(--line);border-radius:9px;font-size:13px;font-family:inherit;background:var(--card);font-weight:600;cursor:pointer">${months.map(m=>`<option value="${m}" ${m===mk?'selected':''}>${monthLabel(m)}</option>`).join('')}</select>`;
-  setTimeout(()=>{const s=document.getElementById('cmSel');if(s)s.onchange=e=>setCreditMonth(e.target.value);},0);
+  const months=[];for(var _m=1;_m<=12;_m++)months.push('2026-'+('0'+_m).slice(-2));
+  const price=creditPrice();
+  ta.innerHTML=`<select id="cmSel" style="padding:8px 12px;border:1px solid var(--line);border-radius:9px;font-size:13px;font-family:inherit;background:var(--card);font-weight:600;cursor:pointer">${months.map(m=>`<option value="${m}" ${m===mk?'selected':''}>${monthLabel(m)}</option>`).join('')}</select><label style="font-size:12px;color:var(--muted);margin-left:10px;white-space:nowrap">Giá/credit mặc định (₫) <input id="cmPrice" type="number" min="0" step="1000" value="${price}" style="width:108px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:13px;margin-left:4px"></label>`;
+  setTimeout(()=>{const s=document.getElementById('cmSel');if(s)s.onchange=e=>setCreditMonth(e.target.value);const p=document.getElementById('cmPrice');if(p)p.onchange=e=>setCreditPrice(e.target.value);},0);
   const buList=[...new Set([...DB.tasks.filter(t=>taskMonthKey(t)===mk&&t.BU).map(t=>t.BU),...Object.keys(DB.buCredits||{})])];
   const buW=buList.map(b=>[b,buWallet(b,mk)]).sort((a,b)=>b[1].used-a[1].used);
   const people=staffPeople();
@@ -2502,20 +2509,22 @@ function rCredit(c,ta){
   const buBud=buW.reduce((s,x)=>s+x[1].budget,0),buUsedT=buW.reduce((s,x)=>s+x[1].used,0),buPendT=buW.reduce((s,x)=>s+x[1].pending,0);
   const stTar=stW.reduce((s,x)=>s+x[1].target,0),stUsedT=stW.reduce((s,x)=>s+x[1].used,0);
   const buOver=buW.filter(x=>x[1].remaining<0).length,stOver=stW.filter(x=>x[1].remaining<0).length;
+  const totalOverCr=buW.reduce((s,x)=>s+(x[1].remaining<0?-x[1].remaining:0),0);
+  const totalFee=buW.reduce((s,x)=>s+((x[1].remaining<0?-x[1].remaining:0)*buPrice(x[0])),0);
   const colOf=p=>p>=100?'#b4524f':(p>=80?'#b58a3a':'#3f8a63');
   const bar=(pct,col)=>`<div style="height:8px;background:var(--track);border-radius:5px;overflow:hidden"><div style="height:100%;border-radius:5px;background:${col};width:${Math.min(100,pct)}%"></div></div>`;
   const kpi=(lab,num,note,col)=>`<div class="kpi"><div class="bar" style="background:${col}"></div><div class="lab">${lab}</div><div class="num">${num}</div><div class="note">${note}</div></div>`;
-  const buRows=buW.map(x=>{const b=x[0],w=x[1];return `<tr><td class="name-cell">${esc(b)}</td><td style="text-align:right">${w.budget}</td><td style="text-align:right;font-weight:700;color:#46506b">${w.used}</td><td style="text-align:right;color:#8a6516">${w.pending}</td><td style="text-align:right;font-weight:700;color:${w.remaining<0?'#b4524f':'#2f6d4d'}">${w.remaining<0?'vượt '+Math.abs(w.remaining):w.remaining}</td><td style="min-width:150px">${bar(w.pct,colOf(w.pct))}</td><td style="text-align:right;color:#6b7080">${w.pct}%</td></tr>`;}).join('')||'<tr><td colspan="7" class="empty">Chưa có dữ liệu tháng này</td></tr>';
+  const buRows=buW.map(x=>{const b=x[0],w=x[1];const over=w.remaining<0?-w.remaining:0;const overPct=over?Math.round(over/w.budget*100):0;return `<tr><td class="name-cell">${esc(b)}</td><td style="text-align:right">${w.budget}</td><td style="text-align:right;font-weight:700;color:#46506b">${w.used}</td><td style="text-align:right"><input type="number" min="0" step="1000000" value="${buFee(b)||''}" onchange="setBuFee('${b}',this.value)" style="width:118px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:12px;text-align:right" placeholder="—"><div style="font-size:10px;color:#8c909c;margin-top:2px">${fmtVnd(buPrice(b))}/cr</div></td><td style="text-align:right;font-weight:700;color:${w.remaining<0?'#b4524f':'#2f6d4d'}">${w.remaining<0?'vượt '+over:w.remaining}</td><td style="min-width:120px">${bar(w.pct,colOf(w.pct))}<span style="font-size:10.5px;color:#8c909c">${w.pct}%</span></td><td style="text-align:right;font-weight:700;color:${over?'#b4524f':'#8c909c'}">${over?'+'+overPct+'%':'—'}</td><td style="text-align:right;font-weight:800;color:${over?'#b4524f':'#9aa0ac'}">${over?fmtVnd(over*buPrice(b)):'—'}</td></tr>`;}).join('')||'<tr><td colspan="8" class="empty">Chưa có dữ liệu tháng này</td></tr>';
   const stRows=stW.map(x=>{const n=x[0],w=x[1];return `<tr><td class="name-cell">${esc(n)}</td><td style="text-align:right">${w.target}</td><td style="text-align:right;font-weight:700;color:#46506b">${w.used}</td><td style="text-align:right;font-weight:700;color:${w.remaining<0?'#b4524f':'#2f6d4d'}">${w.remaining<0?'vượt '+Math.abs(w.remaining):w.remaining}</td><td style="min-width:150px">${bar(w.pct,colOf(w.pct))}</td><td style="text-align:right;color:#6b7080">${w.pct}%</td></tr>`;}).join('')||'<tr><td colspan="6" class="empty">Chưa có nhân sự</td></tr>';
   c.innerHTML=`
   <div class="kpis">
     ${kpi('VÍ BU · ĐÃ DÙNG',buUsedT,'/ '+buBud+' budget · chờ '+buPendT,(buUsedT>buBud?'#b4524f':'#3f6ea5'))}
-    ${kpi('BU VƯỢT NGÂN SÁCH',buOver,'trong '+buW.length+' BU có việc',buOver?'#b4524f':'#3f8a63')}
-    ${kpi('KPI NHÂN SỰ · ĐÃ NHẬN',stUsedT,'/ '+stTar+' chỉ tiêu',(stUsedT>stTar?'#b4524f':'#3f8a63'))}
+    ${kpi('BU VƯỢT NGÂN SÁCH',buOver,'vượt '+totalOverCr+' credit · '+buW.length+' BU có việc',buOver?'#b4524f':'#3f8a63')}
+    ${kpi('PHẢI THU THÊM',fmtVnd(totalFee),totalOverCr+' credit vượt · giá theo phí từng BU',totalFee?'#b4524f':'#3f8a63')}
     ${kpi('NHÂN SỰ VƯỢT KPI',stOver,'trong '+stW.length+' người',stOver?'#b4524f':'#3f8a63')}
   </div>
-  <div class="panel" style="margin-bottom:16px"><h3><span class="dot" style="background:#3f6ea5"></span>Ví credit theo BU · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· budget mặc định ${DEFAULT_BU_CREDIT}/tháng · sắp theo mức dùng</span></h3>
-    <div class="tablewrap"><table><thead><tr><th>BU</th><th style="text-align:right">Budget</th><th style="text-align:right">Đã dùng</th><th style="text-align:right">Chờ duyệt</th><th style="text-align:right">Còn lại</th><th>Mức dùng</th><th style="text-align:right">%</th></tr></thead><tbody>${buRows}</tbody></table></div></div>
+  <div class="panel" style="margin-bottom:16px"><h3><span class="dot" style="background:#3f6ea5"></span>Ví credit theo BU · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· budget mặc định ${DEFAULT_BU_CREDIT}/tháng · nhập phí tháng mỗi BU → tự suy ra giá/credit · vượt thì thu thêm</span></h3>
+    <div class="tablewrap"><table><thead><tr><th>BU</th><th style="text-align:right">Budget</th><th style="text-align:right">Đã dùng</th><th style="text-align:right">Phí tháng (₫)</th><th style="text-align:right">Còn lại</th><th>Mức dùng</th><th style="text-align:right">Vượt %</th><th style="text-align:right">Phải thu thêm</th></tr></thead><tbody>${buRows}</tbody></table></div></div>
   <div class="panel"><h3><span class="dot" style="background:#3f8a63"></span>KPI nhân sự sản xuất · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· mặc định ${DEFAULT_STAFF_CREDIT}/tháng (1 FTE) · chỉ tính người trực tiếp làm</span></h3>
     <div class="tablewrap"><table><thead><tr><th>Nhân sự</th><th style="text-align:right">KPI tháng</th><th style="text-align:right">Đã nhận</th><th style="text-align:right">Còn lại</th><th>Tiến độ</th><th style="text-align:right">%</th></tr></thead><tbody>${stRows}</tbody></table></div></div>${supW.length?`<div class="panel" style="margin-top:16px"><h3><span class="dot" style="background:#6b5e9c"></span>Điều phối / Giám sát · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· phụ trách & review — KHÔNG tính KPI sản xuất</span></h3><div class="tablewrap"><table><thead><tr><th>Người</th><th>Vai trò</th><th style="text-align:right">Khối lượng phụ trách (credit)</th><th style="text-align:right">Số task</th></tr></thead><tbody>${supW.map(x=>`<tr><td class="name-cell">${esc(x[0])}</td><td><span class="role-badge role-${roleOfName(x[0])}">${roleLabel(roleOfName(x[0]))}</span></td><td style="text-align:right;font-weight:700;color:#6b5e9c">${x[1].used}</td><td style="text-align:right;color:#6b7080">${DB.tasks.filter(t=>t.Owner===x[0]&&taskMonthKey(t)===mk&&t.Status!=='Cancelled').length}</td></tr>`).join('')}</tbody></table></div></div>`:''}`;
 }
