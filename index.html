@@ -1186,7 +1186,7 @@ window.taskModal=(id,presetType)=>{
         <button type="button" class="btn ghost" onclick="mSubAdd()">Thêm</button>
       </div>
     </div>
-    <div class="mfoot">${id?`<button class="btn ghost" onclick="sendToAgent('${id}')" title="POST task sang endpoint agent (content/ảnh/video)">⚡ Gửi tới Agent</button><button class="btn ghost" onclick="aiWriteContent('${id}')" title="Gọi AI (Make) viết content cho task này">✍️ AI viết content</button><button class="btn ghost" onclick="aiCampaign('${id}')" title="AI lên caption đa kênh (FB/Google Search+PMax/TikTok/Zalo) chuẩn brand BU + gợi ý ảnh/video">🎯 AI lên campaign</button>`:''}<button class="btn ghost" id="tCancel">Cancel</button><button class="btn gold" id="tSave">${id?'Save':'Assign'}</button></div>`);
+    <div class="mfoot">${id?`<button class="btn ghost" onclick="sendToAgent('${id}')" title="POST task sang endpoint agent (content/ảnh/video)">⚡ Gửi tới Agent</button><button class="btn ghost" onclick="aiWriteContent('${id}')" title="Gọi AI (Make) viết content cho task này">✍️ AI viết content</button><button class="btn ghost" onclick="aiCampaign('${id}')" title="AI lên caption đa kênh (FB/Google Search+PMax/TikTok/Zalo) chuẩn brand BU + gợi ý ảnh/video">🎯 AI lên campaign</button><button class="btn ghost" onclick="aiMedia('${id}')" title="AI viết prompt Ảnh/Video (kèm kích thước) để dán vào ChatGPT/Grok">🎨 AI prompt ảnh/video</button>`:''}<button class="btn ghost" id="tCancel">Cancel</button><button class="btn gold" id="tSave">${id?'Save':'Assign'}</button></div>`);
   document.getElementById('tCancel').addEventListener('click',mClose);
   document.getElementById('tSave').addEventListener('click',()=>saveTask(id||''));
   MSUBS=(t.subtasks||[]).map(s=>({...s}));
@@ -1466,6 +1466,49 @@ function showContentModal(t,text,loading){
   var sv=document.getElementById('aiSaveNote'); if(sv)sv.onclick=function(){var v=document.getElementById('aiOut').value;t.Notes=(t.Notes?t.Notes+'\n\n':'')+'[AI content]\n'+v;logHist(t,'Lưu AI content vào ghi chú');save();document.getElementById('modal').classList.remove('show');alert('✓ Đã lưu vào ghi chú task.');};
   var sb=document.getElementById('aiSendBU'); if(sb)sb.onclick=function(){t.Deliverable=document.getElementById('aiOut').value;t.Delivered=true;logHist(t,'📤 Gửi content cho BU');save();document.getElementById('modal').classList.remove('show');try{alert('✓ Đã gửi cho BU. BU sẽ thấy ở Cổng BU.');}catch(e){}};
 }
+window.aiMedia=function(id){
+  var t=DB.tasks.find(function(x){return x._id===id;}); if(!t)return;
+  var box=document.getElementById('mbox');
+  var S='width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-size:13.5px;background:var(--input-bg);color:var(--ink);box-sizing:border-box';
+  box.innerHTML='<h2>🎨 AI prompt Ảnh / Video'+(t['Request Name']?(' · '+esc(t['Request Name'])):'')+'</h2>'
+    +'<div style="font-size:12.5px;color:var(--muted);margin:-8px 0 14px">AI viết <b>prompt chuẩn (tiếng Anh, kèm kích thước)</b> theo brand <b>'+esc(t.BU||'')+'</b> → copy dán vào <b>ChatGPT</b> hoặc <b>Grok</b> để tạo ảnh/video.</div>'
+    +'<div class="mgrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+    +'<div><label style="font-size:12px;font-weight:600;color:var(--ink2);display:block;margin-bottom:5px">Loại</label><select id="md_type" style="'+S+'"><option value="Ảnh">🖼️ Ảnh</option><option value="Video">🎬 Video</option></select></div>'
+    +'<div><label style="font-size:12px;font-weight:600;color:var(--ink2);display:block;margin-bottom:5px">Tỷ lệ / kích thước</label><select id="md_ratio" style="'+S+'"><option>1:1 · 1080×1080 (vuông – feed)</option><option>4:5 · 1080×1350 (đứng – feed)</option><option>9:16 · 1080×1920 (story/reel/tiktok)</option><option>16:9 · 1920×1080 (youtube/landscape)</option><option>1.91:1 · 1200×628 (link FB/Google)</option></select></div>'
+    +'<div><label style="font-size:12px;font-weight:600;color:var(--ink2);display:block;margin-bottom:5px">Nền tảng</label><select id="md_plat" style="'+S+'"><option>Facebook</option><option>Instagram</option><option>TikTok</option><option>YouTube</option><option>Google Ads</option><option>Zalo</option></select></div>'
+    +'<div><label style="font-size:12px;font-weight:600;color:var(--ink2);display:block;margin-bottom:5px">Số biến thể</label><select id="md_n" style="'+S+'"><option>3</option><option selected>4</option></select></div>'
+    +'</div>'
+    +'<div class="mfoot" style="margin-top:16px"><button class="btn ghost" id="mdClose">Đóng</button><button class="btn gold" id="mdGo">⚡ Tạo prompt</button></div>';
+  document.getElementById('modal').classList.add('show');
+  document.getElementById('mdClose').onclick=function(){document.getElementById('modal').classList.remove('show');};
+  document.getElementById('mdGo').onclick=function(){aiMediaRun(id);};
+};
+window.aiMediaRun=async function(id){
+  var t=DB.tasks.find(function(x){return x._id===id;}); if(!t)return;
+  var g=function(k){var e=document.getElementById(k);return e?e.value:'';};
+  var type=g('md_type'),ratio=g('md_ratio'),plat=g('md_plat'),nv=g('md_n');
+  var a=DB.agents||{}; var url=((a.image||a.content||a.webhook||'https://hook.us2.make.com/sivw06ded7skk1n4ugv3ymmteo27cdmm')+'').trim();
+  var refInfo=(t.CampaignRef||t.Notes||'(không có)');
+  var instr;
+  if(type==='Video'){
+    instr='Bạn là chuyên gia tạo prompt VIDEO AI. Viết '+nv+' PROMPT TIẾNG ANH chi tiết, sẵn sàng dán vào ChatGPT/Grok/tool video, để tạo VIDEO NGẮN cho bài đăng của brand "'+(t.BU||'')+'" — chủ đề: "'+(t['Request Name']||'')+'". Nền tảng: '+plat+'. Tỷ lệ/kích thước: '+ratio+', thời lượng ~15-30s. Mỗi prompt mô tả: ý tưởng tổng thể, SHOT LIST từng cảnh (hành động/góc máy/chuyển động), bảng màu & mood theo brand, nhạc/âm thanh gợi ý, text/caption on-screen, và phần "avoid". Đánh số PA1/PA2/... Sau mỗi prompt tiếng Anh thêm 1 dòng tiếng Việt tóm tắt cho người duyệt.';
+  } else {
+    instr='Bạn là chuyên gia tạo prompt ẢNH AI. Viết '+nv+' PROMPT TIẾNG ANH chi tiết, sẵn sàng dán vào ChatGPT/DALL·E/Grok, để tạo ẢNH cho bài đăng của brand "'+(t.BU||'')+'" — chủ đề: "'+(t['Request Name']||'')+'". Nền tảng: '+plat+'. Tỷ lệ/kích thước: '+ratio+'. Mỗi prompt mô tả: chủ thể chính, bối cảnh, bố cục, phong cách hình ảnh, bảng màu theo brand '+(t.BU||'')+', ánh sáng & mood, có/không text overlay, và phần "avoid" (tránh gì). Đánh số PA1/PA2/... Sau mỗi prompt tiếng Anh thêm 1 dòng tiếng Việt tóm tắt cho người duyệt.';
+  }
+  instr+=' Thông tin tham khảo: '+refInfo+'.';
+  var payload=agentPayload(t); payload.mode='media'; payload.mediaType=type; payload.ratio=ratio; payload.platform=plat; payload.notes=instr; payload.title='['+type.toUpperCase()+' PROMPT] '+(t['Request Name']||'');
+  showContentModal(t,'⏳ Đang tạo '+nv+' prompt '+type+' ('+ratio+')… chờ vài giây',true);
+  try{
+    var r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var text=''; var ct=(r.headers.get('content-type')||'');
+    if(ct.indexOf('application/json')>=0){var j=await r.json();text=(j&&(j.content||j.text||j.result))||JSON.stringify(j);}else{text=await r.text();}
+    if(!text)text='(Không nhận được nội dung. Kiểm tra Make scenario.)';
+    showContentModal(t,text+'\n\n— Copy prompt → dán vào ChatGPT hoặc Grok để tạo '+type.toLowerCase()+' theo kích thước '+ratio+'.',false);
+    try{t.agent=Object.assign({},t.agent,{status:'done',type:type==='Video'?'video':'image',resultAt:new Date().toISOString()});logHist(t,'🎨 AI prompt '+type+' ('+ratio+')');save();}catch(e){}
+  }catch(e){
+    showContentModal(t,'❌ Lỗi gọi AI: '+((e&&e.message)||e)+'\n\nKiểm tra Make scenario đã BẬT & webhook đúng chưa.',false);
+  }
+};
 window.aiCampaign=function(id){
   var t=DB.tasks.find(function(x){return x._id===id;}); if(!t)return;
   var chans=['Facebook','Google Ads','TikTok','Zalo','YouTube'];
