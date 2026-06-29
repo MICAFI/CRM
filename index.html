@@ -451,7 +451,17 @@ function curMonthKey(){const d=new Date();return d.getFullYear()+'-'+String(d.ge
 function taskMonthKey(t){const d=parseDate(t['Start Date']||t['Request Date']);return d?d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'):curMonthKey();}
 function buUsed(bu,mk){mk=mk||curMonthKey();return DB.tasks.filter(t=>t.BU===bu&&buConsumes(t)&&taskMonthKey(t)===mk).reduce((s,t)=>s+creditOf(t),0);}
 function buPending(bu,mk){mk=mk||curMonthKey();return DB.tasks.filter(t=>t.BU===bu&&t.Status==='Open'&&taskMonthKey(t)===mk).reduce((s,t)=>s+creditOf(t),0);}
-function buWallet(bu){const budget=buBudget(bu),used=buUsed(bu),pending=buPending(bu);return {budget,used,pending,remaining:budget-used,pct:budget?Math.min(100,Math.round(used/budget*100)):0};}
+function buWallet(bu,mk){const budget=buBudget(bu),used=buUsed(bu,mk),pending=buPending(bu,mk);return {budget,used,pending,remaining:budget-used,pct:budget?Math.min(100,Math.round(used/budget*100)):0};}
+function monthLabel(mk){const p=String(mk).split('-');return p[1]?('Tháng '+Number(p[1])+'/'+p[0]):mk;}
+// === KPI CREDIT THEO NHÂN SỰ MKT (1 credit = 15 phút · 1 FTE = 768/tháng) ===
+const DEFAULT_STAFF_CREDIT=768;
+function staffRecord(name){return (DB.staff||[]).find(s=>s.name===name)||null;}
+function staffTarget(name){const s=staffRecord(name);if(s&&s.monthlyCredit!=null&&s.monthlyCredit!=='')return Number(s.monthlyCredit);return DEFAULT_STAFF_CREDIT;}
+function staffConsumes(t){return !!t.Owner&&t.Status!=='Cancelled';}
+function staffUsed(name,mk){mk=mk||curMonthKey();return DB.tasks.filter(t=>t.Owner===name&&staffConsumes(t)&&taskMonthKey(t)===mk).reduce((s,t)=>s+creditOf(t),0);}
+function staffWallet(name,mk){const target=staffTarget(name),used=staffUsed(name,mk);return {target,used,remaining:target-used,pct:target?Math.round(used/target*100):0};}
+function staffPeople(){const set=new Set();(DB.staff||[]).forEach(s=>{if(s.name)set.add(s.name);});(DB.users||[]).forEach(u=>{if(['staff','lead','manager'].includes(u.role)&&u.name)set.add(u.name);});DB.tasks.forEach(t=>{if(t.Owner)set.add(t.Owner);});return [...set];}
+function staffKpiBanner(name){const w=staffWallet(name);const over=w.remaining<0;const col=w.pct>=100?'#b4524f':(w.pct>=80?'#b58a3a':'#3f8a63');return `<div class="panel" style="margin-bottom:14px"><div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap"><div><div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">KPI credit · ${monthLabel(curMonthKey())}</div><div style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-top:2px">${over?'<span style="color:#b4524f">Vượt '+Math.abs(w.remaining)+'</span>':w.remaining+' còn lại'} <span style="font-size:13px;font-weight:600;color:var(--muted)">/ ${w.target} KPI tháng</span></div></div><div style="flex:1;min-width:170px"><div style="height:9px;background:var(--track);border-radius:6px;overflow:hidden"><div style="height:100%;border-radius:6px;background:${col};width:${Math.min(100,w.pct)}%"></div></div><div style="font-size:11px;color:var(--muted);margin-top:5px">Đã nhận ${w.used} credit · đạt ${w.pct}% KPI ${over?'· đang vượt chỉ tiêu':(w.pct>=80?'· sắp đầy':'· còn dư')}</div></div></div></div>`;}
 
 /* ---- progress / deadline / quality helpers ---- */
 function today(){return new Date().toISOString().slice(0,10);}
@@ -655,27 +665,27 @@ function me(){return DB.users.find(u=>u.id===DB.session);}
 
 /* ============ ROLE-BASED MENU ============ */
 const NAV=[
-  {v:'flow',ic:'<i class="ti ti-sitemap"></i>',t:'Sơ đồ hệ thống',sec:'WORK',roles:['admin','manager','lead','staff']},
-  {v:'dash',ic:'<i class=\"ti ti-layout-dashboard\"></i>',t:'Overview',sec:'WORK',roles:['admin','manager','lead','staff']},
-  {v:'focus',ic:'<i class=\"ti ti-target\"></i>',t:'My Focus',sec:'WORK',roles:['staff']},
-  {v:'kanban',ic:'<i class=\"ti ti-layout-kanban\"></i>',t:'Kanban Board',sec:'WORK',roles:['admin','manager','lead','staff']},
-  {v:'tasks',ic:'<i class=\"ti ti-checklist\"></i>',t:'Marketing Tasks',sec:'WORK',roles:['admin','manager','lead','staff']},
-  {v:'recur',ic:'<i class=\"ti ti-repeat\"></i>',t:'Công việc định kỳ',sec:'WORK',roles:['admin','manager','lead','staff']},
-  {v:'backlog',ic:'<i class=\"ti ti-stack-2\"></i>',t:'Backlog',sec:'WORK',roles:['admin','manager']},
-  {v:'requests',ic:'<i class=\"ti ti-mail\"></i>',t:'Yêu cầu mới',sec:'WORK',roles:['admin','manager']},
-  {v:'exec',ic:'<i class=\"ti ti-star\"></i>',t:'Executive Summary',sec:'INSIGHTS',roles:['admin','manager']},
-  {v:'scorecard',ic:'<i class=\"ti ti-target-arrow\"></i>',t:'Manager Scorecard',sec:'INSIGHTS',roles:['admin','manager']},
-  {v:'progress',ic:'<i class=\"ti ti-progress\"></i>',t:'Tiến độ theo Lead',sec:'INSIGHTS',roles:['admin','manager']},
-  {v:'sla',ic:'<i class=\"ti ti-clock\"></i>',t:'SLA',sec:'INSIGHTS',roles:['admin','manager']},
-  {v:'perf',ic:'<i class=\"ti ti-chart-bar\"></i>',t:'Hiệu suất & Báo cáo',sec:'INSIGHTS',roles:['admin','manager']},
-  {v:'workload',ic:'<i class=\"ti ti-scale\"></i>',t:'Workload',sec:'INSIGHTS',roles:['admin','manager']},
-  {v:'staff',ic:'<i class=\"ti ti-users\"></i>',t:'People',sec:'ADMIN',roles:['admin']},
-  {v:'dept',ic:'<i class=\"ti ti-building\"></i>',t:'Departments',sec:'ADMIN',roles:['admin']},
-  {v:'users',ic:'<i class=\"ti ti-key\"></i>',t:'Accounts & Roles',sec:'ADMIN',roles:['admin']},
-  {v:'backup',ic:'<i class=\"ti ti-database\"></i>',t:'Sao lưu & Khôi phục',sec:'ADMIN',roles:['admin']},
-  {v:'agents',ic:'<i class=\"ti ti-bolt\"></i>',t:'Automation & API',sec:'ADMIN',roles:['admin','manager']},
-  {v:'account',ic:'<i class=\"ti ti-settings\"></i>',t:'Tài khoản',sec:'HELP',roles:['admin','manager','lead','staff']},
-  {v:'guide',ic:'<i class=\"ti ti-book\"></i>',t:'Guide & Training',sec:'HELP',roles:['admin','manager','lead','staff']},
+  {v:'flow',ic:'<i class="ti ti-sitemap"></i>',t:'System Map',vi:'Sơ đồ hệ thống — quy trình & lộ trình AI',sec:'WORK',roles:['admin','manager','lead','staff']},
+  {v:'dash',ic:'<i class="ti ti-layout-dashboard"></i>',t:'Overview',vi:'Tổng quan workload toàn nhóm',sec:'WORK',roles:['admin','manager','lead','staff']},
+  {v:'focus',ic:'<i class="ti ti-target"></i>',t:'My Focus',vi:'Việc của tôi cần xử lý ngay',sec:'WORK',roles:['staff']},
+  {v:'kanban',ic:'<i class="ti ti-layout-kanban"></i>',t:'Kanban Board',vi:'Bảng Kanban — kéo thả đổi trạng thái',sec:'WORK',roles:['admin','manager','lead','staff']},
+  {v:'tasks',ic:'<i class="ti ti-checklist"></i>',t:'Tasks Pool',vi:'Kho task chung — danh sách & theo dõi',sec:'WORK',roles:['admin','manager','lead','staff']},
+  {v:'recur',ic:'<i class="ti ti-repeat"></i>',t:'Recurring',vi:'Công việc định kỳ',sec:'WORK',roles:['admin','manager','lead','staff']},
+  {v:'backlog',ic:'<i class="ti ti-stack-2"></i>',t:'Backlog',vi:'Việc tồn đọng · quá hạn · đang chờ',sec:'WORK',roles:['admin','manager']},
+  {v:'requests',ic:'<i class="ti ti-mail"></i>',t:'New Requests',vi:'Yêu cầu mới — duyệt & giao cho Lead',sec:'WORK',roles:['admin','manager']},
+  {v:'exec',ic:'<i class="ti ti-star"></i>',t:'Executive Summary',vi:'Tóm tắt cho ban lãnh đạo',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'scorecard',ic:'<i class="ti ti-target-arrow"></i>',t:'Manager Scorecard',vi:'KPI điều phối so với mục tiêu',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'progress',ic:'<i class="ti ti-progress"></i>',t:'Lead Progress',vi:'Tiến độ & cập nhật theo từng Lead',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'sla',ic:'<i class="ti ti-clock"></i>',t:'SLA',vi:'% đúng hạn & vi phạm SLA',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'perf',ic:'<i class="ti ti-chart-bar"></i>',t:'Performance',vi:'Hiệu suất & báo cáo theo người / BU',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'workload',ic:'<i class="ti ti-scale"></i>',t:'Workload',vi:'Năng lực vs khối lượng mỗi người',sec:'INSIGHTS',roles:['admin','manager']},
+  {v:'staff',ic:'<i class="ti ti-users"></i>',t:'People',vi:'Quản lý nhân sự & KPI credit tháng',sec:'ADMIN',roles:['admin']},
+  {v:'dept',ic:'<i class="ti ti-building"></i>',t:'Departments',vi:'Cơ cấu phòng ban Marketing',sec:'ADMIN',roles:['admin']},
+  {v:'users',ic:'<i class="ti ti-key"></i>',t:'Accounts & Roles',vi:'Tài khoản đăng nhập & phân quyền',sec:'ADMIN',roles:['admin']},
+  {v:'backup',ic:'<i class="ti ti-database"></i>',t:'Backup & Restore',vi:'Sao lưu & khôi phục dữ liệu',sec:'ADMIN',roles:['admin']},
+  {v:'agents',ic:'<i class="ti ti-bolt"></i>',t:'Automation & API',vi:'Ngân sách credit BU · endpoint agent · API',sec:'ADMIN',roles:['admin','manager']},
+  {v:'account',ic:'<i class="ti ti-settings"></i>',t:'Account',vi:'Thông tin cá nhân & đổi mật khẩu',sec:'HELP',roles:['admin','manager','lead','staff']},
+  {v:'guide',ic:'<i class="ti ti-book"></i>',t:'Guide & Training',vi:'Hướng dẫn sử dụng CRM',sec:'HELP',roles:['admin','manager','lead','staff']},
 ];
 function buildMenu(){
   const r=me().role;
@@ -698,7 +708,7 @@ function buildMenu(){
       rowStyle=' style="background:rgba(180,82,79,.15);box-shadow:inset 2px 0 0 #b4524f"';
       icStyle=' style="color:#d9817e"';
     }
-    html+=`<a data-v="${n.v}" class="${n.v===VIEW?'active':''}"${rowStyle}><span class="ic"${icStyle}>${n.ic}</span><span>${n.t}</span>${badge}</a>`;
+    html+=`<a data-v="${n.v}" title="${esc(n.vi||n.t)}" class="${n.v===VIEW?'active':''}"${rowStyle}><span class="ic"${icStyle}>${n.ic}</span><span>${n.t}</span>${badge}</a>`;
   });
   document.getElementById('menu').innerHTML=html;
   document.querySelectorAll('#menu a').forEach(a=>a.onclick=()=>{VIEW=a.dataset.v;buildMenu();render();});
@@ -791,7 +801,7 @@ function render(){
   const c=document.getElementById('content');
   const ta=document.getElementById('topActions');ta.innerHTML='';
   const u=me();
-  const T={flow:['Sơ đồ hệ thống','Quy trình vận hành & lộ trình đấu nối AI'],dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Marketing Tasks','Task list & tracking'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],backup:['Sao lưu & Khôi phục','Tải bản sao lưu toàn bộ dữ liệu hoặc khôi phục từ file'],agents:['Automation & API','Ngân sách credit theo BU · endpoint agent (content/ảnh/video) · API đấu nối'],account:['Tài khoản','Cập nhật thông tin cá nhân & đổi mật khẩu'],guide:['Guide & Training','How to use this CRM — at a glance']};
+  const T={flow:['Sơ đồ hệ thống','Quy trình vận hành & lộ trình đấu nối AI'],dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Tasks Pool','Kho task chung của toàn đội · danh sách & theo dõi'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],backup:['Sao lưu & Khôi phục','Tải bản sao lưu toàn bộ dữ liệu hoặc khôi phục từ file'],agents:['Automation & API','Ngân sách credit theo BU · endpoint agent (content/ảnh/video) · API đấu nối'],account:['Tài khoản','Cập nhật thông tin cá nhân & đổi mật khẩu'],guide:['Guide & Training','How to use this CRM — at a glance']};
   document.getElementById('vtitle').textContent=T[VIEW][0];
   document.getElementById('vsub').textContent=T[VIEW][1];
   renderGFBar();
@@ -1197,9 +1207,11 @@ function autoId(){return 'MKT-'+new Date().getFullYear()+'-'+String(DB.tasks.len
 
 /* ===================== CỔNG BU (nhúng trực tiếp) ===================== */
 let BUVIEW='submit';
+let BUMONTH='';
 function buName(){const u=me();return (u&&u.bu)||'';}
 function buToast(msg){let el=document.getElementById('buToast');if(!el){el=document.createElement('div');el.id='buToast';el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#17191f;color:#fff;padding:12px 20px;border-radius:10px;font-size:13.5px;font-weight:600;z-index:200;box-shadow:0 8px 30px rgba(0,0,0,.3);font-family:inherit;opacity:1';document.body.appendChild(el);}el.textContent=msg;el.style.transition='none';el.style.opacity='1';clearTimeout(el._t);el._t=setTimeout(()=>{el.style.transition='opacity .4s';el.style.opacity='0';},2800);}
 window.buGo=v=>{BUVIEW=v;renderBuPortal();};
+window.buSetMonth=mk=>{BUMONTH=mk;renderBuPortal();};
 window.buLogout=()=>{DB.session=null;try{localStorage.setItem(SESS_KEY,'');}catch(e){}location.reload();};
 function buTab(v,label){const on=BUVIEW===v;return `<button onclick="buGo('${v}')" style="padding:9px 16px;border-radius:9px;border:1px solid ${on?'#17191f':'#dfe1e6'};background:${on?'#17191f':'#fff'};color:${on?'#fff':'#3b3f4a'};font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">${label}</button>`;}
 function buMatrixMini(){
@@ -1212,11 +1224,11 @@ function buStatusPill(s){
   const x=m[s]||[s||'—','#6b7080','var(--track)'];
   return `<span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:6px;font-size:11.5px;font-weight:700;background:${x[2]};color:${x[1]}"><span style="width:6px;height:6px;border-radius:50%;background:${x[1]}"></span>${x[0]}</span>`;
 }
-function buWalletCard(w){
+function buWalletCard(w,mk){
   const barCol=w.pct>=100?'#b4524f':(w.pct>=80?'#b58a3a':'#3f8a63');
   return `<div style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 26px;box-shadow:0 2px 10px rgba(23,25,31,.04)">
     <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:16px">
-      <div><div style="font-size:11px;font-weight:700;color:#8c909c;letter-spacing:.6px;text-transform:uppercase">Ví credit · tháng này</div>
+      <div><div style="font-size:11px;font-weight:700;color:#8c909c;letter-spacing:.6px;text-transform:uppercase">Ví credit · ${mk?monthLabel(mk):'tháng này'}</div>
       <div style="font-size:30px;font-weight:800;letter-spacing:-1px;margin-top:3px">${w.remaining} <span style="font-size:15px;font-weight:600;color:#8c909c">/ ${w.budget} còn lại</span></div></div>
       <div style="margin-left:auto;display:flex;gap:24px">
         <div><div style="font-size:20px;font-weight:800;color:#345e8a">${w.used}</div><div style="font-size:10.5px;font-weight:700;color:#8c909c;text-transform:uppercase;letter-spacing:.3px">Đã dùng</div></div>
@@ -1253,6 +1265,15 @@ function buSubmitForm(w){
         <div style="flex:1 1 200px"><label style="${L}">Deadline mong muốn</label><input id="bu_due" type="date" style="${I}"></div>
       </div>
       <div style="margin-bottom:16px"><label style="${L}">Ghi chú / link brief</label><textarea id="bu_note" rows="2" style="${I};resize:vertical" placeholder="Dán link Drive / mô tả ngắn…"></textarea></div>
+      <div style="margin-bottom:14px;padding:13px 15px;background:var(--card2);border:1px solid var(--line);border-radius:10px">
+        <div style="font-size:12px;font-weight:700;color:#3b3f4a;margin-bottom:9px">Loại sản phẩm cần giao <span style="color:#8c909c;font-weight:500">· chọn 1 hoặc nhiều</span></div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="content" style="width:17px;height:17px"> ✍️ Content / bài viết</label>
+          <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="image" style="width:17px;height:17px"> 🎨 Hình ảnh / Banner</label>
+          <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="video" style="width:17px;height:17px"> 🎬 Video</label>
+        </div>
+        <div style="font-size:11.5px;color:#6b7080;line-height:1.6;margin-top:10px">ℹ️ Chọn nhiều loại → hệ thống tách thành <b>các task riêng</b> (content / ảnh / video), <b>tính credit riêng</b> & giao đúng người phụ trách. Để trống nếu chỉ là 1 task đơn.</div>
+      </div>
       <div id="bu_err" style="font-size:12.5px;color:#b4524f;font-weight:600;margin-bottom:10px;display:none"></div>
       <button onclick="buSubmit()" style="width:100%;padding:14px;background:#17191f;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Gửi yêu cầu →</button>
     </div>
@@ -1353,33 +1374,46 @@ window.buSubmit=()=>{
   const name=g('bu_name'),fn=g('bu_fn');
   const err=document.getElementById('bu_err');
   if(!name||!fn){if(err){err.style.display='block';err.textContent='Vui lòng nhập Tên task và chọn Function.';}return;}
-  const t={_id:uid(),'Request ID':autoId(),'Request Date':today(),BU:buName(),'Project/Campaign':g('bu_proj'),'Request Name':name,Function:fn,'Sub Function':g('bu_sub'),Requestor:me().name,Source:'New Request',Priority:g('bu_pr')||'P2',Owner:'',Status:'Open','Due Date':g('bu_due'),Complexity:g('bu_cx'),'Capacity Level':g('bu_cap'),Notes:g('bu_note'),Progress:'',comments:[],history:[]};
-  if(t.Function==='__ASK_MKT__')t.Function='';
-  if(t['Sub Function']==='__ASK_MKT__')t['Sub Function']='';
-  if(t.Complexity==='__ASK_MKT__'){t.Complexity='';t.NeedEstimate=true;}
-  if(t['Capacity Level']==='__ASK_MKT__'){t['Capacity Level']='';t.NeedEstimate=true;}
-  logHist(t,'BU gửi yêu cầu — chờ MKT duyệt'+(t.NeedEstimate?' (nhờ MKT đánh giá credit)':''));
-  DB.tasks.push(t);save();
+  const types=[...document.querySelectorAll('.bu_dtype:checked')].map(e=>e.value);
+  const DLAB={content:'Content',image:'Hình ảnh/Banner',video:'Video'};
+  const base={'Request Date':today(),BU:buName(),'Project/Campaign':g('bu_proj'),Function:fn,'Sub Function':g('bu_sub'),Requestor:me().name,Source:'New Request',Priority:g('bu_pr')||'P2',Owner:'',Status:'Open','Due Date':g('bu_due'),Complexity:g('bu_cx'),'Capacity Level':g('bu_cap'),Notes:g('bu_note'),Progress:''};
+  const list=types.length?types:[null];
+  const made=[];
+  list.forEach(ty=>{
+    const t=Object.assign({_id:uid(),'Request ID':autoId(),'Request Name':name+(ty&&types.length>1?' — '+DLAB[ty]:''),comments:[],history:[]},base);
+    if(ty)t.DeliverType=ty;
+    if(t.Function==='__ASK_MKT__')t.Function='';
+    if(t['Sub Function']==='__ASK_MKT__')t['Sub Function']='';
+    if(t.Complexity==='__ASK_MKT__'){t.Complexity='';t.NeedEstimate=true;}
+    if(t['Capacity Level']==='__ASK_MKT__'){t['Capacity Level']='';t.NeedEstimate=true;}
+    logHist(t,'BU gửi yêu cầu — chờ MKT duyệt'+(ty?' · loại: '+DLAB[ty]:'')+(t.NeedEstimate?' (nhờ MKT đánh giá credit)':''));
+    DB.tasks.push(t);made.push(t);
+  });
+  save();
   BUVIEW='mine';renderBuPortal();
-  buToast('✓ Đã gửi '+t['Request ID']+' · '+(t.NeedEstimate?'MKT sẽ đánh giá credit':creditOf(t)+' credit')+' (chờ duyệt)');
+  buToast('✓ Đã gửi '+made.length+' yêu cầu'+(made.length>1?': '+made.map(x=>DLAB[x.DeliverType]).join(' · '):' · '+made[0]['Request ID'])+' (chờ duyệt)');
 };
 function renderBuPortal(){
   const host=document.getElementById('buPortal');if(!host)return;
   const u=me();const bu=buName();
-  const w=bu?buWallet(bu):{budget:DEFAULT_BU_CREDIT,used:0,pending:0,remaining:DEFAULT_BU_CREDIT,pct:0};
-  const mine=DB.tasks.filter(t=>t.BU===bu);
+  const mk=BUMONTH||curMonthKey();
+  const w=bu?buWallet(bu,mk):{budget:DEFAULT_BU_CREDIT,used:0,pending:0,remaining:DEFAULT_BU_CREDIT,pct:0};
+  const allMine=DB.tasks.filter(t=>t.BU===bu);
+  const mine=allMine.filter(t=>taskMonthKey(t)===mk);
+  const months=[...new Set([curMonthKey(),...allMine.map(taskMonthKey)])].sort().reverse();
+  const monthSel=`<select onchange="buSetMonth(this.value)" style="background:#2a2d36;color:#fff;border:1px solid #3a3d46;border-radius:8px;padding:8px 11px;font-size:12.5px;font-weight:600;font-family:inherit;cursor:pointer">${months.map(m=>`<option value="${m}" ${m===mk?'selected':''}>${monthLabel(m)}</option>`).join('')}</select>`;
   host.innerHTML=`
   <div style="min-height:100vh;background:var(--track)">
     <div style="background:#17191f;color:#fff;padding:15px 30px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:5">
       <div style="width:38px;height:38px;border-radius:9px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px">FM</div>
       <div style="line-height:1.25"><b style="font-size:14px;display:block">Cổng yêu cầu Marketing</b><span style="font-size:11px;color:#9398a3;letter-spacing:.5px">BU · ${esc(bu||'(chưa gán BU)')}</span></div>
       <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
-        <span style="font-size:12.5px;color:#c8cad2">${esc(u?u.name:'')}</span>
+        ${monthSel}<span style="font-size:12.5px;color:#c8cad2">${esc(u?u.name:'')}</span>
         <button onclick="buLogout()" style="background:#2a2d36;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">⎋ Đăng xuất</button>
       </div>
     </div>
     <div style="max-width:1060px;margin:0 auto;padding:26px 30px 80px">
-      ${buWalletCard(w)}
+      ${buWalletCard(w,mk)}
       <div style="display:flex;gap:8px;margin:20px 0 16px">${buTab('submit','✎ Gửi yêu cầu')}${buTab('mine','▦ Yêu cầu của tôi ('+mine.length+')')}</div>
       ${BUVIEW==='submit'?buSubmitForm(w):buApprovalSection(mine)+buMyList(mine)}
     </div>
@@ -1844,7 +1878,7 @@ function rLeadHome(c,ta){
       </div>
       <div style="display:flex;flex-direction:column;gap:7px">${arr.map(row).join('')}</div>
     </div>`;}).join(''):'<div style="font-size:12.5px;color:var(--muted)">Bạn chưa giao việc nào cho nhân viên. Bấm <b>+ Giao việc cho NV</b> để giao.</div>';
-  c.innerHTML=`<div class="kpis" style="grid-template-columns:repeat(4,1fr)">
+  c.innerHTML=staffKpiBanner(u.name)+`<div class="kpis" style="grid-template-columns:repeat(4,1fr)">
       ${k('ĐANG LÀM',open.length,'việc mở trong function','var(--navy)')}
       ${k('QUÁ HẠN',overdue.length,overdue.length?'cần xử lý ngay':'không có','#b4524f')}
       ${k('CHƯA CẬP NHẬT',stale.length,'≥'+STALE_DAYS+' ngày không động','#6b5e9c')}
@@ -1862,7 +1896,7 @@ function rFocus(c,ta){
   ta.innerHTML=`<button class="btn gold" id="quickF">⚡ Ghi nhanh việc đã làm</button>`;
   setTimeout(()=>{const b=document.getElementById('quickF');if(b)b.onclick=quickModal;},0);
   const ts=visibleTasks().filter(t=>!isClosed(t));
-  if(!ts.length){c.innerHTML=emptyBox('Nothing needs your attention right now. 🎉');return;}
+  if(!ts.length){c.innerHTML=staffKpiBanner(me().name)+emptyBox('Nothing needs your attention right now. 🎉');return;}
   const byDue=(a,b)=>(a['Due Date']||'9999').localeCompare(b['Due Date']||'9999');
   const overdue=ts.filter(t=>dueState(t)==='overdue').sort(byDue);
   const soon=ts.filter(t=>dueState(t)==='soon').sort(byDue);
@@ -1870,7 +1904,7 @@ function rFocus(c,ta){
   const waiting=ts.filter(t=>t.Status==='Waiting').sort(byDue);
   const card=t=>`<div data-open="${t._id}" style="display:flex;align-items:center;gap:11px;cursor:pointer;padding:9px 11px;border:1px solid var(--line);border-radius:8px">${healthDot(t)}<span class="pr pr-${t.Priority}">${esc(t.Priority)}</span><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t['Request Name'])}</div><div style="font-size:11px;color:var(--muted)">${esc(t.BU)}${t.Owner?' · '+esc(t.Owner):''}</div></div><div style="width:120px;flex-shrink:0">${progBar(progressOf(t))}</div><span style="font-size:12px;color:var(--muted);width:88px;text-align:right;flex-shrink:0">${esc(t['Due Date']||'')}</span><span style="width:80px;text-align:right;flex-shrink:0">${dueBadge(t)}</span></div>`;
   const sec=(title,arr,dot)=>`<div class="panel" style="margin-bottom:14px"><h3><span class="dot" style="background:${dot}"></span>${title} <span style="color:var(--muted);font-weight:500;font-size:12px">(${arr.length})</span></h3>${arr.length?`<div style="display:flex;flex-direction:column;gap:8px">${arr.map(card).join('')}</div>`:'<div style="font-size:12.5px;color:var(--muted)">None.</div>'}</div>`;
-  c.innerHTML=sec('Overdue',overdue,'#b4524f')+sec('Due soon (next 3 days)',soon,'#b58a3a')+sec('In progress',wip,'#3b6ea5')+sec('Waiting',waiting,'#6b5e9c');
+  c.innerHTML=staffKpiBanner(me().name)+sec('Overdue',overdue,'#b4524f')+sec('Due soon (next 3 days)',soon,'#b58a3a')+sec('In progress',wip,'#3b6ea5')+sec('Waiting',waiting,'#6b5e9c');
   c.querySelectorAll('[data-open]').forEach(e=>e.addEventListener('click',()=>taskDetail(e.dataset.open)));
 }
 
@@ -2395,9 +2429,17 @@ function exportReport(){
 function rStaff(c,ta){
   ta.innerHTML=`<button class="btn gold" id="addStaff">+ Add Person</button>`;
   setTimeout(()=>{const b=document.getElementById('addStaff');if(b)b.addEventListener('click',()=>staffModal());},0);
-  if(!DB.staff.length){c.innerHTML=emptyBox('No people yet.<br>Click <b>+ Add Person</b> to create one.');return;}
-  c.innerHTML=`<div class="tablewrap"><table><thead><tr><th>Name</th><th>Department</th><th>BU</th><th>Title</th><th>Capacity</th><th></th></tr></thead><tbody>
-    ${DB.staff.map(s=>`<tr><td class="name-cell">${esc(s.name)}</td><td>${esc(s.dept||'—')}</td><td><span class="bu-tag">${esc(s.bu||'—')}</span></td><td>${esc(s.title||'—')}</td><td>${s.capacity!=null&&s.capacity!==''?esc(s.capacity)+' cr':'<span style="color:var(--muted)">20 cr</span>'}</td>
+  const mk=curMonthKey();const people=staffPeople();
+  let kpiPanel='';
+  if(people.length){
+    const krows=people.map(n=>{const w=staffWallet(n,mk);const over=w.remaining<0;const col=w.pct>=100?'#b4524f':(w.pct>=80?'#b58a3a':'#3f8a63');
+      return `<tr><td class="name-cell">${esc(n)}</td><td style="text-align:right">${w.target}</td><td style="text-align:right;font-weight:700;color:#46506b">${w.used}</td><td style="text-align:right;font-weight:700;color:${over?'#b4524f':'#2f6d4d'}">${over?'vượt '+Math.abs(w.remaining):w.remaining}</td><td style="min-width:150px"><div style="height:8px;background:var(--track);border-radius:5px;overflow:hidden"><div style="height:100%;border-radius:5px;background:${col};width:${Math.min(100,w.pct)}%"></div></div></td><td style="text-align:right;color:#6b7080">${w.pct}%</td></tr>`;}).join('');
+    kpiPanel=`<div class="panel" style="margin-bottom:18px"><h3><span class="dot" style="background:#3f8a63"></span>KPI credit nhân sự · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· nhận task là KPI tháng tự giảm · mặc định ${DEFAULT_STAFF_CREDIT} credit/tháng (1 FTE)</span></h3>
+    <div class="tablewrap"><table><thead><tr><th>Nhân sự</th><th style="text-align:right">KPI tháng</th><th style="text-align:right">Đã nhận</th><th style="text-align:right">Còn lại</th><th>Tiến độ KPI</th><th style="text-align:right">%</th></tr></thead><tbody>${krows}</tbody></table></div></div>`;
+  }
+  if(!DB.staff.length){c.innerHTML=kpiPanel+emptyBox('No people yet.<br>Click <b>+ Add Person</b> to create one.');return;}
+  c.innerHTML=kpiPanel+`<div class="tablewrap"><table><thead><tr><th>Name</th><th>Department</th><th>BU</th><th>Title</th><th>KPI/tháng</th><th>Capacity</th><th></th></tr></thead><tbody>
+    ${DB.staff.map(s=>`<tr><td class="name-cell">${esc(s.name)}</td><td>${esc(s.dept||'—')}</td><td><span class="bu-tag">${esc(s.bu||'—')}</span></td><td>${esc(s.title||'—')}</td><td>${s.monthlyCredit!=null&&s.monthlyCredit!==''?esc(s.monthlyCredit)+' cr':'<span style="color:var(--muted)">'+DEFAULT_STAFF_CREDIT+' cr</span>'}</td><td>${s.capacity!=null&&s.capacity!==''?esc(s.capacity)+' cr':'<span style="color:var(--muted)">20 cr</span>'}</td>
     <td><div class="acts"><span class="ico" data-edit="${s.id}">✎</span><span class="ico" data-del="${s.id}">🗑</span></div></td></tr>`).join('')}
     </tbody></table></div>`;
   c.querySelectorAll('[data-edit]').forEach(e=>e.addEventListener('click',()=>staffModal(e.dataset.edit)));
@@ -2412,6 +2454,7 @@ window.staffModal=id=>{
     <div class="fld"><label>Department</label><select id="s_dept"><option value="">—</option>${DB.depts.map(d=>`<option ${s.dept===d.name?'selected':''}>${esc(d.name)}</option>`).join('')}</select></div>
     <div class="fld"><label>BU</label><select id="s_bu"><option value="">—</option>${opt(CATS.BU,s.bu)}</select></div>
     <div class="fld"><label>Weekly capacity (credit)</label><input id="s_cap" type="number" min="0" value="${esc(s.capacity!=null?s.capacity:'')}" placeholder="default 20"></div>
+    <div class="fld"><label>KPI credit / tháng</label><input id="s_kpi" type="number" min="0" value="${esc(s.monthlyCredit!=null?s.monthlyCredit:'')}" placeholder="default ${DEFAULT_STAFF_CREDIT}"></div>
     </div><div class="mfoot"><button class="btn ghost" id="sCancel">Cancel</button><button class="btn gold" id="sSave">Save</button></div>`);
   document.getElementById('sCancel').addEventListener('click',mClose);
   document.getElementById('sSave').addEventListener('click',()=>saveStaff(id||''));
@@ -2419,7 +2462,7 @@ window.staffModal=id=>{
 window.saveStaff=id=>{
   const g=x=>document.getElementById(x).value.trim();
   if(!g('s_name')){alert('Enter a name');return;}
-  const o={id:id||uid(),name:g('s_name'),title:g('s_title'),dept:g('s_dept'),bu:g('s_bu'),capacity:g('s_cap')};
+  const o={id:id||uid(),name:g('s_name'),title:g('s_title'),dept:g('s_dept'),bu:g('s_bu'),capacity:g('s_cap'),monthlyCredit:g('s_kpi')};
   if(id){const i=DB.staff.findIndex(x=>x.id===id);DB.staff[i]=o;}else DB.staff.push(o);
   save();mClose();render();
 };
