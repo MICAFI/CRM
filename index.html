@@ -2511,7 +2511,7 @@ function adminKpiOverall(){
     const wip=ts.filter(t=>t.Status==='WIP');const tracking=wip.length?Math.round(wip.filter(t=>progressOf(t)>0||!isStale(t)).length/wip.length*100):100;
     const ppl=staffPeople().filter(n=>!isSupervisor(n));const overload=ppl.filter(n=>staffWallet(n).remaining<0).length;
     const capacity=ppl.length?Math.round(100*(ppl.length-overload)/ppl.length):100;
-    const AUTO={hasCredit:hasCredit,classified:classified,assigned:assigned,priority:priority,backlog:backlog,tracking:tracking,capacity:capacity,sla:sla};
+    const AUTO={hasCredit:hasCredit,classified:classified,assigned:assigned,priority:priority,backlog:backlog,tracking:tracking,capacity:capacity,sla:sla,teamDone:teamDoneScore()};
     let gNum=0,gDen=0;ADMIN_KPI.forEach(f=>f[2].forEach(s=>{const gw=f[1]*s[1]/100;const sc=s[2]?AUTO[s[2]]:adminKpiVal(f[0]+'|'+s[0]);if(sc!=null){gNum+=gw*sc;gDen+=gw;}}));
     return gDen?Math.round(gNum/gDen):0;
   }catch(e){return 0;}
@@ -2607,20 +2607,21 @@ function rOutputKpi(c,ta){
   c.innerHTML=html;
 }
 const ADMIN_KPI=[
- ['Request Intake',5,[['Ghi nhận chính xác yêu cầu BU',30,null],['Nhập task & credit vào hệ thống',30,'hasCredit'],['Phân loại yêu cầu',15,'classified'],['Tạo Brief cho MKT',15,null]]],
+ ['Request Intake',5,[['Ghi nhận chính xác yêu cầu BU',30,'classified'],['Nhập task & credit vào hệ thống',30,'hasCredit'],['Phân loại yêu cầu',15,'classified'],['Tạo Brief cho MKT',15,null]]],
  ['Demand Management',10,[['Quản lý đủ task, không sót task',50,'assigned'],['Phân loại task',25,'classified'],['Đánh giá xếp loại',25,'priority']]],
- ['Backlog Management',5,[['Danh mục quản lý Backlog',40,'backlog'],['Cập nhật tiến độ xử lý',20,'tracking'],['Cảnh báo tồn đọng',20,'backlog'],['Phương án xử lý task tồn',20,null]]],
+ ['Backlog Management',5,[['Danh mục quản lý Backlog',40,'backlog'],['Cập nhật tiến độ xử lý',20,'tracking'],['Cảnh báo tồn đọng',20,'backlog'],['Phương án xử lý task tồn',20,'backlog']]],
  ['Priority Management',5,[['Task đúng Priority',40,'priority'],['Task đúng impact',40,null],['Phân loại task giữa các BU',20,'classified']]],
- ['Capacity Planning',10,[['Quản lý tải công việc MKT',30,'capacity'],['Slot task đang nhận / còn trống',50,'capacity'],['Lịch tiếp nhận task',20,null]]],
- ['Tasks Allocation & Alignment',10,[['Triển khai Brief/task đến bộ phận',40,'assigned'],['Alignment · SLA',30,'sla'],['Alignment · Output',30,'tracking']]],
- ['Project Tracking',10,[['Tracking tiến độ task',65,'tracking'],['Tracking campaign',35,null]]],
- ['SLA Management',5,[['SLA Compliance Rate (≥80%)',80,'sla'],['Cảnh báo vi phạm SLA',20,null]]],
- ['BU Reporting',2,[['Report On-time',40,null],['Report Accuracy',60,null]]],
- ['Business Requirement Gathering',10,[['Requirement Accuracy',50,null],['Requirement Completeness',30,null],['Requirement Gathering SLA',20,null]]],
+ ['Capacity Planning',10,[['Quản lý tải công việc MKT',30,'capacity'],['Slot task đang nhận / còn trống',50,'capacity'],['Lịch tiếp nhận task',20,'capacity']]],
+ ['Tasks Allocation & Alignment',10,[['Triển khai Brief/task đến bộ phận',40,'assigned'],['Alignment · SLA',30,'sla'],['Alignment · Output (team hoàn thành)',30,'teamDone']]],
+ ['Project Tracking',10,[['Tracking tiến độ task',65,'tracking'],['Tracking campaign',35,'tracking']]],
+ ['SLA Management',5,[['SLA Compliance Rate (≥80%)',80,'sla'],['Cảnh báo vi phạm SLA',20,'sla']]],
+ ['BU Reporting',2,[['Report On-time',40,'sla'],['Report Accuracy',60,null]]],
+ ['Business Requirement Gathering',10,[['Requirement Accuracy',50,null],['Requirement Completeness',30,null],['Requirement Gathering SLA',20,'sla']]],
  ['Campaign Brief Development',10,[['Brief Accuracy',40,null],['Brief Completeness',40,null],['Brief Approval Rate',20,null]]],
- ['Campaign Planning',15,[['Campaign Plan Completion',40,null],['Campaign On-time Setup',40,null],['Plan Approval Rate',20,null]]],
- ['Campaign Review',3,[['Campaign Review Completion',40,null],['Insight Quality',40,null],['Improvement Action Closure',20,null]]],
+ ['Campaign Planning',15,[['Campaign Plan Completion (team)',40,'teamDone'],['Campaign On-time Setup',40,'sla'],['Plan Approval Rate',20,null]]],
+ ['Campaign Review',3,[['Campaign Review Completion (team)',40,'teamDone'],['Insight Quality',40,null],['Improvement Action Closure',20,'backlog']]],
 ];
+function teamDoneScore(){var ts=DB.tasks||[];return Math.round(ts.filter(t=>t.Status==='Done').length/(ts.length||1)*100);}
 function adminKpiVal(key){var o=DB.adminKpi||{};var v=o[key];return (v===''||v==null)?null:Number(v);}
 window.setAdminKpi=(key,v)=>{DB.adminKpi=DB.adminKpi||{};DB.adminKpi[key]=(v===''?'':Number(v));save();render();};
 function rAdminKpi(c,ta){
@@ -2641,7 +2642,7 @@ function rAdminKpi(c,ta){
   const ppl=staffPeople().filter(n=>!isSupervisor(n));
   const overload=ppl.filter(n=>staffWallet(n).remaining<0).length;
   const capacity=ppl.length?Math.round(100*(ppl.length-overload)/ppl.length):100;
-  const AUTO={hasCredit:hasCredit,classified:classified,assigned:assigned,priority:priority,backlog:backlog,tracking:tracking,capacity:capacity,sla:sla};
+  const AUTO={hasCredit:hasCredit,classified:classified,assigned:assigned,priority:priority,backlog:backlog,tracking:tracking,capacity:capacity,sla:sla,teamDone:teamDoneScore()};
   const scoreOf=(fn,sub)=>{const key=sub[2];return key?AUTO[key]:adminKpiVal(fn+'|'+sub[0]);};
   // overall (all scored) + auto-only, flattened by global weight = funcWeight * subPct/100
   let gNum=0,gDen=0,aNum=0,aDen=0;
@@ -2667,7 +2668,7 @@ function rAdminKpi(c,ta){
     ${kpi('SLA COMPLIANCE',sla+'%','mục tiêu ≥ 80%',sla>=80?'#3f8a63':'#b4524f')}
     ${kpi('KHÔNG SÓT TASK',assigned+'%','task đã phân người làm',colOf(assigned))}
   </div>
-  <div class="panel"><h3><span class="dot" style="background:#3f6ea5"></span>KPI Quản lý CRM — Admin · Service Management <span style="font-size:11.5px;color:var(--muted);font-weight:500">· 13 nhóm (Σ trọng số = 100%) · mỗi nhóm gồm các sub-KPI · tự đo từ dữ liệu, định tính nhập tay</span></h3>
+  <div class="panel"><h3><span class="dot" style="background:#3f6ea5"></span>KPI Quản lý CRM — Admin · Service Management <span style="font-size:11.5px;color:var(--muted);font-weight:500">· 13 nhóm (Σ = 100%) · phần lớn TỰ ĐO từ kết quả cả team (hoàn thành, đúng hạn, tải, phân bổ, backlog…) · chỉ mục thuần chất lượng (brief/insight) mới nhập tay</span></h3>
     <div class="tablewrap"><table><thead><tr><th>Nhóm chức năng / Sub-KPI</th><th style="text-align:center">Trọng số</th><th style="text-align:right">Điểm</th><th>Mức đạt</th></tr></thead><tbody>${rows}</tbody></table></div>
     <div style="font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:12px"><b>Điểm nhóm</b> = bình quân các sub-KPI theo % trong nhóm. <b>KPI Admin tổng</b> = bình quân các nhóm theo trọng số (cột giữa, cộng lại = 100%). Sub-KPI "tự đo" lấy realtime từ CRM; ô "nhập" là KPI định tính Admin tự chấm 0–100 mỗi kỳ.</div>
   </div>`;
