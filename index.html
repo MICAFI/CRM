@@ -1639,6 +1639,13 @@ function rAgents(c,ta){
       ['publish','🚀','Publish Agent','Đăng FB/IG/TikTok','n8n + connector MXH'],
       ['performance','📡','Performance Agent','Theo dõi hiệu suất','Supermetrics ✓'],
     ]},
+    {grp:'Kết nối ngoài & nâng cao',c:'#3f8a63',items:[
+      ['metaads','📘','Meta Ads Agent','Quản lý & tối ưu ads Meta','Meta connector'],
+      ['seo','🔍','SEO/GEO Agent','Tối ưu SEO · AI Overview','Claude + GEO skill'],
+      ['email','✉️','Email/CRM Agent','Nurture lead · email/Zalo','Claude + Email/Zalo'],
+      ['data','🗂️','Data Reporter','Tổng hợp số liệu đa nguồn','Google Drive/Sheets'],
+      ['seeding','💬','Social Listening','Lắng nghe & seeding MXH','Connector MXH'],
+    ]},
   ];
   let _nConf=0;
   const chainHTML=AG_KEYS.map(g=>`
@@ -1661,7 +1668,7 @@ function rAgents(c,ta){
   c.innerHTML=`
   <details class="sysg" style="margin-bottom:16px;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden"><summary style="padding:15px 20px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:10px"><span style="color:var(--accent)">📖</span> Sơ đồ vận hành &amp; kịch bản tự động <span style="font-size:11.5px;color:var(--muted);font-weight:500;margin-left:auto">bấm để mở ▾</span></summary><div style="padding:6px 20px 20px;border-top:1px solid var(--line)"><div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin:16px 0 10px">Quy trình content (có người duyệt)</div><div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center"><span class="gfl">✉ BU gửi yêu cầu</span><b style="color:var(--accent)">→</b><span class="gfl">◆ MKT giao Lead</span><b style="color:var(--accent)">→</b><span class="gfl" style="border-color:var(--blue)">✍️ AI viết content</span><b style="color:var(--accent)">→</b><span class="gfl">✓ Lead duyệt/sửa</span><b style="color:var(--accent)">→</b><span class="gfl">📤 Giao BU nghiệm thu</span></div><div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin:18px 0 10px">Cầu nối tự động (bên trong "AI viết content")</div><div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center"><span class="gfl">🖥️ CRM</span><b style="color:var(--accent)">→</b><span class="gfl">⚙️ Make (webhook)</span><b style="color:var(--accent)">→</b><span class="gfl">🧠 Claude AI viết</span><b style="color:var(--accent)">→</b><span class="gfl">↩️ Trả về CRM</span></div><div style="font-size:10.5px;font-weight:800;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin:18px 0 10px">Kịch bản (scenarios)</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px"><div class="gsc"><b>✍️ Content Agent<span class="gst on">✓ Đã chạy</span></b><p>Make + Claude — viết text đúng brand.</p></div><div class="gsc"><b>📊 Ads Performance<span class="gst on">✓ Đã test</span></b><p>Supermetrics kéo số 12 TK Google Ads → Claude chấm điểm + gợi ý tối ưu.</p></div><div class="gsc"><b>🎨 Image Agent<span class="gst" style="background:rgba(224,162,60,.2);color:#caa83d">🔶 Đang thử</span></b><p>Nút 🎨 ra prompt chuẩn brand → dán ChatGPT/Grok → tải ảnh → đính task. (API auto + Cloudinary để chạy hàng loạt sau.)</p></div><div class="gsc"><b>🎬 Video Agent<span class="gst" style="background:rgba(224,162,60,.2);color:#caa83d">🔶 Đang thử</span></b><p>Nút 🎨 → Video ra prompt+kịch bản → Grok Imagine tạo & duyệt tay → đính task. (API xAI bất đồng bộ; auto poll để dành chạy hàng loạt.)</p></div></div></div></details>
   <div class="panel" style="margin-bottom:16px">
-    <h3><span class="dot" style="background:var(--navy)"></span>AI Agent Control Center <span style="font-size:11.5px;color:var(--muted);font-weight:500">· ${_nConf}/12 agent đã cắm endpoint</span></h3>
+    <h3><span class="dot" style="background:var(--navy)"></span>AI Agent Control Center <span style="font-size:11.5px;color:var(--muted);font-weight:500">· ${_nConf}/${AG_KEYS.reduce((s,g)=>s+g.items.length,0)} agent đã cắm endpoint</span></h3>
     ${_nConf===0?`<div style="background:#f7efe0;border:1px solid #ecd9ad;border-radius:9px;padding:10px 13px;font-size:12px;color:#7a5a12;margin-bottom:4px">⚠️ Chưa có "bộ não" — hãy cắm endpoint <b>Operation Manager</b> (n8n / Supabase Edge Function) để các agent hoạt động. Xem file kế hoạch để biết cách dựng.</div>`:''}
     ${chainHTML}
     <div style="margin-top:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -1702,7 +1709,7 @@ fadoMKT.setStatus('MKT-2026-001', 'Done')
 ${esc(sample)}</pre>
   </div>`;
   document.getElementById('buSaveBudgets').addEventListener('click',()=>{document.querySelectorAll('[data-bubudget]').forEach(i=>{const bu=i.dataset.bubudget,v=i.value.trim();DB.buCredits[bu]=Object.assign({},DB.buCredits[bu],{budget:v===''?null:Number(v)});});save();render();alert('✓ Đã lưu ngân sách credit theo BU.');});
-  document.getElementById('agSave').addEventListener('click',()=>{const g=k=>{const e=document.getElementById('ag_'+k);return e?e.value.trim():((DB.agents&&DB.agents[k])||'');};DB.agents=Object.assign({},DB.agents,{webhook:g('webhook'),content:g('content'),image:g('image'),video:g('video'),planning:g('planning'),tracking:g('tracking'),budget:g('budget'),report:g('report'),manager:g('manager'),qa:g('qa'),publish:g('publish'),performance:g('performance')});save();render();alert('✓ Đã lưu cấu hình AI Agent.');});
+  document.getElementById('agSave').addEventListener('click',()=>{const g=k=>{const e=document.getElementById('ag_'+k);return e?e.value.trim():((DB.agents&&DB.agents[k])||'');};DB.agents=Object.assign({},DB.agents,{webhook:g('webhook'),content:g('content'),image:g('image'),video:g('video'),planning:g('planning'),tracking:g('tracking'),budget:g('budget'),report:g('report'),manager:g('manager'),qa:g('qa'),publish:g('publish'),performance:g('performance'),metaads:g('metaads'),seo:g('seo'),email:g('email'),data:g('data'),seeding:g('seeding')});save();render();alert('✓ Đã lưu cấu hình AI Agent.');});
 }
 
 /* ---- BACKUP / RESTORE (sao lưu & khôi phục toàn bộ dữ liệu) ---- */
