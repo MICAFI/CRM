@@ -673,6 +673,7 @@ const NAV=[
   {v:'recur',ic:'<i class="ti ti-repeat"></i>',t:'Recurring',vi:'Công việc định kỳ',sec:'WORK',roles:['admin','manager','lead','staff']},
   {v:'backlog',ic:'<i class="ti ti-stack-2"></i>',t:'Backlog',vi:'Việc tồn đọng · quá hạn · đang chờ',sec:'WORK',roles:['admin','manager']},
   {v:'requests',ic:'<i class="ti ti-mail"></i>',t:'New Requests',vi:'Yêu cầu mới — duyệt & giao cho Lead',sec:'WORK',roles:['admin','manager']},
+  {v:'credit',ic:'<i class="ti ti-coins"></i>',t:'Credit Overview',vi:'Tổng quan ví credit BU & KPI nhân sự',sec:'INSIGHTS',roles:['admin','manager']},
   {v:'exec',ic:'<i class="ti ti-star"></i>',t:'Executive Summary',vi:'Tóm tắt cho ban lãnh đạo',sec:'INSIGHTS',roles:['admin','manager']},
   {v:'scorecard',ic:'<i class="ti ti-target-arrow"></i>',t:'Manager Scorecard',vi:'KPI điều phối so với mục tiêu',sec:'INSIGHTS',roles:['admin','manager']},
   {v:'progress',ic:'<i class="ti ti-progress"></i>',t:'Lead Progress',vi:'Tiến độ & cập nhật theo từng Lead',sec:'INSIGHTS',roles:['admin','manager']},
@@ -801,7 +802,7 @@ function render(){
   const c=document.getElementById('content');
   const ta=document.getElementById('topActions');ta.innerHTML='';
   const u=me();
-  const T={flow:['Sơ đồ hệ thống','Quy trình vận hành & lộ trình đấu nối AI'],dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Tasks Pool','Kho task chung của toàn đội · danh sách & theo dõi'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],backup:['Sao lưu & Khôi phục','Tải bản sao lưu toàn bộ dữ liệu hoặc khôi phục từ file'],agents:['Automation & API','Ngân sách credit theo BU · endpoint agent (content/ảnh/video) · API đấu nối'],account:['Tài khoản','Cập nhật thông tin cá nhân & đổi mật khẩu'],guide:['Guide & Training','How to use this CRM — at a glance']};
+  const T={flow:['Sơ đồ hệ thống','Quy trình vận hành & lộ trình đấu nối AI'],dash:['Overview','Marketing workload across the team'],focus:['My Focus','Your tasks that need attention now'],kanban:['Kanban Board','Drag cards to change task status'],tasks:['Tasks Pool','Kho task chung của toàn đội · danh sách & theo dõi'],recur:['Công việc định kỳ','Việc lặp theo kỳ — ai đủ/thiếu chỉ tiêu kỳ này'],projects:['Projects','Tasks grouped by project / campaign'],backlog:['Backlog','Task tồn đọng · quá hạn · đang chờ — cần xử lý trước'],assign:['Giao việc','Create and assign new tasks'],requests:['Yêu cầu mới','Request từ Google Form/Sheet — duyệt & giao cho Lead'],progress:['Tiến độ theo Lead','Tiến độ & mức cập nhật theo từng Function / Lead'],sla:['SLA Management','% đúng hạn & danh sách vi phạm SLA'],credit:['Credit Overview','Ví credit BU & KPI nhân sự theo tháng'],exec:['Executive Summary','What marketing delivered — at a glance'],scorecard:['Manager Scorecard','KPI điều phối của bạn so với mục tiêu'],leadupd:['Cập nhật từ Lead','Lead nào đã/chưa cập nhật tiến độ cho bạn'],report:['Reports & Performance','Breakdown by person, BU and priority'],perf:['Hiệu suất & Báo cáo','Xếp hạng người làm + bảng theo người / BU / ưu tiên'],workload:['Workload','Capacity vs assigned workload per person'],staff:['People','Manage team members'],dept:['Departments','Marketing department structure'],users:['Accounts & Roles','Manage logins and permissions'],gsheet:['Google Sheet Sync','Pull leads/tasks from Google Sheets into the CRM'],backup:['Sao lưu & Khôi phục','Tải bản sao lưu toàn bộ dữ liệu hoặc khôi phục từ file'],agents:['Automation & API','Ngân sách credit theo BU · endpoint agent (content/ảnh/video) · API đấu nối'],account:['Tài khoản','Cập nhật thông tin cá nhân & đổi mật khẩu'],guide:['Guide & Training','How to use this CRM — at a glance']};
   document.getElementById('vtitle').textContent=T[VIEW][0];
   document.getElementById('vsub').textContent=T[VIEW][1];
   renderGFBar();
@@ -817,6 +818,7 @@ function render(){
   else if(VIEW==='progress')rProgress(c,ta);
   else if(VIEW==='backlog')rBacklog(c,ta);
   else if(VIEW==='sla')rSla(c,ta);
+  else if(VIEW==='credit')rCredit(c,ta);
   else if(VIEW==='exec')rExec(c);
   else if(VIEW==='scorecard')rScorecard(c,ta);
   else if(VIEW==='leadupd'){VIEW='progress';rProgress(c,ta);}
@@ -2473,6 +2475,37 @@ function exportReport(){
 }
 
 /* ---- STAFF ---- */
+let CREDITMONTH='';
+window.setCreditMonth=mk=>{CREDITMONTH=mk;render();};
+function rCredit(c,ta){
+  const mk=CREDITMONTH||curMonthKey();
+  const months=[...new Set([curMonthKey(),...DB.tasks.map(taskMonthKey)])].sort().reverse();
+  ta.innerHTML=`<select id="cmSel" style="padding:8px 12px;border:1px solid var(--line);border-radius:9px;font-size:13px;font-family:inherit;background:var(--card);font-weight:600;cursor:pointer">${months.map(m=>`<option value="${m}" ${m===mk?'selected':''}>${monthLabel(m)}</option>`).join('')}</select>`;
+  setTimeout(()=>{const s=document.getElementById('cmSel');if(s)s.onchange=e=>setCreditMonth(e.target.value);},0);
+  const buList=[...new Set([...DB.tasks.filter(t=>taskMonthKey(t)===mk&&t.BU).map(t=>t.BU),...Object.keys(DB.buCredits||{})])];
+  const buW=buList.map(b=>[b,buWallet(b,mk)]).sort((a,b)=>b[1].used-a[1].used);
+  const people=staffPeople();
+  const stW=people.map(n=>[n,staffWallet(n,mk)]).sort((a,b)=>b[1].used-a[1].used);
+  const buBud=buW.reduce((s,x)=>s+x[1].budget,0),buUsedT=buW.reduce((s,x)=>s+x[1].used,0),buPendT=buW.reduce((s,x)=>s+x[1].pending,0);
+  const stTar=stW.reduce((s,x)=>s+x[1].target,0),stUsedT=stW.reduce((s,x)=>s+x[1].used,0);
+  const buOver=buW.filter(x=>x[1].remaining<0).length,stOver=stW.filter(x=>x[1].remaining<0).length;
+  const colOf=p=>p>=100?'#b4524f':(p>=80?'#b58a3a':'#3f8a63');
+  const bar=(pct,col)=>`<div style="height:8px;background:var(--track);border-radius:5px;overflow:hidden"><div style="height:100%;border-radius:5px;background:${col};width:${Math.min(100,pct)}%"></div></div>`;
+  const kpi=(lab,num,note,col)=>`<div class="kpi"><div class="bar" style="background:${col}"></div><div class="lab">${lab}</div><div class="num">${num}</div><div class="note">${note}</div></div>`;
+  const buRows=buW.map(x=>{const b=x[0],w=x[1];return `<tr><td class="name-cell">${esc(b)}</td><td style="text-align:right">${w.budget}</td><td style="text-align:right;font-weight:700;color:#46506b">${w.used}</td><td style="text-align:right;color:#8a6516">${w.pending}</td><td style="text-align:right;font-weight:700;color:${w.remaining<0?'#b4524f':'#2f6d4d'}">${w.remaining<0?'vượt '+Math.abs(w.remaining):w.remaining}</td><td style="min-width:150px">${bar(w.pct,colOf(w.pct))}</td><td style="text-align:right;color:#6b7080">${w.pct}%</td></tr>`;}).join('')||'<tr><td colspan="7" class="empty">Chưa có dữ liệu tháng này</td></tr>';
+  const stRows=stW.map(x=>{const n=x[0],w=x[1];return `<tr><td class="name-cell">${esc(n)}</td><td style="text-align:right">${w.target}</td><td style="text-align:right;font-weight:700;color:#46506b">${w.used}</td><td style="text-align:right;font-weight:700;color:${w.remaining<0?'#b4524f':'#2f6d4d'}">${w.remaining<0?'vượt '+Math.abs(w.remaining):w.remaining}</td><td style="min-width:150px">${bar(w.pct,colOf(w.pct))}</td><td style="text-align:right;color:#6b7080">${w.pct}%</td></tr>`;}).join('')||'<tr><td colspan="6" class="empty">Chưa có nhân sự</td></tr>';
+  c.innerHTML=`
+  <div class="kpis">
+    ${kpi('VÍ BU · ĐÃ DÙNG',buUsedT,'/ '+buBud+' budget · chờ '+buPendT,(buUsedT>buBud?'#b4524f':'#3f6ea5'))}
+    ${kpi('BU VƯỢT NGÂN SÁCH',buOver,'trong '+buW.length+' BU có việc',buOver?'#b4524f':'#3f8a63')}
+    ${kpi('KPI NHÂN SỰ · ĐÃ NHẬN',stUsedT,'/ '+stTar+' chỉ tiêu',(stUsedT>stTar?'#b4524f':'#3f8a63'))}
+    ${kpi('NHÂN SỰ VƯỢT KPI',stOver,'trong '+stW.length+' người',stOver?'#b4524f':'#3f8a63')}
+  </div>
+  <div class="panel" style="margin-bottom:16px"><h3><span class="dot" style="background:#3f6ea5"></span>Ví credit theo BU · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· budget mặc định ${DEFAULT_BU_CREDIT}/tháng · sắp theo mức dùng</span></h3>
+    <div class="tablewrap"><table><thead><tr><th>BU</th><th style="text-align:right">Budget</th><th style="text-align:right">Đã dùng</th><th style="text-align:right">Chờ duyệt</th><th style="text-align:right">Còn lại</th><th>Mức dùng</th><th style="text-align:right">%</th></tr></thead><tbody>${buRows}</tbody></table></div></div>
+  <div class="panel"><h3><span class="dot" style="background:#3f8a63"></span>KPI credit theo nhân sự · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· mặc định ${DEFAULT_STAFF_CREDIT}/tháng (1 FTE) · nhận task là trừ</span></h3>
+    <div class="tablewrap"><table><thead><tr><th>Nhân sự</th><th style="text-align:right">KPI tháng</th><th style="text-align:right">Đã nhận</th><th style="text-align:right">Còn lại</th><th>Tiến độ</th><th style="text-align:right">%</th></tr></thead><tbody>${stRows}</tbody></table></div></div>`;
+}
 function rStaff(c,ta){
   ta.innerHTML=`<button class="btn gold" id="addStaff">+ Add Person</button>`;
   setTimeout(()=>{const b=document.getElementById('addStaff');if(b)b.addEventListener('click',()=>staffModal());},0);
