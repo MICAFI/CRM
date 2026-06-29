@@ -1186,7 +1186,7 @@ window.taskModal=(id,presetType)=>{
         <button type="button" class="btn ghost" onclick="mSubAdd()">Thêm</button>
       </div>
     </div>
-    <div class="mfoot">${id?`<button class="btn ghost" onclick="sendToAgent('${id}')" title="POST task sang endpoint agent (content/ảnh/video)">⚡ Gửi tới Agent</button><button class="btn ghost" onclick="aiWriteContent('${id}')" title="Gọi AI (Make) viết content cho task này">✍️ AI viết content</button>`:''}<button class="btn ghost" id="tCancel">Cancel</button><button class="btn gold" id="tSave">${id?'Save':'Assign'}</button></div>`);
+    <div class="mfoot">${id?`<button class="btn ghost" onclick="sendToAgent('${id}')" title="POST task sang endpoint agent (content/ảnh/video)">⚡ Gửi tới Agent</button><button class="btn ghost" onclick="aiWriteContent('${id}')" title="Gọi AI (Make) viết content cho task này">✍️ AI viết content</button><button class="btn ghost" onclick="aiCampaign('${id}')" title="AI lên caption đa kênh (FB/Google Search+PMax/TikTok/Zalo) chuẩn brand BU + gợi ý ảnh/video">🎯 AI lên campaign</button>`:''}<button class="btn ghost" id="tCancel">Cancel</button><button class="btn gold" id="tSave">${id?'Save':'Assign'}</button></div>`);
   document.getElementById('tCancel').addEventListener('click',mClose);
   document.getElementById('tSave').addEventListener('click',()=>saveTask(id||''));
   MSUBS=(t.subtasks||[]).map(s=>({...s}));
@@ -1466,6 +1466,48 @@ function showContentModal(t,text,loading){
   var sv=document.getElementById('aiSaveNote'); if(sv)sv.onclick=function(){var v=document.getElementById('aiOut').value;t.Notes=(t.Notes?t.Notes+'\n\n':'')+'[AI content]\n'+v;logHist(t,'Lưu AI content vào ghi chú');save();document.getElementById('modal').classList.remove('show');alert('✓ Đã lưu vào ghi chú task.');};
   var sb=document.getElementById('aiSendBU'); if(sb)sb.onclick=function(){t.Deliverable=document.getElementById('aiOut').value;t.Delivered=true;logHist(t,'📤 Gửi content cho BU');save();document.getElementById('modal').classList.remove('show');try{alert('✓ Đã gửi cho BU. BU sẽ thấy ở Cổng BU.');}catch(e){}};
 }
+window.aiCampaign=function(id){
+  var t=DB.tasks.find(function(x){return x._id===id;}); if(!t)return;
+  var chans=['Facebook','Google Ads','TikTok','Zalo','YouTube'];
+  var box=document.getElementById('mbox');
+  box.innerHTML='<h2>🎯 AI lên Campaign đa kênh'+(t['Request Name']?(' · '+esc(t['Request Name'])):'')+'</h2>'
+    +'<div style="font-size:12.5px;color:var(--muted);margin:-8px 0 12px">Caption chuẩn giọng brand <b>'+esc(t.BU||'(chưa rõ BU)')+'</b> cho từng kênh — đúng format từng loại (Search/PMax khác nhau) + gợi ý hình ảnh & video.</div>'
+    +'<div style="font-size:11.5px;color:var(--muted);font-weight:700;letter-spacing:.3px;margin-bottom:7px">CHỌN KÊNH</div>'
+    +'<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px">'+chans.map(function(c){return '<label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" class="cmpch" value="'+c+'" checked style="width:16px;height:16px"> '+c+'</label>';}).join('')+'</div>'
+    +'<div class="mfoot"><button class="btn ghost" id="cmpClose">Đóng</button><button class="btn gold" id="cmpGo">⚡ Tạo caption đa kênh</button></div>';
+  document.getElementById('modal').classList.add('show');
+  document.getElementById('cmpClose').onclick=function(){document.getElementById('modal').classList.remove('show');};
+  document.getElementById('cmpGo').onclick=function(){aiCampaignRun(id);};
+};
+window.CMP_SPEC={
+  'Facebook':'FACEBOOK: Primary text (đoạn dài, cảm xúc, có CTA), Headline (≤40 ký tự), Description ngắn. Gợi ý ảnh/video (mô tả để designer làm).',
+  'Google Ads':'GOOGLE ADS — tạo CHUẨN RIÊNG cho từng loại quảng cáo: (a) SEARCH RSA: 15 Headlines (mỗi cái ≤30 ký tự, đa dạng góc), 4 Descriptions (≤90 ký tự), 2 Display Path (≤15). (b) PERFORMANCE MAX: 5 Short headlines (≤30), 5 Long headlines (≤90), 5 Descriptions (≤90), 1 Business name, + GỢI Ý ASSET (ảnh 1.91:1 & 1:1 & 4:5, logo vuông, video ngắn 6-15s). (c) DISPLAY (nếu phù hợp): Headline + Long headline + Description + ảnh. Ghi rõ số ký tự còn lại từng dòng.',
+  'TikTok':'TIKTOK: Hook 1 câu (2.5s đầu), kịch bản video ngắn theo từng cảnh (shot list), caption, 3-5 hashtag trend. Gợi ý nhạc/style dựng.',
+  'Zalo':'ZALO OA: tin/bài đăng thân thiện, ngắn gọn, có CTA. Gợi ý ảnh.',
+  'YouTube':'YOUTUBE: Tiêu đề (≤70 ký tự), Mô tả (có timestamp nếu cần), outline kịch bản, gợi ý thumbnail.'
+};
+window.aiCampaignRun=async function(id){
+  var t=DB.tasks.find(function(x){return x._id===id;}); if(!t)return;
+  var chs=[].slice.call(document.querySelectorAll('.cmpch:checked')).map(function(e){return e.value;});
+  if(!chs.length){alert('Chọn ít nhất 1 kênh');return;}
+  var a=DB.agents||{}; var url=((a.content||a.webhook||'https://hook.us2.make.com/sivw06ded7skk1n4ugv3ymmteo27cdmm')+'').trim();
+  var specs=chs.map(function(c){return '• '+(CMP_SPEC[c]||c);}).join('\n');
+  var instr='Đây là CAMPAIGN cho BU '+(t.BU||'')+', tên: "'+(t['Request Name']||'')+'". Viết theo ĐÚNG giọng & chuẩn brand của BU này. '
+    +'Tạo nội dung RIÊNG, đúng FORMAT & giới hạn ký tự cho từng kênh/loại quảng cáo dưới đây (mỗi loại trình bày tách bạch, rõ ràng):\n'+specs
+    +'\nKèm #hashtag phù hợp mỗi kênh và phần GỢI Ý HÌNH ẢNH/VIDEO để designer/editor sản xuất. Trả về Markdown, tách rõ từng kênh & từng loại. Ghi chú gốc của yêu cầu: '+(t.Notes||'(không có)')+'.';
+  var payload=agentPayload(t); payload.mode='campaign'; payload.channels=chs; payload.notes=instr; payload.title='[CAMPAIGN] '+(t['Request Name']||'');
+  showContentModal(t,'⏳ Đang lên campaign đa kênh ('+chs.join(', ')+')… chờ vài giây',true);
+  try{
+    var r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var text=''; var ct=(r.headers.get('content-type')||'');
+    if(ct.indexOf('application/json')>=0){var j=await r.json();text=(j&&(j.content||j.text||j.result))||JSON.stringify(j);}else{text=await r.text();}
+    if(!text)text='(Không nhận được nội dung. Kiểm tra Make scenario.)';
+    showContentModal(t,text,false);
+    try{t.agent=Object.assign({},t.agent,{status:'done',type:'campaign',resultAt:new Date().toISOString()});logHist(t,'🎯 AI lên campaign: '+chs.join(', '));save();}catch(e){}
+  }catch(e){
+    showContentModal(t,'❌ Lỗi gọi AI: '+((e&&e.message)||e)+'\n\nKiểm tra Make scenario đã BẬT & webhook đúng chưa.',false);
+  }
+};
 window.aiWriteContent=async function(id){
   var t=DB.tasks.find(function(x){return x._id===id;}); if(!t)return;
   var a=DB.agents||{}; var url=((a.content||a.webhook||'https://hook.us2.make.com/sivw06ded7skk1n4ugv3ymmteo27cdmm')+'').trim();
