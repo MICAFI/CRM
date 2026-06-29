@@ -2529,29 +2529,30 @@ function rCredit(c,ta){
     <div class="tablewrap"><table><thead><tr><th>Nhân sự</th><th style="text-align:right">KPI tháng</th><th style="text-align:right">Đã nhận</th><th style="text-align:right">Còn lại</th><th>Tiến độ</th><th style="text-align:right">%</th></tr></thead><tbody>${stRows}</tbody></table></div></div>${supW.length?`<div class="panel" style="margin-top:16px"><h3><span class="dot" style="background:#6b5e9c"></span>Điều phối / Giám sát · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· phụ trách & review — KHÔNG tính KPI sản xuất</span></h3><div class="tablewrap"><table><thead><tr><th>Người</th><th>Vai trò</th><th style="text-align:right">Khối lượng phụ trách (credit)</th><th style="text-align:right">Số task</th></tr></thead><tbody>${supW.map(x=>`<tr><td class="name-cell">${esc(x[0])}</td><td><span class="role-badge role-${roleOfName(x[0])}">${roleLabel(roleOfName(x[0]))}</span></td><td style="text-align:right;font-weight:700;color:#6b5e9c">${x[1].used}</td><td style="text-align:right;color:#6b7080">${DB.tasks.filter(t=>t.Owner===x[0]&&taskMonthKey(t)===mk&&t.Status!=='Cancelled').length}</td></tr>`).join('')}</tbody></table></div></div>`:''}`;
 }
 const ADMIN_KPI=[
- ['Request Intake',5,'Ghi nhận & nhập task/credit chính xác, phân loại','intake'],
- ['Demand Management',10,'Quản lý đủ task, không sót, đánh giá xếp loại','assigned'],
- ['Backlog Management',5,'Kiểm soát & cảnh báo tồn đọng','backlog'],
- ['Priority Management',5,'Task đúng Priority / impact','priority'],
- ['Capacity Planning',10,'Quản lý tải & slot nhận task của team','capacity'],
- ['Tasks Allocation & Alignment',10,'Phân bổ task đúng bộ phận · SLA · output','alloc'],
- ['Project Tracking',10,'Theo dõi tiến độ task (65%) & campaign (35%)','tracking'],
- ['SLA Management',5,'SLA Compliance ≥ 80% · cảnh báo vi phạm','sla'],
- ['BU Reporting',2,'Report đúng hạn 40% · chính xác 60%','manual'],
- ['Business Requirement Gathering',10,'Hiểu đúng nhu cầu BU · accuracy/completeness','manual'],
- ['Campaign Brief Development',10,'Brief rõ ràng, đầy đủ, được duyệt','manual'],
- ['Campaign Planning',15,'Plan đúng hạn, hoàn chỉnh, được duyệt','manual'],
- ['Campaign Review',3,'Đánh giá campaign & hành động cải tiến','manual'],
+ ['Request Intake',5,[['Ghi nhận chính xác yêu cầu BU',30,null],['Nhập task & credit vào hệ thống',30,'hasCredit'],['Phân loại yêu cầu',15,'classified'],['Tạo Brief cho MKT',15,null]]],
+ ['Demand Management',10,[['Quản lý đủ task, không sót task',50,'assigned'],['Phân loại task',25,'classified'],['Đánh giá xếp loại',25,'priority']]],
+ ['Backlog Management',5,[['Danh mục quản lý Backlog',40,'backlog'],['Cập nhật tiến độ xử lý',20,'tracking'],['Cảnh báo tồn đọng',20,'backlog'],['Phương án xử lý task tồn',20,null]]],
+ ['Priority Management',5,[['Task đúng Priority',40,'priority'],['Task đúng impact',40,null],['Phân loại task giữa các BU',20,'classified']]],
+ ['Capacity Planning',10,[['Quản lý tải công việc MKT',30,'capacity'],['Slot task đang nhận / còn trống',50,'capacity'],['Lịch tiếp nhận task',20,null]]],
+ ['Tasks Allocation & Alignment',10,[['Triển khai Brief/task đến bộ phận',40,'assigned'],['Alignment · SLA',30,'sla'],['Alignment · Output',30,'tracking']]],
+ ['Project Tracking',10,[['Tracking tiến độ task',65,'tracking'],['Tracking campaign',35,null]]],
+ ['SLA Management',5,[['SLA Compliance Rate (≥80%)',80,'sla'],['Cảnh báo vi phạm SLA',20,null]]],
+ ['BU Reporting',2,[['Report On-time',40,null],['Report Accuracy',60,null]]],
+ ['Business Requirement Gathering',10,[['Requirement Accuracy',50,null],['Requirement Completeness',30,null],['Requirement Gathering SLA',20,null]]],
+ ['Campaign Brief Development',10,[['Brief Accuracy',40,null],['Brief Completeness',40,null],['Brief Approval Rate',20,null]]],
+ ['Campaign Planning',15,[['Campaign Plan Completion',40,null],['Campaign On-time Setup',40,null],['Plan Approval Rate',20,null]]],
+ ['Campaign Review',3,[['Campaign Review Completion',40,null],['Insight Quality',40,null],['Improvement Action Closure',20,null]]],
 ];
-function adminKpiVal(name){var o=DB.adminKpi||{};var v=o[name];return (v===''||v==null)?null:Number(v);}
-window.setAdminKpi=(name,v)=>{DB.adminKpi=DB.adminKpi||{};DB.adminKpi[name]=(v===''?'':Number(v));save();render();};
+function adminKpiVal(key){var o=DB.adminKpi||{};var v=o[key];return (v===''||v==null)?null:Number(v);}
+window.setAdminKpi=(key,v)=>{DB.adminKpi=DB.adminKpi||{};DB.adminKpi[key]=(v===''?'':Number(v));save();render();};
 function rAdminKpi(c,ta){
   ta.innerHTML='';
   const ts=DB.tasks||[];const total=ts.length||1;
   const open=ts.filter(t=>!isClosed(t));const openC=open.length||1;
   const assigned=Math.round(ts.filter(t=>t.Owner).length/total*100);
+  const classified=Math.round(ts.filter(t=>t.Function&&t['Sub Function']).length/total*100);
   const priority=Math.round(ts.filter(t=>t.Priority).length/total*100);
-  const intake=Math.round(ts.filter(t=>t.Function&&t['Sub Function']).length/total*100);
+  const hasCredit=Math.round(ts.filter(t=>creditOf(t)>0).length/total*100);
   const overdue=open.filter(t=>dueState(t)==='overdue').length;
   const backlog=Math.round(100*(1-overdue/openC));
   const closed=ts.filter(isClosed);
@@ -2562,26 +2563,35 @@ function rAdminKpi(c,ta){
   const ppl=staffPeople().filter(n=>!isSupervisor(n));
   const overload=ppl.filter(n=>staffWallet(n).remaining<0).length;
   const capacity=ppl.length?Math.round(100*(ppl.length-overload)/ppl.length):100;
-  const AUTO={intake:intake,assigned:assigned,backlog:backlog,priority:priority,capacity:capacity,alloc:assigned,tracking:tracking,sla:sla};
-  let num=0,den=0,autoNum=0,autoDen=0;
-  ADMIN_KPI.forEach(k=>{const auto=k[3]!=='manual';const sc=auto?AUTO[k[3]]:adminKpiVal(k[0]);if(sc!=null){num+=k[1]*sc;den+=k[1];}if(auto){autoNum+=k[1]*sc;autoDen+=k[1];}});
-  const overall=den?Math.round(num/den):0, autoScore=autoDen?Math.round(autoNum/autoDen):0;
+  const AUTO={hasCredit:hasCredit,classified:classified,assigned:assigned,priority:priority,backlog:backlog,tracking:tracking,capacity:capacity,sla:sla};
+  const scoreOf=(fn,sub)=>{const key=sub[2];return key?AUTO[key]:adminKpiVal(fn+'|'+sub[0]);};
+  // overall (all scored) + auto-only, flattened by global weight = funcWeight * subPct/100
+  let gNum=0,gDen=0,aNum=0,aDen=0;
+  ADMIN_KPI.forEach(f=>{f[2].forEach(s=>{const gw=f[1]*s[1]/100;const sc=scoreOf(f[0],s);if(sc!=null){gNum+=gw*sc;gDen+=gw;}if(s[2]){aNum+=gw*AUTO[s[2]];aDen+=gw;}});});
+  const overall=gDen?Math.round(gNum/gDen):0, autoScore=aDen?Math.round(aNum/aDen):0, coverage=Math.round(gDen);
   const colOf=p=>p==null?'#9aa0ac':(p>=80?'#3f8a63':(p>=50?'#b58a3a':'#b4524f'));
-  const bar=(p,col)=>`<div style="height:8px;background:var(--track);border-radius:5px;overflow:hidden"><div style="height:100%;border-radius:5px;background:${col};width:${Math.min(100,p)}%"></div></div>`;
-  const kpi=(lab,num2,note,col)=>`<div class="kpi"><div class="bar" style="background:${col}"></div><div class="lab">${lab}</div><div class="num">${num2}</div><div class="note">${note}</div></div>`;
-  const rows=ADMIN_KPI.map(k=>{const name=k[0],w=k[1],desc=k[2],key=k[3];const auto=key!=='manual';const sc=auto?AUTO[key]:adminKpiVal(name);const col=colOf(sc);
-    const cell=auto?`<b style="color:${col};font-size:14px">${sc}%</b><div style="font-size:10px;color:#9aa0ac">tự đo</div>`:`<input type="number" min="0" max="100" value="${sc==null?'':sc}" onchange="setAdminKpi('${name}',this.value)" style="width:64px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13px;text-align:right"><div style="font-size:10px;color:#9aa0ac">nhập tay</div>`;
-    return `<tr><td class="name-cell">${name}<div style="font-size:11px;color:var(--muted);font-weight:400">${desc}</div></td><td style="text-align:center;font-weight:800;color:#46506b">${w}%</td><td style="text-align:right">${cell}</td><td style="min-width:130px">${sc==null?'<span style="color:#9aa0ac">— chưa nhập</span>':bar(sc,col)}</td></tr>`;}).join('');
+  const bar=(p,col)=>p==null?'<span style="color:#9aa0ac">— chưa nhập</span>':`<div style="height:7px;background:var(--track);border-radius:5px;overflow:hidden"><div style="height:100%;border-radius:5px;background:${col};width:${Math.min(100,p)}%"></div></div>`;
+  const kpi=(lab,num,note,col)=>`<div class="kpi"><div class="bar" style="background:${col}"></div><div class="lab">${lab}</div><div class="num">${num}</div><div class="note">${note}</div></div>`;
+  let rows='';
+  ADMIN_KPI.forEach(f=>{
+    let fn=0,fd=0;f[2].forEach(s=>{const sc=scoreOf(f[0],s);if(sc!=null){fn+=s[1]*sc;fd+=s[1];}});
+    const fScore=fd?Math.round(fn/fd):null;const fcol=colOf(fScore);
+    rows+=`<tr style="background:var(--card2)"><td style="font-weight:800">${f[0]}</td><td style="text-align:center;font-weight:800;color:#3f6ea5">${f[1]}%</td><td style="text-align:right;font-weight:800;color:${fcol}">${fScore==null?'—':fScore+'%'}</td><td style="min-width:130px">${bar(fScore,fcol)}</td></tr>`;
+    f[2].forEach(s=>{const auto=!!s[2];const sc=scoreOf(f[0],s);const col=colOf(sc);
+      const cell=auto?`<b style="color:${col}">${sc}%</b> <span style="font-size:10px;color:#9aa0ac">tự đo</span>`:`<input type="number" min="0" max="100" value="${sc==null?'':sc}" onchange="setAdminKpi('${f[0]}|${s[0]}',this.value)" style="width:60px;padding:4px 6px;border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:12.5px;text-align:right"> <span style="font-size:10px;color:#9aa0ac">nhập</span>`;
+      rows+=`<tr><td style="padding-left:22px;color:var(--ink2);font-size:12.5px">↳ ${s[0]}</td><td style="text-align:center;color:#8c909c;font-size:12px">${s[1]}%</td><td style="text-align:right">${cell}</td><td>${bar(sc,col)}</td></tr>`;
+    });
+  });
   c.innerHTML=`
   <div class="kpis">
-    ${kpi('KPI ADMIN TỔNG',overall+'%','trọng số có dữ liệu '+den+'% / 100%',colOf(overall))}
-    ${kpi('TỰ ĐO HỆ THỐNG',autoScore+'%','từ '+autoDen+'% trọng số đo được',colOf(autoScore))}
+    ${kpi('KPI ADMIN TỔNG',overall+'%','đã chấm '+coverage+'% / 100% trọng số',colOf(overall))}
+    ${kpi('TỰ ĐO HỆ THỐNG',autoScore+'%','phần định lượng đo tự động',colOf(autoScore))}
     ${kpi('SLA COMPLIANCE',sla+'%','mục tiêu ≥ 80%',sla>=80?'#3f8a63':'#b4524f')}
     ${kpi('KHÔNG SÓT TASK',assigned+'%','task đã phân người làm',colOf(assigned))}
   </div>
-  <div class="panel"><h3><span class="dot" style="background:#3f6ea5"></span>KPI Quản lý CRM — Admin · Service Management <span style="font-size:11.5px;color:var(--muted);font-weight:500">· theo JD & SOW · phần định lượng tự đo từ dữ liệu, phần định tính nhập tay</span></h3>
-    <div class="tablewrap"><table><thead><tr><th>Nhóm chức năng (Sub Function)</th><th style="text-align:center">Trọng số</th><th style="text-align:right">Điểm</th><th>Mức đạt</th></tr></thead><tbody>${rows}</tbody></table></div>
-    <div style="font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:12px">Điểm "tự đo" tính realtime từ CRM (đã phân task, đúng hạn SLA, backlog, tiến độ, tải team…). Ô "nhập tay" là KPI định tính (chất lượng brief, plan, report…) — Admin tự chấm 0–100 mỗi kỳ. <b>KPI Admin tổng</b> = bình quân theo trọng số của các mục đã có điểm.</div>
+  <div class="panel"><h3><span class="dot" style="background:#3f6ea5"></span>KPI Quản lý CRM — Admin · Service Management <span style="font-size:11.5px;color:var(--muted);font-weight:500">· 13 nhóm (Σ trọng số = 100%) · mỗi nhóm gồm các sub-KPI · tự đo từ dữ liệu, định tính nhập tay</span></h3>
+    <div class="tablewrap"><table><thead><tr><th>Nhóm chức năng / Sub-KPI</th><th style="text-align:center">Trọng số</th><th style="text-align:right">Điểm</th><th>Mức đạt</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div style="font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:12px"><b>Điểm nhóm</b> = bình quân các sub-KPI theo % trong nhóm. <b>KPI Admin tổng</b> = bình quân các nhóm theo trọng số (cột giữa, cộng lại = 100%). Sub-KPI "tự đo" lấy realtime từ CRM; ô "nhập" là KPI định tính Admin tự chấm 0–100 mỗi kỳ.</div>
   </div>`;
 }
 function rStaff(c,ta){
