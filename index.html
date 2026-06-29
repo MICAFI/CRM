@@ -1282,11 +1282,11 @@ function buSubmitForm(w){
         <div style="font-size:12px;font-weight:700;color:#3b3f4a;margin-bottom:4px">Loại việc cần giao <span style="color:#8c909c;font-weight:500">· chọn 1 hoặc nhiều · mỗi loại = 1 task tính credit riêng</span></div>
         <div style="font-size:10.5px;color:#8c909c;font-weight:700;letter-spacing:.3px;margin:9px 0 5px">NHÓM CONTENT</div>
         <div style="display:flex;gap:14px;flex-wrap:wrap">
-          <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="content" style="width:17px;height:17px"> ✍️ Content / bài viết</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="image" style="width:17px;height:17px"> 🎨 Hình ảnh / Banner</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="video" style="width:17px;height:17px"> 🎬 Video</label>
+          <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" onchange="buUpdCost()" class="bu_dtype" value="content" style="width:17px;height:17px"> ✍️ Content / bài viết</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" onchange="buUpdCost()" class="bu_dtype" value="image" style="width:17px;height:17px"> 🎨 Hình ảnh / Banner</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" onchange="buUpdCost()" class="bu_dtype" value="video" style="width:17px;height:17px"> 🎬 Video</label>
         </div>
         <div style="font-size:10.5px;color:#8c909c;font-weight:700;letter-spacing:.3px;margin:11px 0 5px">LOẠI VIỆC KHÁC</div>
         <div style="display:flex;gap:14px;flex-wrap:wrap">
-          <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="web" style="width:17px;height:17px"> 🌐 Website / Landing</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="seo" style="width:17px;height:17px"> 🔍 SEO / GEO</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="research" style="width:17px;height:17px"> 🔎 Nghiên cứu / Phân tích</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="ads" style="width:17px;height:17px"> 📈 Quảng cáo / Performance</label>
+          <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" onchange="buUpdCost()" class="bu_dtype" value="web" style="width:17px;height:17px"> 🌐 Website / Landing</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" onchange="buUpdCost()" class="bu_dtype" value="seo" style="width:17px;height:17px"> 🔍 SEO / GEO</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" onchange="buUpdCost()" class="bu_dtype" value="research" style="width:17px;height:17px"> 🔎 Nghiên cứu / Phân tích</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" onchange="buUpdCost()" class="bu_dtype" value="ads" style="width:17px;height:17px"> 📈 Quảng cáo / Performance</label>
         </div>
         <div style="font-size:11.5px;color:#6b7080;line-height:1.6;margin-top:11px">ℹ️ Nhóm <b>Content</b> (bài viết · ảnh · video): mỗi phần tính <b>credit riêng</b> rồi gom chung 1 yêu cầu. <b>Website, SEO/GEO, Nghiên cứu/Phân tích, Quảng cáo</b> là loại việc khác — tách <b>task riêng</b>, tính credit theo độ phức tạp của loại đó & giao đúng người. Để trống nếu chỉ là 1 task đơn.</div>
       </div>
@@ -1376,11 +1376,12 @@ window.buUpdCost=()=>{
   const cost=document.getElementById('bu_cost'),sub=document.getElementById('bu_cost_sub'),after=document.getElementById('bu_after'),warn=document.getElementById('bu_warn');
   if(!cx||!cost)return;
   const _wA=buWallet(buName());
-  if(cx.value==='__ASK_MKT__'||cap.value==='__ASK_MKT__'){cost.textContent='MKT đánh giá';cost.style.fontSize='24px';sub.innerHTML='Bạn để MKT đánh giá độ phức tạp & credit. MKT sẽ xem và xác nhận lại.';if(after)after.textContent=_wA.remaining;if(warn)warn.style.display='none';return;}
+  if(cx.value==='__ASK_MKT__'||cap.value==='__ASK_MKT__'){cost.textContent='MKT đánh giá';cost.style.fontSize='24px';var _n=Math.max(1,document.querySelectorAll('.bu_dtype:checked').length);sub.innerHTML='Bạn để MKT đánh giá độ phức tạp & credit'+(_n>1?(' · '+_n+' loại = '+_n+' task riêng'):'')+'. MKT sẽ xem và xác nhận lại.';if(after)after.textContent=_wA.remaining;if(warn)warn.style.display='none';return;}
   cost.style.fontSize='34px';
-  const c=creditFor(cx.value,cap.value);
+  const nTypes=Math.max(1,document.querySelectorAll('.bu_dtype:checked').length);
+  const c1=creditFor(cx.value,cap.value);const c=c1*nTypes;
   cost.textContent=c+' credit';
-  sub.innerHTML='≈ '+(c*15)+' phút · '+cxKey(cx.value)+' × '+capKey(cap.value);
+  sub.innerHTML='≈ '+(c*15)+' phút · '+cxKey(cx.value)+' × '+capKey(cap.value)+(nTypes>1?(' · '+nTypes+' loại × '+c1+'cr/loại'):'');
   const w=buWallet(buName());const rem=w.remaining-c;
   if(after)after.textContent=rem;
   if(warn){if(rem<0){warn.style.display='block';warn.textContent='⚠ Vượt ngân sách '+Math.abs(rem)+' credit. Vẫn gửi được — chờ MKT duyệt.';}else warn.style.display='none';}
