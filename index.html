@@ -1506,7 +1506,7 @@ window.aiMediaRun=async function(id){
     instr='Bạn là chuyên gia tạo prompt ẢNH AI. Viết '+nv+' PROMPT TIẾNG ANH chi tiết, sẵn sàng dán vào ChatGPT/DALL·E/Grok, để tạo ẢNH cho bài đăng của brand "'+(t.BU||'')+'" — chủ đề: "'+(t['Request Name']||'')+'". Nền tảng: '+plat+'. Tỷ lệ/kích thước: '+ratio+'. Mỗi prompt mô tả: chủ thể chính, bối cảnh, bố cục, phong cách hình ảnh, bảng màu theo brand '+(t.BU||'')+', ánh sáng & mood, có/không text overlay, và phần "avoid" (tránh gì). Đánh số PA1/PA2/... Sau mỗi prompt tiếng Anh thêm 1 dòng tiếng Việt tóm tắt cho người duyệt.';
   }
   instr+=' Thông tin tham khảo: '+refInfo+'.';
-  var payload=agentPayload(t); payload.mode='media'; payload.mediaType=type; payload.ratio=ratio; payload.size=mediaSize(ratio); payload.platform=plat; payload.notes=instr; payload.title='['+type.toUpperCase()+' PROMPT] '+(t['Request Name']||'');
+  var payload=agentPayload(t); payload.mode='media'; payload.mediaType=type; payload.ratio=ratio; payload.size=mediaSize(ratio); payload.platform=plat; payload.subject=(t['Request Name']||''); payload.imgBrief=(t.CampaignRef||t.Notes||''); payload.notes=instr; payload.title='['+type.toUpperCase()+' PROMPT] '+(t['Request Name']||'');
   showContentModal(t,'⏳ Đang tạo '+nv+' prompt '+type+' ('+ratio+')… chờ vài giây',true);
   try{
     var r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
