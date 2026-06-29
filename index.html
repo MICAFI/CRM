@@ -445,7 +445,9 @@ function sumCredit(arr){return arr.reduce((s,t)=>s+creditOf(t),0);}
 
 // === VÍ CREDIT THEO BU ===
 const DEFAULT_BU_CREDIT=650; // credit/tháng mặc định mỗi BU
-function buBudget(bu){const c=DB.buCredits&&DB.buCredits[bu];return c&&c.budget!=null&&c.budget!==''?Number(c.budget):DEFAULT_BU_CREDIT;}
+const BIG_BU=['MICAFI','FDS','Proship','Ratraco','Fado VN'];
+function buDefaultBudget(bu){return BIG_BU.indexOf(bu)>=0?980:272;}
+function buBudget(bu){const c=DB.buCredits&&DB.buCredits[bu];return c&&c.budget!=null&&c.budget!==''?Number(c.budget):buDefaultBudget(bu);}
 function buConsumes(t){return t.Status!=='Open'&&t.Status!=='Cancelled';} // trừ credit khi task đã duyệt/bắt đầu
 function curMonthKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 function taskMonthKey(t){const d=parseDate(t['Start Date']||t['Request Date']);return d?d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'):curMonthKey();}
@@ -1277,13 +1279,16 @@ function buSubmitForm(w){
       </div>
       <div style="margin-bottom:16px"><label style="${L}">Ghi chú / link brief</label><textarea id="bu_note" rows="2" style="${I};resize:vertical" placeholder="Dán link Drive / mô tả ngắn…"></textarea></div>
       <div style="margin-bottom:14px;padding:13px 15px;background:var(--card2);border:1px solid var(--line);border-radius:10px">
-        <div style="font-size:12px;font-weight:700;color:#3b3f4a;margin-bottom:9px">Loại sản phẩm cần giao <span style="color:#8c909c;font-weight:500">· chọn 1 hoặc nhiều</span></div>
-        <div style="display:flex;gap:16px;flex-wrap:wrap">
-          <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="content" style="width:17px;height:17px"> ✍️ Content / bài viết</label>
-          <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="image" style="width:17px;height:17px"> 🎨 Hình ảnh / Banner</label>
-          <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="video" style="width:17px;height:17px"> 🎬 Video</label>
+        <div style="font-size:12px;font-weight:700;color:#3b3f4a;margin-bottom:4px">Loại việc cần giao <span style="color:#8c909c;font-weight:500">· chọn 1 hoặc nhiều · mỗi loại = 1 task tính credit riêng</span></div>
+        <div style="font-size:10.5px;color:#8c909c;font-weight:700;letter-spacing:.3px;margin:9px 0 5px">NHÓM CONTENT</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="content" style="width:17px;height:17px"> ✍️ Content / bài viết</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="image" style="width:17px;height:17px"> 🎨 Hình ảnh / Banner</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="video" style="width:17px;height:17px"> 🎬 Video</label>
         </div>
-        <div style="font-size:11.5px;color:#6b7080;line-height:1.6;margin-top:10px">ℹ️ Chọn nhiều loại → hệ thống tách thành <b>các task riêng</b> (content / ảnh / video), <b>tính credit riêng</b> & giao đúng người phụ trách. Để trống nếu chỉ là 1 task đơn.</div>
+        <div style="font-size:10.5px;color:#8c909c;font-weight:700;letter-spacing:.3px;margin:11px 0 5px">LOẠI VIỆC KHÁC</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="web" style="width:17px;height:17px"> 🌐 Website / Landing</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="seo" style="width:17px;height:17px"> 🔍 SEO / GEO</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="research" style="width:17px;height:17px"> 🔎 Nghiên cứu / Phân tích</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" class="bu_dtype" value="ads" style="width:17px;height:17px"> 📈 Quảng cáo / Performance</label>
+        </div>
+        <div style="font-size:11.5px;color:#6b7080;line-height:1.6;margin-top:11px">ℹ️ Nhóm <b>Content</b> (bài viết · ảnh · video): mỗi phần tính <b>credit riêng</b> rồi gom chung 1 yêu cầu. <b>Website, SEO/GEO, Nghiên cứu/Phân tích, Quảng cáo</b> là loại việc khác — tách <b>task riêng</b>, tính credit theo độ phức tạp của loại đó & giao đúng người. Để trống nếu chỉ là 1 task đơn.</div>
       </div>
       <div id="bu_err" style="font-size:12.5px;color:#b4524f;font-weight:600;margin-bottom:10px;display:none"></div>
       <button onclick="buSubmit()" style="width:100%;padding:14px;background:#17191f;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Gửi yêu cầu →</button>
@@ -1386,7 +1391,7 @@ window.buSubmit=()=>{
   const err=document.getElementById('bu_err');
   if(!name||!fn){if(err){err.style.display='block';err.textContent='Vui lòng nhập Tên task và chọn Function.';}return;}
   const types=[...document.querySelectorAll('.bu_dtype:checked')].map(e=>e.value);
-  const DLAB={content:'Content',image:'Hình ảnh/Banner',video:'Video'};
+  const DLAB={content:'Content',image:'Hình ảnh/Banner',video:'Video',web:'Website/Landing',seo:'SEO/GEO',research:'Nghiên cứu/Phân tích',ads:'Quảng cáo/Performance'};
   const base={'Request Date':today(),BU:buName(),'Project/Campaign':g('bu_proj'),Function:fn,'Sub Function':g('bu_sub'),Requestor:me().name,Source:'New Request',Priority:g('bu_pr')||'P2',Owner:'',Status:'Open','Due Date':g('bu_due'),Complexity:g('bu_cx'),'Capacity Level':g('bu_cap'),Notes:g('bu_note'),Progress:''};
   const list=types.length?types:[null];
   const made=[];
@@ -2493,7 +2498,7 @@ window.setCreditMonth=mk=>{CREDITMONTH=mk;render();};
 function creditPrice(){var p=DB.creditPrice;return (p!=null&&p!=='')?Number(p):50000;}
 window.setCreditPrice=v=>{DB.creditPrice=Number(v)||0;save();render();};
 function fmtVnd(n){return (Math.round(n)||0).toLocaleString('vi-VN')+' ₫';}
-function buFee(bu){var o=DB.buFee||{};var v=o[bu];if(v==null||v===''){return bu==='MICAFI'?36000000:0;}return Number(v);}
+function buFee(bu){var o=DB.buFee||{};var v=o[bu];if(v==null||v===''){return (typeof BIG_BU!=='undefined'&&BIG_BU.indexOf(bu)>=0)?36000000:10000000;}return Number(v);}
 window.setBuFee=(bu,v)=>{DB.buFee=DB.buFee||{};DB.buFee[bu]=(v===''?'':Number(v));save();render();};
 function buPrice(bu){var f=buFee(bu),b=buBudget(bu);return (f>0&&b>0)?Math.round(f/b):creditPrice();}
 function staffBonusRate(){var p=DB.staffBonus;return (p!=null&&p!=='')?Number(p):30000;}
@@ -2550,7 +2555,7 @@ function rCredit(c,ta){
     ${kpi('GIÁ TRỊ CREDIT DƯ',fmtVnd(totalLeftVal),'BU chưa dùng hết · quy theo giá BU',totalLeftVal?'#3f8a63':'#9aa0ac')}
     ${kpi('THƯỞNG VƯỢT KPI',fmtVnd(totalBonus),stOver+' NV vượt × '+fmtVnd(bonus)+'/cr',totalBonus?'#b58a3a':'#9aa0ac')}
   </div>
-  <div class="panel" style="margin-bottom:16px"><h3><span class="dot" style="background:#3f6ea5"></span>Ví credit theo BU · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· phí tháng → giá/credit · vượt = thu thêm · dư = giá trị còn lại (theo giá BU trả)</span></h3>
+  <div class="panel" style="margin-bottom:16px"><h3><span class="dot" style="background:#3f6ea5"></span>Ví credit theo BU · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· dự án lớn 36tr ≈ 980cr · dự án mới 10tr ≈ 272cr · giá/credit ≈ 36.735đ · vượt = thu thêm · dư = giá trị còn lại</span></h3>
     <div class="tablewrap"><table><thead><tr><th>BU</th><th style="text-align:right">Budget</th><th style="text-align:right">Đã dùng</th><th style="text-align:right">Phí tháng (₫)</th><th style="text-align:right">Còn lại</th><th>Mức dùng</th><th style="text-align:right">Thu thêm (vượt)</th><th style="text-align:right">Giá trị dư</th></tr></thead><tbody>${buRows}</tbody></table></div></div>
   <div class="panel"><h3><span class="dot" style="background:#3f8a63"></span>KPI nhân sự sản xuất · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· vượt KPI = thưởng thêm (${fmtVnd(bonus)}/credit vượt) · Admin chốt cuối theo KPI quản lý</span></h3>
     <div class="tablewrap"><table><thead><tr><th>Nhân sự</th><th style="text-align:right">KPI tháng</th><th style="text-align:right">Đã nhận</th><th style="text-align:right">Còn lại</th><th>Tiến độ</th><th style="text-align:right">%</th><th style="text-align:right">Thưởng vượt (₫)</th></tr></thead><tbody>${stRows}${adminRow}</tbody></table></div></div>${supW.length?`<div class="panel" style="margin-top:16px"><h3><span class="dot" style="background:#6b5e9c"></span>Điều phối / Giám sát · ${monthLabel(mk)} <span style="font-size:11.5px;color:var(--muted);font-weight:500">· phụ trách & review — KHÔNG tính KPI sản xuất</span></h3><div class="tablewrap"><table><thead><tr><th>Người</th><th>Vai trò</th><th style="text-align:right">Khối lượng phụ trách (credit)</th><th style="text-align:right">Số task</th></tr></thead><tbody>${supW.map(x=>`<tr><td class="name-cell">${esc(x[0])}</td><td><span class="role-badge role-${roleOfName(x[0])}">${roleLabel(roleOfName(x[0]))}</span></td><td style="text-align:right;font-weight:700;color:#6b5e9c">${x[1].used}</td><td style="text-align:right;color:#6b7080">${DB.tasks.filter(t=>t.Owner===x[0]&&taskMonthKey(t)===mk&&t.Status!=='Cancelled').length}</td></tr>`).join('')}</tbody></table></div></div>`:''}`;
@@ -2577,31 +2582,39 @@ function convVideo(){var v=(DB.convRates||{}).video;return v?Number(v):60;}
 function convTu(){var v=(DB.convRates||{}).tu;return (v&&Number(v)>0)?Number(v):250;}
 window.setConv=(k,v)=>{DB.convRates=DB.convRates||{};DB.convRates[k]=Number(v)||0;save();render();};
 function itemCredit(unit,n){if(unit==='bài')return n*convBai()/15;if(unit==='video')return n*convVideo()/15;if(unit==='từ')return n/convTu();return 0;}
+function contentShare(){var v=DB.contentShare;return (v!=null&&v!=='')?Number(v):30;}
+window.setContentShare=v=>{DB.contentShare=Number(v)||0;save();render();};
 function rOutputKpi(c,ta){
-  ta.innerHTML=`<label style="font-size:12px;color:var(--muted);white-space:nowrap">Phút/bài <input id="cvBai" type="number" min="1" value="${convBai()}" style="width:64px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13px;margin:0 10px 0 4px"></label><label style="font-size:12px;color:var(--muted);white-space:nowrap">Phút/video <input id="cvVid" type="number" min="1" value="${convVideo()}" style="width:64px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13px;margin:0 10px 0 4px"></label><label style="font-size:12px;color:var(--muted);white-space:nowrap">Từ/credit <input id="cvTu" type="number" min="1" value="${convTu()}" style="width:70px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13px;margin:0 0 0 4px"></label>`;
-  setTimeout(()=>{var a=document.getElementById('cvBai');if(a)a.onchange=e=>setConv('bai',e.target.value);var b=document.getElementById('cvVid');if(b)b.onchange=e=>setConv('video',e.target.value);var d=document.getElementById('cvTu');if(d)d.onchange=e=>setConv('tu',e.target.value);},0);
-  const mk=curMonthKey();
-  let html='<div style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px">KPI theo <b>sản lượng</b> (bài/video/từ) như file Nghi/Yến đang chấm, kèm cột <b>credit quy đổi</b> (theo định mức trên) để đối chiếu với KPI credit 768/tháng và số liệu CRM thực tế. Chỉnh định mức để xem có khớp không.</div>';
+  const mk=curMonthKey();const share=contentShare();
+  ta.innerHTML=`<label style="font-size:12.5px;color:var(--ink2);font-weight:600;white-space:nowrap">Tỷ trọng Content trong credit BU (%) <input id="cShare" type="number" min="0" max="100" value="${share}" style="width:64px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:13px;margin-left:5px"></label><span style="margin-left:14px;font-size:12px;color:var(--muted)">Mix kênh: Phút/bài <input id="cvBai" type="number" min="1" value="${convBai()}" style="width:52px;padding:6px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:12px;margin:0 5px"> Phút/video <input id="cvVid" type="number" min="1" value="${convVideo()}" style="width:52px;padding:6px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:12px;margin:0 5px"> Từ/cr <input id="cvTu" type="number" min="1" value="${convTu()}" style="width:58px;padding:6px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:12px;margin-left:5px"></span>`;
+  setTimeout(()=>{var s=document.getElementById('cShare');if(s)s.onchange=e=>setContentShare(e.target.value);var a=document.getElementById('cvBai');if(a)a.onchange=e=>setConv('bai',e.target.value);var b=document.getElementById('cvVid');if(b)b.onchange=e=>setConv('video',e.target.value);var d=document.getElementById('cvTu');if(d)d.onchange=e=>setConv('tu',e.target.value);},0);
+  let html='<div style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px">Credit mỗi BU (vd dự án lớn 980cr, dự án mới 272cr) chia cho nhiều mảng. <b>Content chỉ chiếm 1 phần</b> (mặc định '+share+'%), phần còn lại là <b>Ads · SEO · Nghiên cứu · Website…</b>. Bảng dưới cho thấy content chiếm bao nhiêu credit ở mỗi BU và chia ra sao theo kênh.</div>';
   Object.keys(OUTPUT_KPI).forEach(name=>{
     const cfg=OUTPUT_KPI[name];
     const bus=[...new Set([].concat.apply([],cfg.items.map(it=>Object.keys(it[2]))))];
-    let totCr=0,totUnit=0;
-    const rows=cfg.items.map(it=>{const ch=it[0],unit=it[1],m=it[2];const tot=bus.reduce((s,b)=>s+(m[b]||0),0);const cr=itemCredit(unit,tot);totCr+=cr;
+    const target=staffTarget(name);
+    const buBudgetTot=bus.reduce((s,b)=>s+buBudget(b),0);
+    const buContent={};bus.forEach(b=>buContent[b]=Math.round(buBudget(b)*share/100));
+    const totContent=bus.reduce((s,b)=>s+buContent[b],0);
+    const other=buBudgetTot-totContent;
+    let totalRaw=0;cfg.items.forEach(it=>{const tot=bus.reduce((s,b)=>s+(it[2][b]||0),0);totalRaw+=itemCredit(it[1],tot);});
+    const rows=cfg.items.map(it=>{const ch=it[0],unit=it[1],m=it[2];const tot=bus.reduce((s,b)=>s+(m[b]||0),0);const cr=totalRaw>0?itemCredit(unit,tot)/totalRaw*totContent:0;
       return `<tr><td class="name-cell">${ch}</td><td style="color:#8c909c">${unit}</td>${bus.map(b=>`<td style="text-align:right">${m[b]||'—'}</td>`).join('')}<td style="text-align:right;font-weight:700">${tot} ${unit}</td><td style="text-align:right;font-weight:800;color:#3f6ea5">${Math.round(cr)} cr</td></tr>`;}).join('');
-    const kpiTarget=staffTarget(name);const actual=staffUsed(name,mk);
-    const pctVsKpi=kpiTarget?Math.round(totCr/kpiTarget*100):0;
-    const diff=Math.round(totCr-kpiTarget);
-    const nx = totCr<kpiTarget*0.7 ? ('Sản lượng quy đổi ('+Math.round(totCr)+'cr) THẤP hơn KPI credit '+kpiTarget+' → hoặc còn việc khác ngoài content, hoặc định mức/phút mỗi đơn vị đang để thấp.') : (totCr>kpiTarget*1.3 ? ('Sản lượng quy đổi cao hơn KPI credit → định mức đang để cao, hoặc tải thật sự vượt.') : ('Khá khớp với KPI credit '+kpiTarget+' (lệch '+(diff>0?'+':'')+diff+' cr).'));
+    const budgetRow=`<tr style="background:var(--card2)"><td style="font-weight:700;color:#6b7080">Tổng credit BU/tháng</td><td></td>${bus.map(b=>`<td style="text-align:right;color:#6b7080;font-weight:700">${buBudget(b)}</td>`).join('')}<td></td><td style="text-align:right;color:#6b7080;font-weight:700">${buBudgetTot}</td></tr>`;
+    const contentRow=`<tr style="background:rgba(63,110,165,.08)"><td style="font-weight:800;color:#3f6ea5">↳ Content (${share}%)</td><td></td>${bus.map(b=>`<td style="text-align:right;font-weight:800;color:#3f6ea5">${buContent[b]}</td>`).join('')}<td></td><td style="text-align:right;font-weight:800;color:#3f6ea5">${totContent} cr</td></tr>`;
+    const actual=staffUsed(name,mk);const pctKpi=target?Math.round(totContent/target*100):0;
+    const kpi=(num,lab,col)=>`<div><div style="font-size:22px;font-weight:800;color:${col||'inherit'}">${num}</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">${lab}</div></div>`;
     html+=`<div class="panel" style="margin-bottom:16px"><h3><span class="dot" style="background:#3f8a63"></span>${name} · ${cfg.role}</h3>
       <div style="font-size:11.5px;color:var(--muted);margin:-6px 0 12px">${cfg.note}</div>
-      <div class="tablewrap"><table><thead><tr><th>Kênh</th><th>ĐVT</th>${bus.map(b=>`<th style="text-align:right">${esc(b)}</th>`).join('')}<th style="text-align:right">Tổng</th><th style="text-align:right">Credit quy đổi</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="tablewrap"><table><thead><tr><th>Kênh</th><th>ĐVT</th>${bus.map(b=>`<th style="text-align:right">${esc(b)}</th>`).join('')}<th style="text-align:right">Tổng</th><th style="text-align:right">Credit content</th></tr></thead><tbody>${rows}${budgetRow}${contentRow}</tbody></table></div>
       <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:14px">
-        <div><div style="font-size:22px;font-weight:800;color:#3f6ea5">${Math.round(totCr)} cr</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Sản lượng → credit/tháng</div></div>
-        <div><div style="font-size:22px;font-weight:800">${kpiTarget}</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">KPI credit (FTE)</div></div>
-        <div><div style="font-size:22px;font-weight:800;color:${pctVsKpi>=70&&pctVsKpi<=130?'#3f8a63':'#b58a3a'}">${pctVsKpi}%</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Quy đổi / KPI</div></div>
-        <div><div style="font-size:22px;font-weight:800;color:#8a6516">${actual} cr</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">CRM thực tế ${monthLabel(mk).replace('Tháng ','T')}</div></div>
+        ${kpi(totContent+' cr','Content/tháng ('+share+'% credit BU)','#3f6ea5')}
+        ${kpi(other+' cr','Mảng khác (Ads/SEO/Web…)','#8a6516')}
+        ${kpi(target,'KPI nhân sự (FTE)')}
+        ${kpi(pctKpi+'%','Content / KPI',pctKpi>100?'#b4524f':'#3f8a63')}
+        ${kpi(actual+' cr','CRM thực tế '+monthLabel(mk).replace('Tháng ','T'),'#8a6516')}
       </div>
-      <div style="font-size:12px;color:var(--ink2);line-height:1.6;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)">💡 ${nx}</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.6;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)">💡 Content chiếm <b>${share}%</b> credit mỗi BU (tổng ${totContent}cr) · ${100-share}% còn lại (${other}cr) là Ads/SEO/Nghiên cứu/Website. ${pctKpi>100?('Riêng content đã '+pctKpi+'% KPI 1 người → cần chia bớt BU hoặc thêm người.'):('Content ≈ '+pctKpi+'% KPI '+target+'cr của '+name+'.')}</div>
     </div>`;
   });
   c.innerHTML=html;
