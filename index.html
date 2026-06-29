@@ -1513,7 +1513,7 @@ window.aiMediaRun=async function(id){
     var text=''; var ct=(r.headers.get('content-type')||'');
     if(ct.indexOf('application/json')>=0){var j=await r.json();text=(j&&(j.content||j.text||j.result))||JSON.stringify(j);}else{text=await r.text();}
     if(!text)text='(Không nhận được nội dung. Kiểm tra Make scenario.)';
-    var imgUrl=''; try{ var tx=(''+text).trim(); if(tx.slice(0,11)==='data:image/')imgUrl=tx; var m=tx.match(/https?:\/\/[^\s"'<>]+\.(?:png|jpg|jpeg|webp)(?:\?[^\s"'<>]*)?/i); if(!imgUrl&&m)imgUrl=m[0]; else if(!imgUrl){ try{var jj=JSON.parse(tx); imgUrl=(jj&&(jj.url||jj.image_url||(jj.data&&jj.data[0]&&jj.data[0].url)))||''; }catch(e2){} } }catch(e1){}
+    var imgUrl=''; try{ var tx=(''+text).trim(); if(tx.slice(0,11)==='data:image/')imgUrl=tx; var m=tx.match(/https?:\/\/[^\s"'<>]+\.(?:png|jpg|jpeg|webp)(?:\?[^\s"'<>]*)?/i); if(!imgUrl&&m)imgUrl=m[0]; if(!imgUrl&&/^https?:\/\/\S+$/i.test(tx))imgUrl=tx; if(!imgUrl){ try{var jj=JSON.parse(tx); imgUrl=(jj&&(jj.url||jj.image_url||(jj.data&&jj.data[0]&&jj.data[0].url)))||''; }catch(e2){} } }catch(e1){}
     if(imgUrl){ showImgResult(t,imgUrl,instr); try{t.MediaUrl=imgUrl;logHist(t,'🖼️ Ảnh AI đã tạo');save();}catch(e){} }
     else showContentModal(t,text+'\n\n— Nếu đây là PROMPT: copy dán vào ChatGPT/Grok. Nếu đã nối API ảnh mà ra chữ này → kiểm tra webhook image trả về URL ảnh.',false);
     try{t.agent=Object.assign({},t.agent,{status:'done',type:type==='Video'?'video':'image',resultAt:new Date().toISOString()});logHist(t,'🎨 AI prompt '+type+' ('+ratio+')');save();}catch(e){}
