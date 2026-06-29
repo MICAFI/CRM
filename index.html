@@ -1653,27 +1653,42 @@ window.quickModal=()=>{
   const staffNames=[...new Set([...DB.staff.map(s=>s.name),...DB.users.map(x=>x.name)])].filter(Boolean);
   const canPick=['admin','manager','lead'].includes(u.role);
   const opt=(arr,v)=>arr.map(x=>`<option ${v===x?'selected':''}>${esc(x)}</option>`).join('');
-  mOpen(`<h2>⚡ Ghi nhanh việc đã làm</h2>
-    <p style="color:var(--muted);font-size:12.5px;margin:-12px 0 18px;line-height:1.6">Dành cho việc nhỏ 30 phút–1 giờ (sửa content, bảng giá, banner…). Ghi 1 dòng, tự đánh dấu xong — vẫn tính vào khối lượng &amp; hiệu suất.</p>
+  mOpen(`<h2>⚡ Ghi nhật ký công việc · trừ credit</h2>
+    <p style="color:var(--muted);font-size:12.5px;margin:-12px 0 18px;line-height:1.6">Ghi việc làm trong ngày & số <b>credit tiêu tốn</b>. Mỗi dòng sẽ <b>trừ KPI tháng của người làm</b> và <b>trừ ví credit của BU</b> tương ứng (1 credit = 15 phút). Dùng cho giai đoạn nhập tay trước khi tự động hóa.</p>
     <div class="mgrid">
       <div class="fld full"><label>Đã làm gì? *</label><input id="q_name" placeholder="vd: Sửa bảng giá ship tuyến Mỹ trên web"></div>
       <div class="fld"><label>Người làm</label>${canPick?`<select id="q_own">${staffNames.map(n=>`<option ${n===u.name?'selected':''}>${esc(n)}</option>`).join('')}</select>`:`<input id="q_own" value="${esc(u.name)}" disabled>`}</div>
-      <div class="fld"><label>BU</label><select id="q_bu"><option value="">—</option>${opt(CATS.BU,u.bu||'')}</select></div>
+      <div class="fld"><label>BU * <span style="color:var(--muted);font-weight:400">(bị trừ ví credit)</span></label><select id="q_bu" onchange="updQuickCredit()"><option value="">—</option>${opt(CATS.BU,u.bu||'')}</select></div>
       <div class="fld"><label>Ngày làm</label><input id="q_date" type="date" value="${today()}"></div>
-      <div class="fld"><label>Thời lượng</label><select id="q_cx">${opt(CATS.Complexity,'XS - <1h')}</select></div>
+      <div class="fld"><label>Thời lượng → credit</label><select id="q_dur" onchange="var c=document.getElementById('q_credit');if(c){c.value=this.value;}updQuickCredit()"><option value="1">15 phút · 1 credit</option><option value="2">30 phút · 2 credit</option><option value="4" selected>1 giờ · 4 credit</option><option value="6">1.5 giờ · 6 credit</option><option value="8">2 giờ · 8 credit</option><option value="12">3 giờ · 12 credit</option><option value="16">Nửa ngày (4h) · 16 credit</option><option value="24">6 giờ · 24 credit</option><option value="32">1 ngày (8h) · 32 credit</option></select></div>
+      <div class="fld"><label>Credit tiêu tốn *</label><input id="q_credit" type="number" min="0" step="1" value="4" oninput="updQuickCredit()"></div>
+      <div class="fld full"><div id="q_credit_hint" style="font-size:12px;color:var(--muted);background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;line-height:1.6"></div></div>
       <div class="fld full"><label>Ghi chú (tùy chọn)</label><input id="q_note" placeholder="link / chi tiết…"></div>
     </div>
     <div class="mfoot"><button class="btn ghost" id="qCancel">Hủy</button><button class="btn gold" id="qSave">Lưu (đã xong)</button></div>`);
   document.getElementById('qCancel').addEventListener('click',mClose);
   document.getElementById('qSave').addEventListener('click',saveQuick);
+  setTimeout(function(){if(window.updQuickCredit)updQuickCredit();},0);
   const ni=document.getElementById('q_name');if(ni){ni.focus();ni.addEventListener('keydown',e=>{if(e.key==='Enter')saveQuick();});}
+};
+window.updQuickCredit=()=>{
+  const gv=x=>{const e=document.getElementById(x);return e?e.value:'';};
+  const h=document.getElementById('q_credit_hint');if(!h)return;
+  const cr=Number(gv('q_credit'))||0;
+  const own=(gv('q_own')||me().name);
+  const bu=gv('q_bu');
+  let s='≈ '+(cr*15)+' phút · trừ KPI <b>'+esc(own)+'</b> '+cr+' credit';
+  s+= bu?(' · trừ ví BU <b>'+esc(bu)+'</b> '+cr+' credit'):' · <span style="color:#b4524f;font-weight:700">chưa chọn BU → không trừ ví BU nào</span>';
+  h.innerHTML=s;
 };
 window.saveQuick=()=>{
   const g=x=>{const e=document.getElementById(x);return e?e.value.trim():'';};
   if(!g('q_name')){alert('Nhập nội dung việc đã làm');return;}
+  const cr=Number(g('q_credit'));
+  if(!cr||cr<=0){alert('Nhập số credit tiêu tốn (1 credit = 15 phút)');return;}
   const own=g('q_own')||me().name, date=g('q_date')||today();
-  const o={_id:uid(),'Request ID':autoId(),'Request Date':date,BU:g('q_bu'),'Request Name':g('q_name'),Owner:own,Requestor:me().name,Source:'Ad-hoc/Internal',Priority:'P4',Status:'Done','Due Date':date,'Close Date':date,Complexity:g('q_cx')||'XS - <1h',Type:'Một lần',Progress:100,Notes:g('q_note'),comments:[],history:[]};
-  logHist(o,'Ghi nhanh — đã xong');
+  const o={_id:uid(),'Request ID':autoId(),'Request Date':date,BU:g('q_bu'),'Request Name':g('q_name'),Owner:own,Requestor:me().name,Source:'Ad-hoc/Internal',Priority:'P4',Status:'Done','Due Date':date,'Close Date':date,CreditOverride:cr,'Capacity Level':'',Type:'Một lần',LogEntry:true,Progress:100,Notes:g('q_note'),comments:[],history:[]};
+  logHist(o,'Nhật ký — đã xong · '+cr+' credit'+(o.BU?' · trừ ví BU '+o.BU:' · không gắn BU'));
   DB.tasks.push(o);save();mClose();render();
 };
 
@@ -1893,7 +1908,7 @@ function rLeadHome(c,ta){
 
 /* ---- MY FOCUS ---- */
 function rFocus(c,ta){
-  ta.innerHTML=`<button class="btn gold" id="quickF">⚡ Ghi nhanh việc đã làm</button>`;
+  ta.innerHTML=`<button class="btn gold" id="quickF">⚡ Ghi nhật ký công việc</button>`;
   setTimeout(()=>{const b=document.getElementById('quickF');if(b)b.onclick=quickModal;},0);
   const ts=visibleTasks().filter(t=>!isClosed(t));
   if(!ts.length){c.innerHTML=staffKpiBanner(me().name)+emptyBox('Nothing needs your attention right now. 🎉');return;}
