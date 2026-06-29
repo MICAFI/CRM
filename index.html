@@ -1263,21 +1263,21 @@ function buSubmitForm(w){
   return `<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
     <div style="flex:1 1 460px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px 26px">
       <div style="font-size:10.5px;font-weight:700;letter-spacing:.8px;color:#8c909c;text-transform:uppercase;margin-bottom:14px">Thông tin yêu cầu</div>
-      <div style="margin-bottom:13px"><label style="${L}">Tên task / yêu cầu *</label><input id="bu_name" style="${I}" placeholder="VD: Chạy Google Ads ra mắt sản phẩm tháng 7"></div>
+      <div style="margin-bottom:13px"><label style="${L}">Tên task / yêu cầu *</label><input id="bu_name" style="${I}" placeholder="VD: Chạy Google Ads ra mắt sản phẩm tháng 7"><div style="font-size:11px;color:#9aa0ac;margin-top:5px;line-height:1.45">Ví dụ: <i>Viết content ra mắt gói ship Châu Âu</i> · <i>Chạy Google Ads tháng 7</i> · <i>Check hiệu suất ads tuyến Pháp</i></div></div>
       <div style="margin-bottom:13px"><label style="${L}">Dự án / Campaign</label><input id="bu_proj" style="${I}" placeholder="Tùy chọn"></div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:13px">
         <div style="flex:1 1 200px"><label style="${L}">Function *</label><select id="bu_fn" style="${I}" onchange="buUpdCost()"><option value="">— Chọn —</option><option value="__ASK_MKT__">🤝 Không rõ — để MKT chọn giúp</option>${fnOpts}</select></div>
-        <div style="flex:1 1 200px"><label style="${L}">Sub Function</label><select id="bu_sub" style="${I}"><option value="">—</option>${subOpts}</select></div>
+        <div style="flex:1 1 200px"><label style="${L}">Sub Function</label><select id="bu_sub" style="${I}"><option value="">—</option>${subOpts}</select><div style="font-size:11px;color:#9aa0ac;margin-top:5px;line-height:1.45">VD: Content · Social Media · Google Ads · SEO · Landing Page · Nghiên cứu…</div></div>
       </div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:13px">
         <div style="flex:1 1 200px"><label style="${L}">Độ phức tạp *</label><select id="bu_cx" style="${I}" onchange="buUpdCost()">${cxOpts}</select></div>
-        <div style="flex:1 1 200px"><label style="${L}">Mức năng lực *</label><select id="bu_cap" style="${I}" onchange="buUpdCost()">${capOpts}</select></div>
+        <div style="flex:1 1 200px"><label style="${L}">Mức năng lực *</label><select id="bu_cap" style="${I}" onchange="buUpdCost()">${capOpts}</select><div style="font-size:11px;color:#9aa0ac;margin-top:5px;line-height:1.45">Việc nhỏ &lt;4h=<b>S</b> · ~1 ngày=<b>M</b> · &gt;2 ngày=<b>L</b> · độ khó Thấp/TB/Cao. Không chắc → chọn “để MKT đánh giá”.</div></div>
       </div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:13px">
         <div style="flex:1 1 200px"><label style="${L}">Ưu tiên</label><select id="bu_pr" style="${I}">${prOpts}</select></div>
         <div style="flex:1 1 200px"><label style="${L}">Deadline mong muốn</label><input id="bu_due" type="date" style="${I}"></div>
       </div>
-      <div style="margin-bottom:16px"><label style="${L}">Ghi chú / link brief</label><textarea id="bu_note" rows="2" style="${I};resize:vertical" placeholder="Dán link Drive / mô tả ngắn…"></textarea></div>
+      <div style="margin-bottom:16px"><label style="${L}">Ghi chú / Brief tham khảo <span style="color:#8c909c;font-weight:400">· càng rõ, MKT/AI làm càng đúng</span></label><textarea id="bu_note" rows="4" style="${I};resize:vertical" placeholder="Nên có: mục tiêu · đối tượng · thông điệp chính · ưu đãi/giá · link Drive/landing.&#10;VD (Content): ra mắt gói ship EU, đối tượng DN XNK, nhấn nhanh-rẻ-bảo hiểm, link brief: ...&#10;VD (Ads): tài khoản EuroGo (1886683433), campaign tuyến Pháp, 30 ngày, CPA cao quá check giúp."></textarea><div style="font-size:11px;color:#9aa0ac;margin-top:5px;line-height:1.45">Mỗi loại việc cần info khác nhau — Content: USP/ưu đãi/đối tượng · Ads: tài khoản + campaign + thời gian + vấn đề · Website/SEO: link trang + mục tiêu.</div></div>
       <div style="margin-bottom:14px;padding:13px 15px;background:var(--card2);border:1px solid var(--line);border-radius:10px">
         <div style="font-size:12px;font-weight:700;color:#3b3f4a;margin-bottom:4px">Loại việc cần giao <span style="color:#8c909c;font-weight:500">· chọn 1 hoặc nhiều · mỗi loại = 1 task tính credit riêng</span></div>
         <div style="font-size:10.5px;color:#8c909c;font-weight:700;letter-spacing:.3px;margin:9px 0 5px">NHÓM CONTENT</div>
