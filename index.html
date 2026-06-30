@@ -1608,6 +1608,7 @@ window.fadoMKT={
   ingestRequest:(o={})=>{const t={_id:uid(),'Request ID':o.requestId||autoId(),'Request Date':o.requestDate||today(),BU:o.bu||'','Project/Campaign':o.project||'','Request Name':o.title||o.name||'(no title)',Function:o.function||'','Sub Function':o.subFunction||'',Requestor:o.requestor||'API',Source:o.source||'New Request',Priority:o.priority||'P3',Owner:o.owner||'',Status:o.status||'Open','Due Date':o.dueDate||'',Complexity:o.complexity||'M - 1 day','Capacity Level':o.capacity||'Medium',Notes:o.notes||'',comments:[],history:[]};logHist(t,'Tạo qua API (ingestRequest)');DB.tasks.push(t);save();render();return t['Request ID'];},
   updateAgentResult:(id,res={})=>{const t=DB.tasks.find(x=>x._id===id||x['Request ID']===id);if(!t)return false;t.agent=Object.assign({},t.agent,{status:res.status||'done',outputUrl:res.outputUrl||res.url||'',resultAt:new Date().toISOString(),meta:res.meta||null});if(res.complete)t.Status='Done';logHist(t,'Agent cập nhật: '+(res.status||'done')+(res.outputUrl?(' · '+res.outputUrl):''));save();render();return true;},
   setStatus:(id,status)=>{const t=DB.tasks.find(x=>x._id===id||x['Request ID']===id);if(!t)return false;t.Status=status;logHist(t,'API setStatus → '+status);save();render();return true;},
+  setFields:(id,fields={})=>{const t=DB.tasks.find(x=>x._id===id||x['Request ID']===id);if(!t)return false;Object.assign(t,fields);logHist(t,'API setFields: '+Object.keys(fields).join(', '));save();render();return true;},
 };
 
 /* ---- AUTOMATION & API PAGE ---- */
