@@ -1335,7 +1335,7 @@ function buDeliveredSection(mine){
 }
 window.buCopyDeliv=function(id){var t=DB.tasks.find(function(x){return x._id===id;});if(t&&navigator.clipboard){navigator.clipboard.writeText(t.Deliverable||'');try{buToast('✓ Đã copy nội dung');}catch(e){}}};
 window.buToggleContent=function(id){var r=document.getElementById('cr_'+id);if(r)r.style.display=(r.style.display==='none'?'table-row':'none');};
-window.buApproveContent=function(id){var t=DB.tasks.find(function(x){return x._id===id;});if(!t)return;t.ContentStatus='approved';t.ContentFeedback='';logHist(t,'✓ BU đã duyệt nội dung — OK');save();notifyTG('✅ BU '+(t.BU||'')+' DUYỆT content: '+t['Request Name']);renderBuPortal();try{buToast('✓ Đã duyệt — báo MKT');}catch(e){}};
+window.buApproveContent=function(id){var t=DB.tasks.find(function(x){return x._id===id;});if(!t)return;t.ContentStatus='approved';t.ContentFeedback='';logHist(t,'✓ BU đã duyệt nội dung — OK');save();renderBuPortal();try{buToast('✓ Đã duyệt — báo MKT');}catch(e){}};
 window.buRejectContent=function(id){var t=DB.tasks.find(function(x){return x._id===id;});if(!t)return;var r=prompt('Bạn muốn MKT sửa gì? (ghi chú)');if(r===null)return;t.ContentStatus='revise';t.ContentFeedback=r||'';logHist(t,'✎ BU yêu cầu sửa nội dung'+(r?': '+r:''));save();notifyTG('✎ BU '+(t.BU||'')+' XIN SỬA content: '+t['Request Name']+(r?' — '+r:''));renderBuPortal();try{buToast('Đã gửi yêu cầu sửa cho MKT');}catch(e){}};
 function buApprovalSection(mine){
   var p=(mine||[]).filter(function(t){return t.BUApproval==='pending';});
@@ -1409,7 +1409,6 @@ window.buSubmit=()=>{
     DB.tasks.push(t);made.push(t);
   });
   save();
-  try{notifyTG('🆕 BU '+buName()+' gửi '+made.length+' yêu cầu: '+name);}catch(e){}
   BUVIEW='mine';renderBuPortal();
   buToast('✓ Đã gửi '+made.length+' yêu cầu'+(made.length>1?': '+made.map(x=>DLAB[x.DeliverType]).join(' · '):' · '+made[0]['Request ID'])+' (chờ duyệt)');
 };
@@ -1467,7 +1466,7 @@ function showContentModal(t,text,loading){
   var cl=document.getElementById('aiClose'); if(cl)cl.onclick=function(){document.getElementById('modal').classList.remove('show');};
   var cp=document.getElementById('aiCopy'); if(cp)cp.onclick=function(){try{navigator.clipboard.writeText(document.getElementById('aiOut').value);cp.textContent='✓ Đã copy';}catch(e){}};
   var sv=document.getElementById('aiSaveNote'); if(sv)sv.onclick=function(){var v=document.getElementById('aiOut').value;t.Notes=(t.Notes?t.Notes+'\n\n':'')+'[AI content]\n'+v;logHist(t,'Lưu AI content vào ghi chú');save();document.getElementById('modal').classList.remove('show');alert('✓ Đã lưu vào ghi chú task.');};
-  var sb=document.getElementById('aiSendBU'); if(sb)sb.onclick=function(){t.Deliverable=document.getElementById('aiOut').value;t.Delivered=true;logHist(t,'📤 Gửi content cho BU');save();notifyTG('📤 Đã gửi content cho BU '+(t.BU||'')+': '+t['Request Name']);document.getElementById('modal').classList.remove('show');try{alert('✓ Đã gửi cho BU. BU sẽ thấy ở Cổng BU.');}catch(e){}};
+  var sb=document.getElementById('aiSendBU'); if(sb)sb.onclick=function(){t.Deliverable=document.getElementById('aiOut').value;t.Delivered=true;logHist(t,'📤 Gửi content cho BU');save();document.getElementById('modal').classList.remove('show');try{alert('✓ Đã gửi cho BU. BU sẽ thấy ở Cổng BU.');}catch(e){}};
 }
 function mediaSize(ratio){ratio=(ratio||'').slice(0,4);if(ratio.indexOf('9:16')===0)return '1024x1792';if(ratio.indexOf('16:9')===0||ratio.indexOf('1.91')===0)return '1792x1024';return '1024x1024';}
 window.showImgResult=function(t,url,promptText){
@@ -2388,7 +2387,7 @@ function reqCard(t){
   </div>`;
 }
 window.reqSendBU=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.BUApproval='pending';t.BURejectNote='';logHist(t,'📤 Gửi BU duyệt'+(t.MktNote?' (kèm phản hồi)':''));save();render();};
-window.reqConfirm=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.Confirmed=true;logHist(t,'Xác nhận yêu cầu hợp lệ (MKT Services)');save();notifyTG('✓ Xác nhận hợp lệ: '+t['Request Name']+' · '+(t.BU||''));render();};
+window.reqConfirm=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.Confirmed=true;logHist(t,'Xác nhận yêu cầu hợp lệ (MKT Services)');save();render();};
 window.reqDismiss=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;
   mOpen(`<h2 style="margin-bottom:6px">Bỏ qua yêu cầu</h2>
     <div style="font-size:13px;color:var(--ink2);line-height:1.5"><b>${esc(t['Request Name']||'(không tên)')}</b></div>
