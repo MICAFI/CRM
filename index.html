@@ -1195,7 +1195,7 @@ window.taskModal=(id,presetType)=>{
   const msi=document.getElementById('msub_name');if(msi)msi.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();mSubAdd();}});
 };
 window.updCreditHint=()=>{const cx=document.getElementById('t_cx'),cap=document.getElementById('t_cap'),cr=document.getElementById('t_credit'),h=document.getElementById('t_credit_hint');if(!h)return;const auto=creditFor(cx?cx.value:'',cap?cap.value:'');const raw=cr?cr.value.trim():'';const ov=raw!==''?Number(raw):null;h.innerHTML=(ov!=null&&!isNaN(ov))?('Đang dùng credit nhập tay <b>'+ov+'</b> · tự tính theo ma trận = '+auto):('Tự tính theo ma trận = <b>'+auto+'</b> credit');};
-function notifyTG(text){try{var a=DB.agents||{};var url=(a.notify||'').trim();if(!url)return;fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,source:'fado-mkt',at:new Date().toISOString()})}).catch(function(){});}catch(e){}}
+function notifyTG(text){try{var a=DB.agents||{};var url=(a.notify||'').trim();if(!url)return;fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'text='+encodeURIComponent(text)}).catch(function(){});}catch(e){}}
 window.saveTask=id=>{
   const g=x=>{const e=document.getElementById(x);return e?e.value.trim():'';};
   if(!g('t_name')){alert('Hãy nhập tên công việc');return;}
