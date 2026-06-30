@@ -544,7 +544,7 @@ const SUBTASK_TEMPLATES={
   'SEO / Website':['Keyword research','On-page','Nội dung','Kỹ thuật','Báo cáo'],
 };
 function uidS(){return 's'+Math.random().toString(36).slice(2,8);}
-window.subAdd=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;const ne=document.getElementById('sub_name'),oe=document.getElementById('sub_own');const name=ne?ne.value.trim():'';if(!name){if(ne)ne.focus();return;}const owner=oe?oe.value:'';(t.subtasks=t.subtasks||[]).push({id:uidS(),name,owner,status:'Open'});logHist(t,'Thêm hạng mục: '+name+(owner?' → '+owner:''));if(owner)notifyTG('📌 Hạng mục "'+name+'" của '+t['Request Name']+' → '+tgTag(owner));save();taskDetail(id);render();};
+window.subAdd=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;const ne=document.getElementById('sub_name'),oe=document.getElementById('sub_own');const name=ne?ne.value.trim():'';if(!name){if(ne)ne.focus();return;}const owner=oe?oe.value:'';(t.subtasks=t.subtasks||[]).push({id:uidS(),name,owner,status:'Open'});logHist(t,'Thêm hạng mục: '+name+(owner?' → '+owner:''));if(owner)notifyTG('📌 Hạng mục "'+name+'" của '+t['Request Name']+' → '+tgTag(owner)+tgDesc(t));save();taskDetail(id);render();};
 window.subCycle=(id,sid)=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;const s=(t.subtasks||[]).find(x=>x.id===sid);if(!s)return;const u=me();if(!(['admin','manager','lead'].includes(u.role)||s.owner===u.name))return;const order=['Open','WIP','Done'];s.status=order[(order.indexOf(s.status)+1)%order.length];logHist(t,'Hạng mục "'+s.name+'": '+s.status);save();taskDetail(id);render();};
 window.subOwner=(id,sid,val)=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;const s=(t.subtasks||[]).find(x=>x.id===sid);if(!s)return;s.owner=val;logHist(t,'Hạng mục "'+s.name+'" giao cho '+(val||'—'));save();taskDetail(id);render();};
 window.subDel=(id,sid)=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.subtasks=(t.subtasks||[]).filter(x=>x.id!==sid);save();taskDetail(id);render();};
@@ -1196,8 +1196,9 @@ window.taskModal=(id,presetType)=>{
 };
 window.updCreditHint=()=>{const cx=document.getElementById('t_cx'),cap=document.getElementById('t_cap'),cr=document.getElementById('t_credit'),h=document.getElementById('t_credit_hint');if(!h)return;const auto=creditFor(cx?cx.value:'',cap?cap.value:'');const raw=cr?cr.value.trim():'';const ov=raw!==''?Number(raw):null;h.innerHTML=(ov!=null&&!isNaN(ov))?('Đang dùng credit nhập tay <b>'+ov+'</b> · tự tính theo ma trận = '+auto):('Tự tính theo ma trận = <b>'+auto+'</b> credit');};
 function notifyTG(text){try{var a=DB.agents||{};var url=(a.notify||'').trim();if(!url)return;fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'text='+encodeURIComponent(text)}).catch(function(){});}catch(e){}}
-var TG_MAP={'Nghi':'phuongnghi99','Phương Nghi':'phuongnghi99','Phuong Nghi':'phuongnghi99','Thuận':'tranduythuan','Duy Thuận':'tranduythuan','Trần Văn Lanh':'tranvanlanh','Trần Lanh':'tranvanlanh','Lanh':'tranvanlanh'};
+var TG_MAP={'Nghi':'phuongnghi99','Phương Nghi':'phuongnghi99','Phuong Nghi':'phuongnghi99','Thuận':'tranduythuan','Duy Thuận':'tranduythuan','Trần Văn Lanh':'tranvanlanh','Trần Lanh':'tranvanlanh','Lanh':'tranvanlanh','Liên':'lienkili','Lien':'lienkili'};
 function tgTag(name){if(!name)return '';var s=(DB.staff||[]).find(function(x){return x.name===name;});var u=s&&s.tg?(''+s.tg).trim().replace(/^@/,''):'';if(!u&&TG_MAP[name])u=TG_MAP[name];if(u&&/^[A-Za-z0-9_]{4,32}$/.test(u))return name+' @'+u;return name;}
+function tgDesc(o){var n=((o&&o.Notes)||'').toString().replace(/\s+/g,' ').trim();if(n.length>700)n=n.slice(0,700)+'…';var meta=[];if(o&&o['Due Date'])meta.push('🗓 '+o['Due Date']);if(o&&o.Priority)meta.push(o.Priority);return (n?('\n📝 '+n):'')+(meta.length?('\n'+meta.join(' · ')):'')+'\nℹ️ Chi tiết liên hệ Liên @lienkili';}
 window.saveTask=id=>{
   const g=x=>{const e=document.getElementById(x);return e?e.value.trim():'';};
   if(!g('t_name')){alert('Hãy nhập tên công việc');return;}
@@ -1208,10 +1209,10 @@ window.saveTask=id=>{
   o.subtasks=MSUBS.map(s=>({...s}));
   if(o.Status==='Done'&&!o['Close Date'])o['Close Date']=today();
   if(o.Status!=='Done')o['Close Date']='';
-  if(!prev){logHist(o,'Created task');notifyTG('🆕 Task: '+o['Request Name']+' · '+(o.BU||'')+' → '+(o.Owner?tgTag(o.Owner):'chưa giao'));}
+  if(!prev){logHist(o,'Created task');notifyTG('🆕 Task: '+o['Request Name']+' · '+(o.BU||'')+' → '+(o.Owner?tgTag(o.Owner):'chưa giao')+tgDesc(o));}
   else{
     if(prev.Status!==o.Status){logHist(o,'Status: '+(prev.Status||'—')+' → '+o.Status);notifyTG('🔄 '+o['Request Name']+': '+(prev.Status||'—')+' → '+o.Status+(o.Owner?' · '+tgTag(o.Owner):''));}
-    if((prev.Owner||'')!==o.Owner){logHist(o,'Owner: '+(prev.Owner||'—')+' → '+o.Owner);notifyTG('👤 Giao "'+o['Request Name']+'" cho '+tgTag(o.Owner||'—')+' · '+(o.BU||''));}
+    if((prev.Owner||'')!==o.Owner){logHist(o,'Owner: '+(prev.Owner||'—')+' → '+o.Owner);notifyTG('👤 Giao "'+o['Request Name']+'" cho '+tgTag(o.Owner||'—')+' · '+(o.BU||'')+tgDesc(o));}
     if(String(prev.Progress||'')!==String(o.Progress||''))logHist(o,'Progress → '+progressOf(o)+'%');
     if((prev.Priority||'')!==o.Priority)logHist(o,'Priority: '+(prev.Priority||'—')+' → '+o.Priority);
     if((prev.QC||'—')!==(o.QC||'—'))logHist(o,'QC → '+(o.QC||'—'));
@@ -2389,7 +2390,7 @@ function reqCard(t){
   </div>`;
 }
 window.reqSendBU=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.BUApproval='pending';t.BURejectNote='';logHist(t,'📤 Gửi BU duyệt'+(t.MktNote?' (kèm phản hồi)':''));save();render();};
-window.reqConfirm=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.Confirmed=true;logHist(t,'Xác nhận yêu cầu hợp lệ (MKT Services)');save();try{var L=DB.users.find(function(u){return u.role==='lead'&&u.func===funcAlias(t.Function);});var ln=L?L.name:'';notifyTG('📥 Yêu cầu hợp lệ → '+(ln?'giao '+tgTag(ln):'chưa gán Lead — Function: '+(t.Function||'?'))+' · '+t['Request Name']+' · '+(t.BU||''));}catch(e){}render();};
+window.reqConfirm=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.Confirmed=true;logHist(t,'Xác nhận yêu cầu hợp lệ (MKT Services)');save();try{var L=DB.users.find(function(u){return u.role==='lead'&&u.func===funcAlias(t.Function);});var ln=L?L.name:'';notifyTG('📥 Yêu cầu hợp lệ → '+(ln?'giao '+tgTag(ln):'chưa gán Lead — Function: '+(t.Function||'?'))+' · '+t['Request Name']+' · '+(t.BU||'')+tgDesc(t));}catch(e){}render();};
 window.reqDismiss=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;
   mOpen(`<h2 style="margin-bottom:6px">Bỏ qua yêu cầu</h2>
     <div style="font-size:13px;color:var(--ink2);line-height:1.5"><b>${esc(t['Request Name']||'(không tên)')}</b></div>
