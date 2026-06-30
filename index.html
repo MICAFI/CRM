@@ -2387,7 +2387,7 @@ function reqCard(t){
   </div>`;
 }
 window.reqSendBU=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.BUApproval='pending';t.BURejectNote='';logHist(t,'📤 Gửi BU duyệt'+(t.MktNote?' (kèm phản hồi)':''));save();render();};
-window.reqConfirm=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.Confirmed=true;logHist(t,'Xác nhận yêu cầu hợp lệ (MKT Services)');save();render();};
+window.reqConfirm=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.Confirmed=true;logHist(t,'Xác nhận yêu cầu hợp lệ (MKT Services)');save();try{var L=DB.users.find(function(u){return u.role==='lead'&&u.func===t.Function;});var ln=L?L.name:'';notifyTG('📥 Yêu cầu hợp lệ → '+(ln?'giao '+tgTag(ln):'chưa gán Lead — Function: '+(t.Function||'?'))+' · '+t['Request Name']+' · '+(t.BU||''));}catch(e){}render();};
 window.reqDismiss=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;
   mOpen(`<h2 style="margin-bottom:6px">Bỏ qua yêu cầu</h2>
     <div style="font-size:13px;color:var(--ink2);line-height:1.5"><b>${esc(t['Request Name']||'(không tên)')}</b></div>
