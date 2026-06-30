@@ -407,7 +407,7 @@ try{ if(window.supabase&&SUPA_KEY&&SUPA_KEY.indexOf('PASTE')<0) supa=window.supa
 let DB={users:[],depts:[],staff:[],tasks:[],session:null,gsheet:{csvUrl:'',map:{}},buCredits:{},agents:{webhook:'',content:'',image:'',video:''}};
 const CATS={
   BU:['Proship','Ratraco','MICAFI','FDS','Fado168','EuroGo','Fado VN','The Winds','GoPrint','Internal Project','BOD/CEO'],
-  Function:['Content & Creative','Marketing Operation','Performance & Growth','Marketing Strategy','Growth & Innovation'],
+  Function:['Content & Creative','Marketing Operation','Performance & Growth','Marketing Strategy'],
   SubFunction:['Request Intake','Project Coordination','Campaign Planning','Research','KPI','Google Ads','Facebook Ads','TikTok Ads','Zalo Ads','SEO','Lead Generation','Retargeting','Website','Landing Page','Tracking','Dashboard','Analytics','Reporting','Content'],
   Source:['New Request','Recurring','Maintenance','Campaign','Ad-hoc/Internal'],
   Priority:['P1','P2','P3','P4'],
@@ -2387,7 +2387,7 @@ function reqCard(t){
   </div>`;
 }
 window.reqSendBU=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.BUApproval='pending';t.BURejectNote='';logHist(t,'📤 Gửi BU duyệt'+(t.MktNote?' (kèm phản hồi)':''));save();render();};
-window.reqConfirm=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.Confirmed=true;logHist(t,'Xác nhận yêu cầu hợp lệ (MKT Services)');save();try{var L=DB.users.find(function(u){return u.role==='lead'&&u.func===t.Function;});var ln=L?L.name:'';notifyTG('📥 Yêu cầu hợp lệ → '+(ln?'giao '+tgTag(ln):'chưa gán Lead — Function: '+(t.Function||'?'))+' · '+t['Request Name']+' · '+(t.BU||''));}catch(e){}render();};
+window.reqConfirm=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.Confirmed=true;logHist(t,'Xác nhận yêu cầu hợp lệ (MKT Services)');save();try{var L=DB.users.find(function(u){return u.role==='lead'&&u.func===funcAlias(t.Function);});var ln=L?L.name:'';notifyTG('📥 Yêu cầu hợp lệ → '+(ln?'giao '+tgTag(ln):'chưa gán Lead — Function: '+(t.Function||'?'))+' · '+t['Request Name']+' · '+(t.BU||''));}catch(e){}render();};
 window.reqDismiss=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;
   mOpen(`<h2 style="margin-bottom:6px">Bỏ qua yêu cầu</h2>
     <div style="font-size:13px;color:var(--ink2);line-height:1.5"><b>${esc(t['Request Name']||'(không tên)')}</b></div>
@@ -2420,7 +2420,8 @@ window.reqDismissDo=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;
   logHist(t,'Bỏ qua yêu cầu (intake) · Lý do: '+reason);
   save();mClose();render();
 };
-function leadOf(f){const l=DB.users.find(u=>u.role==='lead'&&u.func===f);return l?esc(l.name):'<span style="color:#b4524f">chưa gán Lead</span>';}
+function funcAlias(f){return ({'Growth & Innovation':'Performance & Growth'})[f]||f;}
+function leadOf(f){const ff=funcAlias(f);const l=DB.users.find(u=>u.role==='lead'&&u.func===ff);return l?esc(l.name):'<span style="color:#b4524f">chưa gán Lead</span>';}
 function pullCsvInto(){
   const url=(DB.gsheet&&DB.gsheet.csvUrl||'').trim();
   if(!url){REQMSG='<span style="color:var(--red)">Chưa có link Google Sheet. Vào <b>ADMIN → Google Sheet Sync</b> để dán & lưu link CSV trước.</span>';render();return;}
