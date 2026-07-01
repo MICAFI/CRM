@@ -500,9 +500,9 @@ function daysToDue(t){if(!t['Due Date'])return null;const d=parseDate(t['Due Dat
 function dueBadge(t){
   const s=dueState(t);if(s==='none')return '';
   const n=daysToDue(t);
-  const wrap=(bg,fg,txt,tip)=>`<span title="${tip||''}" style="display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;background:${bg};color:${fg};white-space:nowrap">${txt}</span>`;
-  if(s==='overdue')return wrap('#f6e7e6','#9c4441','⏰ QUÁ HẠN '+(n==null?'':Math.abs(n)+'N'),'Đã quá hạn '+(n==null?'':Math.abs(n)+' ngày'));
-  if(s==='soon'){const txt=n===0?'HẾT HẠN HÔM NAY':'CÒN '+n+'N';return wrap('#f7efe0','#956511',txt,'Còn '+n+' ngày đến hạn');}
+  const wrap=(bg,fg,txt,tip,extra)=>`<span title="${tip||''}" style="display:inline-block;padding:3px 9px;border-radius:6px;font-size:10.5px;font-weight:800;background:${bg};color:${fg};white-space:nowrap;${extra||''}">${txt}</span>`;
+  if(s==='overdue')return wrap('#c0392b','#fff','⏰ QUÁ HẠN '+(n==null?'':Math.abs(n)+'N'),'Đã quá hạn '+(n==null?'':Math.abs(n)+' ngày'),'box-shadow:0 0 0 2px rgba(192,57,43,.3)');
+  if(s==='soon'){if(n===0)return wrap('#e8590c','#fff','🔴 HẾT HẠN HÔM NAY','Hết hạn hôm nay','box-shadow:0 0 0 2px rgba(232,89,12,.3)');if(n===1)return wrap('#f08c00','#fff','🟠 CÒN 1 NGÀY','Còn 1 ngày đến hạn');return wrap('#f7efe0','#956511','CÒN '+n+'N','Còn '+n+' ngày đến hạn');}
   if(s==='ok')return wrap('var(--card2)','#5b6478','còn '+n+'N','Còn '+n+' ngày đến hạn');
   return '';
 }
