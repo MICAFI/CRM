@@ -419,7 +419,7 @@ const CATS={
   TaskType:['Một lần','Định kỳ'],
   Cadence:['Hàng ngày','Hàng tuần','Hàng tháng'],
 };
-const ROLES={admin:'Administrator',manager:'Marketing Work Mgmt',lead:'Function Lead',staff:'Staff',bu:'Business Unit (gửi yêu cầu)'};
+const ROLES={admin:'Administrator',manager:'Marketing Work Mgmt',lead:'Function Lead',staff:'Staff',bu:'Business Unit (gửi yêu cầu)',viewer:'Xem toàn bộ (chỉ đọc)'};
 // Backward-compat labels for any old accounts still tagged ceo/head
 const ROLES_LEGACY={ceo:'Marketing Work Mgmt',head:'Function Lead'};
 function roleLabel(r){return ROLES[r]||ROLES_LEGACY[r]||r;}
@@ -574,6 +574,7 @@ function remoteShape(){return {users:DB.users,depts:DB.depts,staff:DB.staff,task
 let _saveTimer=null,REMOTE_TS=null,SAVE_PENDING=false,_pushing=false,_dirty=false;
 function save(){
   try{localStorage.setItem(SESS_KEY,DB.session||'');}catch(e){}
+  var _mv=null;try{_mv=me();}catch(e){}if(_mv&&_mv.role==='viewer'){try{appToast('👁 Chế độ chỉ xem — thay đổi không được lưu');}catch(e){}return;}
   try{localStorage.setItem(DB_KEY,JSON.stringify(DB));}catch(e){}   /* backup cục bộ */
   if(supa){SAVE_PENDING=true;pushRemote();}   /* ghi NGAY lên cloud, không chờ — tránh mất lệnh khi tải lại nhanh */
 }
@@ -697,7 +698,7 @@ const NAV=[
 ];
 function buildMenu(){
   const r=me().role;
-  const items=NAV.filter(n=>n.roles.includes(r));
+  const items=NAV.filter(n=>n.roles.includes(r)||(r==='viewer'&&(n.roles.includes('admin')||n.roles.includes('manager'))));
   const reqCount=['admin','manager'].includes(r)?DB.tasks.filter(t=>!isClosed(t)&&!t.Owner).length:0;
   const bkOpen=roleTasks().filter(t=>!isClosed(t));
   const bkCount=bkOpen.filter(t=>dueState(t)==='overdue'||t.Health==='Blocked'||t.Health==='Difficulty').length; // ưu tiên đỏ: quá hạn + bị chặn / gặp khó
@@ -744,7 +745,7 @@ function openApp(){
   document.getElementById('meRole').textContent=roleLabel(u.role)+(u.func?(' · '+u.func):'');
   document.getElementById('meAv').textContent=u.name[0].toUpperCase();
   (function(){var av=document.getElementById('tbAv'),nm=document.getElementById('tbName'),rl=document.getElementById('tbRole'),n2=document.getElementById('tbName2'),em=document.getElementById('tbEmail');if(nm){nm.textContent=u.name;n2.textContent=u.name;rl.textContent=roleLabel(u.role);av.textContent=u.name[0].toUpperCase();em.textContent=u.username||'';}var tu=document.getElementById('tbUser'),tm=document.getElementById('tbMenu');if(tu&&!tu._w){tu._w=1;tu.addEventListener('click',function(e){e.stopPropagation();tm.classList.toggle('show');});document.addEventListener('click',function(){tm.classList.remove('show');});var ac=document.getElementById('tbAccount');if(ac)ac.addEventListener('click',function(){VIEW='account';buildMenu();render();tm.classList.remove('show');});var lo=document.getElementById('tbLogout');if(lo)lo.addEventListener('click',function(){DB.session=null;try{localStorage.setItem(SESS_KEY,'');}catch(e){}location.reload();});var hp=document.getElementById('tbHelp');if(hp)hp.addEventListener('click',function(){VIEW='guide';buildMenu();render();});var s=document.getElementById('tbSearch');if(s)s.addEventListener('keydown',function(e){if(e.key==='Enter'){F.q=s.value.trim();VIEW='tasks';TASKVIEW='list';buildMenu();render();}});}var _bl=document.getElementById('tbBell');if(_bl&&!_bl._w){_bl._w=1;_bl.addEventListener('click',function(){VIEW='requests';buildMenu();render();});}updateReqBell();var _u=me();if(_u&&['admin','manager'].indexOf(_u.role)>=0){var _nr=DB.tasks.filter(function(t){return !isClosed(t)&&!t.Owner;});var _cr=DB.tasks.filter(function(t){return t.ContentStatus==='revise';}).length;var _m=[];if(_nr.length)_m.push('🔔 '+_nr.length+' yêu cầu mới');if(_cr)_m.push('✎ '+_cr+' nội dung BU xin sửa');if(_m.length)appToast(_m.join(' · ')+'. Bấm xem.');}})();
-  if(!NAV.find(n=>n.v===VIEW&&n.roles.includes(u.role)))VIEW='dash';
+  if(!NAV.find(n=>n.v===VIEW&&(n.roles.includes(u.role)||(u.role==='viewer'&&(n.roles.includes('admin')||n.roles.includes('manager'))))))VIEW='dash';
   buildMenu();render();
   startAutoSync();
   startLiveSync();
@@ -771,7 +772,7 @@ function startAutoSync(){
 /* ============ ROLE-BASED TASK SCOPE ============ */
 function roleTasks(){
   const u=me();
-  if(u.role==='admin'||u.role==='manager')return DB.tasks;
+  if(u.role==='admin'||u.role==='manager'||u.role==='viewer')return DB.tasks;
   if(u.role==='lead')return DB.tasks.filter(t=>t.Function===u.func||t.Owner===u.name||(t.subtasks||[]).some(s=>s.owner===u.name)); // lead: their function + anything assigned to them
   return DB.tasks.filter(t=>t.Owner===u.name||(t.subtasks||[]).some(s=>s.owner===u.name)); // staff: own tasks + sub-items assigned
 }
