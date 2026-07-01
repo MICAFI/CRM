@@ -1220,6 +1220,13 @@ window.saveTask=id=>{
     if(String(prev.Progress||'')!==String(o.Progress||''))logHist(o,'Progress → '+progressOf(o)+'%');
     if((prev.Priority||'')!==o.Priority)logHist(o,'Priority: '+(prev.Priority||'—')+' → '+o.Priority);
     if((prev.QC||'—')!==(o.QC||'—'))logHist(o,'QC → '+(o.QC||'—'));
+    var _chg=[];
+    if((prev.Attachment||'')!==(o.Attachment||''))_chg.push(o.Attachment?'📎 ảnh đính kèm (thêm/đổi)':'📎 gỡ ảnh đính kèm');
+    if((prev.Notes||'')!==(o.Notes||''))_chg.push('📝 mô tả');
+    if((prev.Deliverable||'')!==(o.Deliverable||'')||(!!prev.Delivered)!==(!!o.Delivered))_chg.push('📤 nội dung giao BU');
+    if((prev['Due Date']||'')!==(o['Due Date']||''))_chg.push('🗓 hạn'+(o['Due Date']?' → '+o['Due Date']:''));
+    if((prev.Priority||'')!==(o.Priority||''))_chg.push('ưu tiên → '+(o.Priority||'—'));
+    if(_chg.length){logHist(o,'Admin cập nhật: '+_chg.join(', '));notifyTG('✏️ Admin cập nhật "'+o['Request Name']+'"'+(o.Owner?' · '+tgTag(o.Owner):'')+' · '+(o.BU||'')+'\n→ '+_chg.join(', ')+'\nℹ️ Chi tiết liên hệ Liên @lienkili');}
   }
   if(id){const i=DB.tasks.findIndex(t=>t._id===id);DB.tasks[i]=o;}else DB.tasks.push(o);
   save();mClose();render();
