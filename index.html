@@ -1216,7 +1216,7 @@ window.saveTask=id=>{
   if(o.Status!=='Done')o['Close Date']='';
   if(!prev){logHist(o,'Created task');notifyTG('🆕 Task: '+o['Request Name']+' · '+(o.BU||'')+' → '+(o.Owner?tgTag(o.Owner):'chưa giao')+tgDesc(o));}
   else{
-    if(prev.Status!==o.Status){logHist(o,'Status: '+(prev.Status||'—')+' → '+o.Status);}
+    if(prev.Status!==o.Status){logHist(o,'Status: '+(prev.Status||'—')+' → '+o.Status);if(o.Status==='Done')try{notifyTG('✅ '+me().name+' hoàn thành "'+o['Request Name']+'" · '+(o.BU||''));}catch(e){}}
     if((prev.Owner||'')!==o.Owner){logHist(o,'Owner: '+(prev.Owner||'—')+' → '+o.Owner);notifyTG('👤 Giao "'+o['Request Name']+'" cho '+tgTag(o.Owner||'—')+' · '+(o.BU||'')+tgDesc(o));}
     if(String(prev.Progress||'')!==String(o.Progress||''))logHist(o,'Progress → '+progressOf(o)+'%');
     if((prev.Priority||'')!==o.Priority)logHist(o,'Priority: '+(prev.Priority||'—')+' → '+o.Priority);
@@ -2984,7 +2984,7 @@ function wireDrag(canDragTask){
       if(!dragId)return;
       const t=DB.tasks.find(x=>x._id===dragId);
       if(t&&canDragTask&&!canDragTask(t)){dragId=null;return;} // chặn kéo task không thuộc quyền
-      if(t&&t.Status!==drop.dataset.st){const old=t.Status;t.Status=drop.dataset.st;if(t.Status==='Done'&&!t['Close Date'])t['Close Date']=today();if(t.Status!=='Done')t['Close Date']='';logHist(t,'Status: '+(old||'—')+' → '+t.Status+' (Kanban)');save();render();}
+      if(t&&t.Status!==drop.dataset.st){const old=t.Status;t.Status=drop.dataset.st;if(t.Status==='Done'&&!t['Close Date'])t['Close Date']=today();if(t.Status!=='Done')t['Close Date']='';logHist(t,'Status: '+(old||'—')+' → '+t.Status+' (Kanban)');if(t.Status==='Done')try{notifyTG('✅ '+me().name+' hoàn thành "'+t['Request Name']+'" · '+(t.BU||''));}catch(e){}save();render();}
       dragId=null;
     });
   });
