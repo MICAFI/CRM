@@ -545,7 +545,7 @@ const SUBTASK_TEMPLATES={
 };
 function uidS(){return 's'+Math.random().toString(36).slice(2,8);}
 window.subAdd=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;const ne=document.getElementById('sub_name'),oe=document.getElementById('sub_own');const name=ne?ne.value.trim():'';if(!name){if(ne)ne.focus();return;}const owner=oe?oe.value:'';(t.subtasks=t.subtasks||[]).push({id:uidS(),name,owner,status:'Open'});logHist(t,'Thêm hạng mục: '+name+(owner?' → '+owner:''));if(owner)notifyTG('📌 Hạng mục "'+name+'" của '+t['Request Name']+' → '+tgTag(owner)+tgDesc(t));save();taskDetail(id);render();};
-window.subCycle=(id,sid)=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;const s=(t.subtasks||[]).find(x=>x.id===sid);if(!s)return;const u=me();if(!(['admin','manager','lead'].includes(u.role)||s.owner===u.name))return;const order=['Open','WIP','Done'];s.status=order[(order.indexOf(s.status)+1)%order.length];logHist(t,'Hạng mục "'+s.name+'": '+s.status);notifyTG('📌 '+me().name+' đổi hạng mục "'+s.name+'" → '+s.status+' · task: '+t['Request Name']+(s.owner?' · '+tgTag(s.owner):''));save();taskDetail(id);render();};
+window.subCycle=(id,sid)=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;const s=(t.subtasks||[]).find(x=>x.id===sid);if(!s)return;const u=me();if(!(['admin','manager','lead'].includes(u.role)||s.owner===u.name))return;const order=['Open','WIP','Done'];s.status=order[(order.indexOf(s.status)+1)%order.length];logHist(t,'Hạng mục "'+s.name+'": '+s.status);save();taskDetail(id);render();};
 window.subOwner=(id,sid,val)=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;const s=(t.subtasks||[]).find(x=>x.id===sid);if(!s)return;s.owner=val;logHist(t,'Hạng mục "'+s.name+'" giao cho '+(val||'—'));save();taskDetail(id);render();};
 window.subDel=(id,sid)=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.subtasks=(t.subtasks||[]).filter(x=>x.id!==sid);save();taskDetail(id);render();};
 window.subTemplate=(id,key)=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;const names=SUBTASK_TEMPLATES[key]||[];const have=new Set((t.subtasks||[]).map(s=>(s.name||'').toLowerCase()));names.forEach(n=>{if(!have.has(n.toLowerCase()))(t.subtasks=t.subtasks||[]).push({id:uidS(),name:n,owner:'',status:'Open'});});logHist(t,'Chia theo mẫu: '+key);save();taskDetail(id);render();};
@@ -1216,7 +1216,7 @@ window.saveTask=id=>{
   if(o.Status!=='Done')o['Close Date']='';
   if(!prev){logHist(o,'Created task');notifyTG('🆕 Task: '+o['Request Name']+' · '+(o.BU||'')+' → '+(o.Owner?tgTag(o.Owner):'chưa giao')+tgDesc(o));}
   else{
-    if(prev.Status!==o.Status){logHist(o,'Status: '+(prev.Status||'—')+' → '+o.Status);notifyTG('🔄 '+o['Request Name']+': '+(prev.Status||'—')+' → '+o.Status+(o.Owner?' · '+tgTag(o.Owner):''));}
+    if(prev.Status!==o.Status){logHist(o,'Status: '+(prev.Status||'—')+' → '+o.Status);}
     if((prev.Owner||'')!==o.Owner){logHist(o,'Owner: '+(prev.Owner||'—')+' → '+o.Owner);notifyTG('👤 Giao "'+o['Request Name']+'" cho '+tgTag(o.Owner||'—')+' · '+(o.BU||'')+tgDesc(o));}
     if(String(prev.Progress||'')!==String(o.Progress||''))logHist(o,'Progress → '+progressOf(o)+'%');
     if((prev.Priority||'')!==o.Priority)logHist(o,'Priority: '+(prev.Priority||'—')+' → '+o.Priority);
@@ -1228,7 +1228,7 @@ window.saveTask=id=>{
     if((prev['Due Date']||'')!==(o['Due Date']||''))_chg.push('🗓 hạn'+(o['Due Date']?' → '+o['Due Date']:''));
     if((prev.Priority||'')!==(o.Priority||''))_chg.push('ưu tiên → '+(o.Priority||'—'));
     if(String(prev.Progress||'')!==String(o.Progress||''))_chg.push('tiến độ → '+progressOf(o)+'%');
-    if(_chg.length){logHist(o,'Admin cập nhật: '+_chg.join(', '));notifyTG('✏️ Admin cập nhật "'+o['Request Name']+'"'+(o.Owner?' · '+tgTag(o.Owner):'')+' · '+(o.BU||'')+'\n→ '+_chg.join(', ')+'\nℹ️ Chi tiết liên hệ Liên @lienkili');}
+    if(_chg.length){logHist(o,'Admin cập nhật: '+_chg.join(', '));}
   }
   if(id){const i=DB.tasks.findIndex(t=>t._id===id);DB.tasks[i]=o;}else DB.tasks.push(o);
   save();mClose();render();
@@ -1941,9 +1941,9 @@ window.taskDetail=id=>{
   if(canCheck){
     let ckH=t.Health||'';
     document.querySelectorAll('.ckbtn').forEach(b=>b.addEventListener('click',()=>{ckH=b.dataset.h;document.querySelectorAll('.ckbtn').forEach(x=>{const s=x.dataset.h===ckH;x.style.borderColor=s?HEALTH[ckH]:'var(--line)';x.style.background=s?HEALTH[ckH]:'#fff';x.style.color=s?'#fff':'var(--ink2)';});}));
-    const cs=document.getElementById('ck_save');if(cs)cs.addEventListener('click',()=>{const note=document.getElementById('ck_note').value.trim();const changed=(t.Health||'')!==ckH||(t.Blocker||'')!==note;t.Health=ckH;t.Blocker=note;if(changed){logHist(t,'Check-in: '+(ckH||'—')+(note?' — '+note:''));var _hm={'On track':'🟢 On track','Difficulty':'🟡 Difficulty','Blocked':'🔴 Blocked'};notifyTG('◉ '+me().name+' check-in "'+t['Request Name']+'": '+(_hm[ckH]||ckH||'—')+(note?' — '+note:'')+' · '+(t.BU||'')+(t.Owner?' · '+tgTag(t.Owner):''));}save();taskDetail(id);render();});
+    const cs=document.getElementById('ck_save');if(cs)cs.addEventListener('click',()=>{const note=document.getElementById('ck_note').value.trim();const changed=(t.Health||'')!==ckH||(t.Blocker||'')!==note;t.Health=ckH;t.Blocker=note;if(changed){logHist(t,'Check-in: '+(ckH||'—')+(note?' — '+note:''));}save();taskDetail(id);render();});
   }
-  const add=()=>{const v=document.getElementById('dc_in').value.trim();if(!v)return;(t.comments=t.comments||[]).push({by:me().name,at:new Date().toLocaleString('en-GB'),text:v});logHist(t,'Commented');notifyTG('💬 '+me().name+' bình luận "'+t['Request Name']+'": '+v+' · '+(t.BU||'')+(t.Owner?' · '+tgTag(t.Owner):''));save();taskDetail(id);};
+  const add=()=>{const v=document.getElementById('dc_in').value.trim();if(!v)return;(t.comments=t.comments||[]).push({by:me().name,at:new Date().toLocaleString('en-GB'),text:v});logHist(t,'Commented');save();taskDetail(id);};
   document.getElementById('dc_add').addEventListener('click',add);
   document.getElementById('dc_in').addEventListener('keydown',e=>{if(e.key==='Enter')add();});
   const si=document.getElementById('sub_name');if(si)si.addEventListener('keydown',e=>{if(e.key==='Enter')subAdd(id);});
@@ -2984,7 +2984,7 @@ function wireDrag(canDragTask){
       if(!dragId)return;
       const t=DB.tasks.find(x=>x._id===dragId);
       if(t&&canDragTask&&!canDragTask(t)){dragId=null;return;} // chặn kéo task không thuộc quyền
-      if(t&&t.Status!==drop.dataset.st){const old=t.Status;t.Status=drop.dataset.st;if(t.Status==='Done'&&!t['Close Date'])t['Close Date']=today();if(t.Status!=='Done')t['Close Date']='';logHist(t,'Status: '+(old||'—')+' → '+t.Status+' (Kanban)');try{notifyTG('🔄 '+me().name+' kéo "'+t['Request Name']+'": '+(old||'—')+' → '+t.Status+(t.Owner?' · '+tgTag(t.Owner):'')+' · '+(t.BU||''));}catch(e){}save();render();}
+      if(t&&t.Status!==drop.dataset.st){const old=t.Status;t.Status=drop.dataset.st;if(t.Status==='Done'&&!t['Close Date'])t['Close Date']=today();if(t.Status!=='Done')t['Close Date']='';logHist(t,'Status: '+(old||'—')+' → '+t.Status+' (Kanban)');save();render();}
       dragId=null;
     });
   });
