@@ -1432,6 +1432,32 @@ window.buSubmit=()=>{
   BUVIEW='mine';renderBuPortal();
   buToast('✓ Đã gửi '+made.length+' yêu cầu'+(made.length>1?': '+made.map(x=>DLAB[x.DeliverType]).join(' · '):' · '+made[0]['Request ID'])+' (chờ duyệt)');
 };
+function buQueue(bu){
+  var all=DB.tasks.filter(function(t){return t.BU===bu&&!isClosed(t);});
+  var open=all.filter(function(t){return !t.Owner;}).length;
+  var wip=all.filter(function(t){return t.Owner;}).length;
+  var td=today();
+  var overdue=all.filter(function(t){return t['Due Date']&&t['Due Date']<td;}).length;
+  var hours=all.reduce(function(s,t){return s+(creditOf(t)||0);},0);
+  var eta=Math.ceil(hours/8);
+  return {total:all.length,open:open,wip:wip,overdue:overdue,hours:hours,eta:eta};
+}
+function buQueueCard(bu){
+  var q=buQueue(bu);
+  if(!q.total)return '<div style="background:#e6f0ea;border:1px solid #cfe3d7;border-radius:12px;padding:14px 18px;margin-bottom:14px;font-size:13px;color:#2f6d4d;font-weight:600">✓ Hàng đợi trống — chưa có task nào đang chờ. Thoải mái gửi yêu cầu mới.</div>';
+  var big=q.total>=8||q.eta>=5;
+  var bc=big?'#c0392b':'#17191f';
+  return '<div style="background:var(--card);border:1px solid var(--line);border-left:4px solid '+bc+';border-radius:12px;padding:15px 18px;margin-bottom:14px">'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:16px">📊</span><b style="font-size:13.5px">Hàng đợi của bạn</b>'+(q.overdue?'<span style="margin-left:auto;font-size:11px;font-weight:700;color:#c0392b;background:#f6e7e6;padding:3px 9px;border-radius:6px">⏰ '+q.overdue+' quá hạn</span>':'')+'</div>'
+    +'<div style="display:flex;gap:22px;flex-wrap:wrap;align-items:flex-end">'
+    +'<div><div style="font-size:22px;font-weight:800;color:#3b6ea5">'+q.total+'</div><div style="font-size:11px;color:#8b8f9a;font-weight:600">Chưa xong</div></div>'
+    +'<div><div style="font-size:22px;font-weight:800;color:#8a6516">'+q.open+'</div><div style="font-size:11px;color:#8b8f9a;font-weight:600">Chưa giao</div></div>'
+    +'<div><div style="font-size:22px;font-weight:800;color:#2f6d4d">'+q.wip+'</div><div style="font-size:11px;color:#8b8f9a;font-weight:600">Đang làm</div></div>'
+    +'<div style="border-left:1px solid var(--line);padding-left:22px"><div style="font-size:22px;font-weight:800;color:'+bc+'">~'+q.eta+' ngày</div><div style="font-size:11px;color:#8b8f9a;font-weight:600">Ước tính xử lý hết (8h/ngày)</div></div>'
+    +'</div>'
+    +(big?'<div style="margin-top:12px;font-size:12.5px;color:#c0392b;background:#f6e7e6;border-radius:8px;padding:9px 12px;line-height:1.5">⚠️ Hàng đợi đang khá nhiều ('+q.total+' task chưa xong · ~'+q.eta+' ngày). Cân nhắc mức ưu tiên & thời điểm trước khi gửi thêm yêu cầu mới nhé.</div>':'')
+    +'</div>';
+}
 function renderBuPortal(){
   const host=document.getElementById('buPortal');if(!host)return;
   const u=me();const bu=buName();
@@ -1456,6 +1482,7 @@ function renderBuPortal(){
     <div style="max-width:1060px;margin:0 auto;padding:26px 30px 80px">
       ${monthBar}
       ${buWalletCard(w,mk)}
+      ${buQueueCard(bu)}
       <div style="display:flex;gap:8px;margin:20px 0 16px">${buTab('submit','✎ Gửi yêu cầu')}${buTab('mine','▦ Yêu cầu của tôi ('+mine.length+')')}</div>
       ${BUVIEW==='submit'?buSubmitForm(w):buApprovalSection(mine)+buMyList(mine)}
     </div>
@@ -2397,6 +2424,11 @@ function reqCard(t){
     ${t.Function?`<div style="display:flex;align-items:center;gap:7px;font-size:11.5px;flex-wrap:wrap"><span style="background:var(--card2);color:#3b6ea5;border:1px solid #d6e2ef;border-radius:6px;padding:3px 8px;font-weight:700">⊚ ${esc(t.Function)}</span><span style="color:var(--muted)">→ Lead: <b style="color:var(--ink2)">${leadOf(t.Function)}</b></span></div>`:''}
     ${note?`<div style="font-size:12.5px;line-height:1.55;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 10px">${esc(note)}</div>`:''}
     ${t.Attachment?`<a href="${esc(t.Attachment)}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:#3b6ea5;text-decoration:none">📎 Tài liệu đính kèm →</a>`:''}
+    <div style="margin-top:2px">
+      ${t.MktNote?`<div style="font-size:12px;background:#eef3f9;border:1px solid #d6e2ef;border-radius:8px;padding:8px 10px;margin-bottom:7px;white-space:pre-wrap"><b style="color:#345e8a">💬 Đã phản hồi BU:</b> ${esc(t.MktNote)}</div>`:''}
+      <textarea id="rfb_${t._id}" rows="2" placeholder="💬 Phản hồi / trao đổi lại với BU trước khi giao…" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;font-family:inherit;resize:vertical">${esc(t.MktNote||'')}</textarea>
+      <button class="btn ghost sm" style="margin-top:6px" onclick="reqFeedback('${t._id}')">💬 Gửi phản hồi cho BU</button>
+    </div>
     <div style="display:flex;gap:8px;margin-top:3px;flex-wrap:wrap">
       ${t.Confirmed
         ? `<button class="btn gold sm" style="flex:1" onclick="taskModal('${t._id}')">➤ Giao cho Lead</button>`
@@ -2408,6 +2440,7 @@ function reqCard(t){
   </div>`;
 }
 window.reqSendBU=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.BUApproval='pending';t.BURejectNote='';logHist(t,'📤 Gửi BU duyệt'+(t.MktNote?' (kèm phản hồi)':''));save();render();};
+window.reqFeedback=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;var el=document.getElementById('rfb_'+id);var v=el?el.value.trim():'';t.MktNote=v;logHist(t,'💬 MKT phản hồi BU'+(v?': '+v:''));save();try{notifyTG('💬 MKT phản hồi yêu cầu "'+t['Request Name']+'" · '+(t.BU||'')+(v?'\n→ '+v:''));}catch(e){}render();try{appToast('Đã gửi phản hồi cho BU · '+(t.BU||''));}catch(e){}};
 window.reqConfirm=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;t.Confirmed=true;logHist(t,'Xác nhận yêu cầu hợp lệ (MKT Services)');save();try{var L=DB.users.find(function(u){return u.func===funcAlias(t.Function)&&['lead','admin','manager'].includes(u.role);});var ln=L?L.name:'';notifyTG('📥 Yêu cầu hợp lệ → '+(ln?'giao '+tgTag(ln):'chưa gán Lead — Function: '+(t.Function||'?'))+' · '+t['Request Name']+' · '+(t.BU||'')+tgDesc(t));}catch(e){}render();};
 window.reqDismiss=id=>{const t=DB.tasks.find(x=>x._id===id);if(!t)return;
   mOpen(`<h2 style="margin-bottom:6px">Bỏ qua yêu cầu</h2>
