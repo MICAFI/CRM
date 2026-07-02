@@ -570,10 +570,10 @@ window.mSubCycle=i=>{const o=['Open','WIP','Done'];MSUBS[i].status=o[(o.indexOf(
 window.mSubOwner=(i,v)=>{if(MSUBS[i])MSUBS[i].owner=v;};
 window.mSubTemplate=key=>{const have=new Set(MSUBS.map(s=>(s.name||'').toLowerCase()));(SUBTASK_TEMPLATES[key]||[]).forEach(n=>{if(!have.has(n.toLowerCase()))MSUBS.push({id:uidS(),name:n,owner:'',status:'Open'});});renderMsubs();};
 
-const BUILD=106;
-function remoteShape(){return {users:DB.users,depts:DB.depts,staff:DB.staff,tasks:DB.tasks,gsheet:DB.gsheet,buCredits:DB.buCredits,agents:DB.agents,_build:BUILD};}
+const BUILD=107;
+function remoteShape(){return {users:DB.users,depts:DB.depts,staff:DB.staff,tasks:DB.tasks,gsheet:DB.gsheet,buCredits:DB.buCredits,agents:DB.agents,_build:BUILD,_backups:DB._backups||{}};}
 function mergeArr(rem,loc,key){rem=rem||[];loc=loc||[];var map={},seen={},out=[];rem.forEach(function(x){if(x&&x[key]!=null)map[x[key]]=x;});loc.forEach(function(x){if(x&&x[key]!=null)map[x[key]]=x;});loc.forEach(function(x){var k=x&&x[key];if(k!=null&&!seen[k]){seen[k]=1;out.push(map[k]);}});rem.forEach(function(x){var k=x&&x[key];if(k!=null&&!seen[k]){seen[k]=1;out.push(map[k]);}});return out;}
-function mergeShape(rem,loc){rem=rem||{};loc=loc||{};return {users:mergeArr(rem.users,loc.users,'id'),depts:mergeArr(rem.depts,loc.depts,'id'),staff:mergeArr(rem.staff,loc.staff,'id'),tasks:mergeArr(rem.tasks,loc.tasks,'_id'),buCredits:Object.assign({},rem.buCredits||{},loc.buCredits||{}),agents:loc.agents||rem.agents||{},gsheet:loc.gsheet||rem.gsheet||{}};}
+function mergeShape(rem,loc){rem=rem||{};loc=loc||{};return {users:mergeArr(rem.users,loc.users,'id'),depts:mergeArr(rem.depts,loc.depts,'id'),staff:mergeArr(rem.staff,loc.staff,'id'),tasks:mergeArr(rem.tasks,loc.tasks,'_id'),buCredits:Object.assign({},rem.buCredits||{},loc.buCredits||{}),_backups:Object.assign({},rem._backups||{},loc._backups||{}),agents:loc.agents||rem.agents||{},gsheet:loc.gsheet||rem.gsheet||{}};}
 let _saveTimer=null,REMOTE_TS=null,SAVE_PENDING=false,_pushing=false,_dirty=false;
 var _upgraded=false;
 function forceUpgrade(src){if(_upgraded)return;_upgraded=true;try{if(typeof LIVE_TIMER!=='undefined'&&LIVE_TIMER)clearInterval(LIVE_TIMER);}catch(e){}try{setSync(false);}catch(e){}try{var _d=document.getElementById('syncDot');if(_d){_d.textContent='● Đang cập nhật…';_d.style.color='#c98b3a';}}catch(e){}try{localStorage.setItem(DB_KEY,JSON.stringify(DB));}catch(e){}setTimeout(function(){location.replace(location.pathname+'?b='+Date.now());},300);}
@@ -592,7 +592,7 @@ async function pushRemote(){
     let _rem={};try{const _r=await supa.from('app_state').select('data').eq('id','main').single();_rem=(_r&&_r.data&&_r.data.data)||{};}catch(e){}
     if(_rem&&_rem._build&&_rem._build>BUILD){_pushing=false;SAVE_PENDING=false;console.warn('Bản cũ — không ghi đè, đang nâng cấp');forceUpgrade('push');return;}
     const _merged=mergeShape(_rem, remoteShape());_merged._build=BUILD;
-    DB.tasks=_merged.tasks;DB.users=_merged.users;DB.staff=_merged.staff;DB.depts=_merged.depts;DB.buCredits=_merged.buCredits;if(_merged.agents)DB.agents=_merged.agents;if(_merged.gsheet)DB.gsheet=_merged.gsheet;
+    DB.tasks=_merged.tasks;DB.users=_merged.users;DB.staff=_merged.staff;DB.depts=_merged.depts;DB.buCredits=_merged.buCredits;if(_merged.agents)DB.agents=_merged.agents;if(_merged.gsheet)DB.gsheet=_merged.gsheet;if(_merged._backups)DB._backups=_merged._backups;
     const {error}=await supa.from('app_state').update({data:_merged,updated_at:ts}).eq('id','main');
     setSync(!error);if(error)console.warn('Supabase save:',error.message);else REMOTE_TS=ts; // merge-then-write: không xoá task của phiên khác
   }catch(e){setSync(false);console.warn(e);}
@@ -613,7 +613,7 @@ async function liveSync(){
     REMOTE_TS=data.updated_at;
     const d=data.data||{};
     if(d._build&&d._build>BUILD){forceUpgrade('live');return;}
-    var _m=mergeShape(d, remoteShape());DB.users=_m.users;DB.depts=_m.depts;DB.staff=_m.staff;DB.tasks=_m.tasks;DB.buCredits=_m.buCredits;if(_m.agents)DB.agents=_m.agents;if(_m.gsheet)DB.gsheet=_m.gsheet;
+    var _m=mergeShape(d, remoteShape());DB.users=_m.users;DB.depts=_m.depts;DB.staff=_m.staff;DB.tasks=_m.tasks;DB.buCredits=_m.buCredits;if(_m.agents)DB.agents=_m.agents;if(_m.gsheet)DB.gsheet=_m.gsheet;if(_m._backups)DB._backups=_m._backups;
     setSync(true);buildMenu();render();
   }catch(e){}
 }
@@ -629,11 +629,12 @@ async function load(){
       const d=(data&&data.data)||{};
       if(d._build&&d._build>BUILD){forceUpgrade('load');return true;}
       REMOTE_TS=data&&data.updated_at||null;
-      DB.users=d.users||[];DB.depts=d.depts||[];DB.staff=d.staff||[];DB.tasks=d.tasks||[];DB.gsheet=d.gsheet||{csvUrl:'',map:{}};DB.buCredits=d.buCredits||{};DB.agents=d.agents||DB.agents||{webhook:'',content:'',image:'',video:''};
+      DB.users=d.users||[];DB.depts=d.depts||[];DB.staff=d.staff||[];DB.tasks=d.tasks||[];DB.gsheet=d.gsheet||{csvUrl:'',map:{}};DB.buCredits=d.buCredits||{};DB.agents=d.agents||DB.agents||{webhook:'',content:'',image:'',video:''};DB._backups=d._backups||{};
       REMOTE_OK=true;setSync(true);
     }catch(e){ok=false;REMOTE_OK=false;setSync(false);console.warn('Supabase load failed:',e&&e.message);}
   }else{loadLocal();setSync(false);}
   try{const s=localStorage.getItem(SESS_KEY);if(s)DB.session=s;}catch(e){}   /* phiên đăng nhập: riêng từng máy */
+  try{dailySnapshot();}catch(e){}
   return ok;
 }
 function setSync(ok){const e=document.getElementById('syncDot');if(e){e.textContent=ok?'● Cloud':'● Offline';e.title=ok?'Dữ liệu dùng chung (Supabase)':'Chưa kết nối Supabase — đang dùng dữ liệu cục bộ';e.style.color=ok?'#4a9e6f':'#c98b3a';}}
@@ -1828,8 +1829,39 @@ window.doSeedJune=(silent)=>{
   if(!silent)render();
   if(!silent)alert('✓ Đã nạp '+DB.tasks.length+' task tháng 6 + '+PEOPLE.length+' nhân sự.\nMở People (KPI) và Cổng BU (đăng nhập BU) để xem credit bị trừ 2 bên.');
 };
+function dailySnapshot(){
+  try{
+    DB._backups=DB._backups||{};
+    var k=today();
+    if(DB._backups[k])return;
+    var trim=(DB.tasks||[]).map(function(t){return {id:t['Request ID'],name:t['Request Name'],bu:t.BU,owner:t.Owner,fn:t.Function,sub:t['Sub Function'],pr:t.Priority,st:t.Status,due:t['Due Date'],cad:t.Cadence,notes:t.Notes};});
+    DB._backups[k]={ts:new Date().toISOString(),n:trim.length,tasks:trim};
+    var keys=Object.keys(DB._backups).sort();
+    while(keys.length>10){delete DB._backups[keys.shift()];}
+    save();
+  }catch(e){}
+}
+window.dlSnapshotMd=function(k){
+  var s=DB._backups&&DB._backups[k];if(!s)return;
+  var byo={};(s.tasks||[]).forEach(function(t){var o=t.owner||'(chưa giao)';(byo[o]=byo[o]||[]).push(t);});
+  var md='# FADO MKT — Sao lưu '+k+' ('+(s.n||0)+' task)\n\n';
+  Object.keys(byo).forEach(function(o){md+='## '+o+' ('+byo[o].length+')\n';byo[o].forEach(function(t,i){md+=(i+1)+'. '+(t.name||'')+' · '+(t.bu||'')+' · '+(t.st||'')+(t.due?' · hạn '+t.due:'')+'\n';});md+='\n';});
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([md],{type:'text/markdown'}));a.download='FADO-MKT-backup-'+k+'.md';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+};
+window.restoreSnapshot=function(k){
+  var s=DB._backups&&DB._backups[k];if(!s)return;
+  var have={};DB.tasks.forEach(function(t){have[t['Request ID']]=1;});
+  var add=(s.tasks||[]).filter(function(x){return x.id&&!have[x.id];});
+  if(!add.length){alert('Ngày '+k+': không có task nào thiếu so với hiện tại. (Tất cả đã có)');return;}
+  if(!confirm('Khôi phục '+add.length+' task THIẾU từ bản '+k+'?\nKhông xoá/không đụng task hiện có.'))return;
+  var who='';try{who=me().name;}catch(e){}
+  add.forEach(function(x){DB.tasks.push({_id:uid(),'Request ID':x.id,'Request Date':k,BU:x.bu||'','Project/Campaign':'','Request Name':x.name||'',Function:x.fn||'','Sub Function':x.sub||'',Requestor:'Khôi phục',Source:'Restore',Priority:x.pr||'P3',Owner:x.owner||'',Status:x.st||'Open','Due Date':x.due||'',Cadence:x.cad||'',Complexity:'','Capacity Level':'',Notes:x.notes||'',comments:[],history:[{by:who,at:new Date().toLocaleString('en-GB'),text:'Khôi phục từ backup '+k}]});});
+  save();render();alert('✓ Đã khôi phục '+add.length+' task từ bản '+k+'.');
+};
 function rBackup(c,ta){
   const d=remoteShape();
+  const _bk=DB._backups||{};const _bkKeys=Object.keys(_bk).sort().reverse();
+  const bkRows=_bkKeys.length?_bkKeys.map(function(k){var s=_bk[k];return '<div style="display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line)"><b style="font-size:13px;min-width:98px">'+k+'</b><span style="font-size:12px;color:var(--muted)">'+(s.n||(s.tasks?s.tasks.length:0))+' task</span><span style="margin-left:auto;display:flex;gap:6px"><button class="btn ghost sm" onclick="dlSnapshotMd(\''+k+'\')">⬇ .md</button><button class="btn sm" style="background:#2f6d4d;color:#fff" onclick="restoreSnapshot(\''+k+'\')">↺ Khôi phục task thiếu</button></span></div>';}).join(''):'<div style="font-size:12.5px;color:var(--muted)">Chưa có bản tự động nào — sẽ tự tạo khi mở CRM mỗi ngày.</div>';
   c.innerHTML=`
   <div style="max-width:720px">
     <div class="panel" style="margin-bottom:16px">
@@ -1842,6 +1874,11 @@ function rBackup(c,ta){
         <div><div style="font-size:26px;font-weight:800;letter-spacing:-1px">${(d.depts||[]).length}</div><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px">Phòng ban</div></div>
       </div>
       <button class="btn" id="bkDl">⬇ Tải bản sao lưu (.json)</button>
+    </div>
+    <div class="panel" style="border-color:#cddccd;margin-bottom:16px">
+      <h3><span class="dot" style="background:#2f6d4d"></span>🕓 Sao lưu tự động theo ngày</h3>
+      <p style="color:var(--muted);font-size:12.5px;line-height:1.6;margin-bottom:12px">Hệ thống <b>tự chụp 1 bản mỗi ngày</b> (giữ 10 ngày gần nhất) ngay trong CRM — không cần thao tác. Lỡ mất task thì bấm <b>↺ Khôi phục task thiếu</b> để lấy lại (KHÔNG đụng task hiện có), hoặc <b>⬇ .md</b> để tải bảng công việc ngày đó.</p>
+      ${bkRows}
     </div>
     <div class="panel" style="border-color:#e6c5c4">
       <h3><span class="dot" style="background:var(--red)"></span>Khôi phục dữ liệu</h3>
