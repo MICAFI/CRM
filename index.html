@@ -406,7 +406,7 @@ let supa=null,REMOTE_OK=false;
 try{ if(window.supabase&&SUPA_KEY&&SUPA_KEY.indexOf('PASTE')<0) supa=window.supabase.createClient(SUPA_URL,SUPA_KEY); }catch(e){console.warn('Supabase init',e);}
 let DB={users:[],depts:[],staff:[],tasks:[],session:null,gsheet:{csvUrl:'',map:{}},buCredits:{},agents:{webhook:'',content:'',image:'',video:''}};
 const CATS={
-  BU:['Proship','Ratraco','MICAFI','FDS','Fado168','EuroGo','Fado VN','The Winds','GoPrint','Internal Project','BOD/CEO'],
+  BU:['Proship','Ratraco','MICAFI','FDS','Fado168','EuroGo','Fado VN','The Winds','GoPrint','Fanaro','Internal Project','BOD/CEO'],
   Function:['Content & Creative','Marketing Operation','Performance & Growth','Marketing Strategy'],
   SubFunction:['Request Intake','Project Coordination','Campaign Planning','Research','KPI','Google Ads','Facebook Ads','TikTok Ads','Zalo Ads','SEO','Lead Generation','Retargeting','Website','Landing Page','Tracking','Dashboard','Analytics','Reporting','Content'],
   Source:['New Request','Recurring','Maintenance','Campaign','Ad-hoc/Internal'],
